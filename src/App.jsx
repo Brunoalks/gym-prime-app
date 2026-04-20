@@ -182,8 +182,8 @@ const MobileView = () => {
           </div>
           <Link to="/admin" className="text-xs font-semibold text-gray-400 hover:text-gymPurple transition-colors duration-200">ADMIN</Link>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">E aí, Monstro! 💪</h1>
-        <p className="text-gray-500 text-sm mb-5">O que vamos mandar pra dentro hoje?</p>
+        <h1 className="text-2xl font-bold text-gray-800">Bem-vindo à Gym Prime! 👋</h1>
+<p className="text-gray-500 text-sm">Escolha sua opção saudável para hoje.</p>
         
         <div className="relative mb-5">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
