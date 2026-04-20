@@ -33,13 +33,13 @@ const AdminView = () => {
     setPreco('');
     setFile(null);
     document.getElementById('file-upload').value = '';
-    showToast('Produto cadastrado com sucesso!');
+    toast.success('Produto cadastrado com sucesso!');
   };
 
   const handleDelete = (id) => {
     deleteProduct(id);
     setProducts(getProducts());
-    showToast('Produto removido com sucesso.', 'error');
+    toast.error('Produto removido com sucesso.');
   };
 
   return (
