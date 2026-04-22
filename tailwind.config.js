@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Poppins', 'sans-serif'], // Isso força o app inteiro a usar Poppins
+      },
       colors: {
         gymGreen: '#10B981',
         gymPurple: '#8A2BE2',
