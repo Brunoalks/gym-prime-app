@@ -3,13 +3,15 @@ services:
     build:
       context: ./backend
     container_name: gym-prime-backend
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql+psycopg://gym_prime:gym_prime@postgres:5432/gym_prime
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ACCESS_KEY: gym_prime
-      MINIO_SECRET_KEY: gym_prime_secret
-      MINIO_BUCKET: gym-prime
-      MINIO_PUBLIC_URL: http://localhost:9000
+      DATABASE_URL: ${DATABASE_URL}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
     ports:
       - "8000:8000"
     depends_on:
@@ -20,8 +22,10 @@ services:
     build:
       context: ./frontend
     container_name: gym-prime-frontend
+    env_file:
+      - .env
     environment:
-      VITE_API_URL: http://localhost:8000
+      VITE_API_URL: ${VITE_API_URL}
     ports:
       - "5173:5173"
     depends_on:
@@ -30,10 +34,12 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: gym-prime-postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: gym_prime
-      POSTGRES_USER: gym_prime
-      POSTGRES_PASSWORD: gym_prime
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -43,9 +49,11 @@ services:
     image: minio/minio:latest
     container_name: gym-prime-minio
     command: server /data --console-address ":9001"
+    env_file:
+      - .env
     environment:
-      MINIO_ROOT_USER: gym_prime
-      MINIO_ROOT_PASSWORD: gym_prime_secret
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
