@@ -1,16 +1,42 @@
-# React + Vite
+# Gym Prime
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema local para pedidos da lanchonete da academia.
 
-Currently, two official plugins are available:
+## Como rodar
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+docker compose up -d
+```
 
-## React Compiler
+Servicos locais:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Frontend: `http://localhost:5173`
+- Totem: `http://localhost:5173/totem`
+- Admin: `http://localhost:5173/admin`
+- Backend: `http://localhost:8000`
+- MinIO Console: `http://localhost:9001`
 
-## Expanding the ESLint configuration
+## Seed local
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Para criar dados de demonstracao, configure o admin no `.env` do backend ou exporte as variaveis antes de rodar:
+
+```bash
+SEED_ADMIN_EMAIL=admin@gymprime.local
+SEED_ADMIN_PASSWORD=admin123456
+SEED_ADMIN_NAME="Admin Gym Prime"
+SEED_ADMIN_CPF=00000000000
+```
+
+Depois execute:
+
+```bash
+cd backend
+uv run python seed.py
+```
+
+Credenciais locais sugeridas:
+
+- Email: `admin@gymprime.local`
+- Senha: `admin123456`
+
+O seed tambem cria produtos, variantes e estoque inicial de demonstracao. Ele pode ser executado mais de uma vez sem duplicar dados.
