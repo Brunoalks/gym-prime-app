@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
+from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.security import create_access_token, decode_access_token, hash_password, verify_password
 from app.models.user import User
@@ -62,13 +63,14 @@ def login(payload: UserLogin, response: Response, db: Session = Depends(get_db))
         )
 
     access_token = create_access_token(str(user.id))
+    settings = get_settings()
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=60 * 60 * 24 * 7,
+        samesite=settings.cookie_samesite,
+        secure=settings.cookie_secure,
+        max_age=settings.jwt_expires_minutes * 60,
     )
     create_audit_log(db, action="login", entity="user", entity_id=user.id, user_id=user.id)
     db.commit()

@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-production-local-secret-key"
     jwt_algorithm: str = "HS256"
     jwt_expires_minutes: int = 60 * 24 * 7
+    cookie_secure: bool = False
+    cookie_samesite: str = "lax"
     whatsapp_phone: str | None = None
     minio_endpoint: str = "localhost:9000"
     minio_public_url: str = "http://localhost:9000"

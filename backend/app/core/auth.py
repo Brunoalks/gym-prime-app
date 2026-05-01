@@ -11,20 +11,20 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     if access_token is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Nao autenticado")
 
     try:
         user_id = int(decode_access_token(access_token))
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Nao autenticado") from exc
 
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Nao autenticado")
     return user
 
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin permission required")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permissao de admin necessaria")
     return current_user

@@ -30,5 +30,5 @@ class CheckoutRead(BaseModel):
 
 
 class TotemCheckoutCreate(BaseModel):
-    customer_name: str = Field(min_length=2, max_length=120)
+    customer_name: str = Field(min_length=2, max_length=120, pattern=r".*\S.*")
     items: list[CartItemCreate] = Field(min_length=1)
