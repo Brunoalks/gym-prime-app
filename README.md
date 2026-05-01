@@ -21,7 +21,7 @@ Servicos locais:
 Para criar dados de demonstracao, configure o admin no `.env` do backend ou exporte as variaveis antes de rodar:
 
 ```bash
-SEED_ADMIN_EMAIL=admin@gymprime.local
+SEED_ADMIN_EMAIL=admin@gymprime.com
 SEED_ADMIN_PASSWORD=admin123456
 SEED_ADMIN_NAME="Admin Gym Prime"
 SEED_ADMIN_CPF=00000000000
@@ -36,7 +36,7 @@ uv run python seed.py
 
 Credenciais locais sugeridas:
 
-- Email: `admin@gymprime.local`
+- Email: `admin@gymprime.com`
 - Senha: `admin123456`
 
 O seed tambem cria produtos, variantes e estoque inicial de demonstracao. Ele pode ser executado mais de uma vez sem duplicar dados.
