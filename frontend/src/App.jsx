@@ -3,37 +3,8 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { Check, LayoutDashboard, LogIn, Package, Plus, ShoppingBag, Trash2, UserPlus } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from './components/classNames.js';
-import { Badge, Button, Card, Feedback, TextInput } from './components/ui.jsx';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-async function api(path, options = {}) {
-  const isFormData = options.body instanceof FormData;
-  const response = await fetch(`${API_URL}${path}`, {
-    credentials: 'include',
-    headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Erro inesperado' }));
-    const detail = Array.isArray(error.detail)
-      ? error.detail.map((item) => {
-        if (item.loc?.includes('password') && item.type === 'string_too_short') {
-          return 'Senha deve ter pelo menos 8 caracteres';
-        }
-        return item.msg;
-      }).join(' ')
-      : error.detail;
-    throw new Error(detail || 'Erro inesperado');
-  }
-
-  if (response.status === 204) return null;
-  return response.json();
-}
+import { Badge, Button, Card, Dialog, Feedback, TextInput } from './components/ui.jsx';
+import { api } from './services/api.js';
 
 function formatCurrency(value) {
   return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -357,8 +328,7 @@ function ProductCard({ product, onAdd, onDetails }) {
 
 function ProductDetailsModal({ product, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-lg overflow-hidden shadow-xl">
+    <Dialog className="max-w-lg overflow-hidden p-0">
         <div className="flex aspect-[16/9] items-center justify-center bg-slate-100 text-slate-400">
           {product.image_url ? (
             <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
@@ -387,8 +357,7 @@ function ProductDetailsModal({ product, onClose }) {
           </div>
           <Button className="mt-5 w-full" onClick={onClose}>Fechar</Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
@@ -397,8 +366,7 @@ function VariantPickerModal({ product, selectedVariantId, setSelectedVariantId, 
   const price = selectedVariant?.price || product.price;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-md p-5 shadow-xl">
+    <Dialog>
         <Badge variant="success">Variante</Badge>
         <h2 className="mt-3 text-xl font-black text-slate-950">{product.name}</h2>
         <p className="mt-1 text-sm text-slate-500">Escolha uma opcao antes de adicionar ao carrinho.</p>
@@ -426,8 +394,7 @@ function VariantPickerModal({ product, selectedVariantId, setSelectedVariantId, 
             Adicionar
           </Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
@@ -1045,8 +1012,7 @@ function AdminPage() {
 
 function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-md p-5 shadow-xl">
+    <Dialog>
         <Badge variant="success">Confirmacao</Badge>
         <h2 className="mt-3 text-xl font-black text-slate-950">Finalizar pedido?</h2>
         <p className="mt-1 text-sm text-slate-500">Confira o total antes de gerar o pedido para a administracao.</p>
@@ -1074,15 +1040,13 @@ function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
             Confirmar
           </Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
 function OrderSuccessModal({ result, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-md p-5 text-center shadow-xl">
+    <Dialog className="text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500 text-slate-950">
           <Check size={24} />
         </div>
@@ -1098,28 +1062,24 @@ function OrderSuccessModal({ result, onClose }) {
             WhatsApp
           </Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
 function ErrorDialog({ message, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-md p-5 shadow-xl">
+    <Dialog>
         <Badge variant="danger">Erro</Badge>
         <h2 className="mt-3 text-xl font-black text-slate-950">Nao foi possivel concluir</h2>
         <p className="mt-2 text-sm leading-6 text-slate-500">{message}</p>
         <Button className="mt-5 w-full" onClick={onClose}>Entendi</Button>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
 function DeleteConfirmModal({ product, onCancel, onConfirm }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="section" className="w-full max-w-md p-5 shadow-xl">
+    <Dialog>
         <Badge variant="danger">Excluir</Badge>
         <h2 className="mt-3 text-xl font-black text-slate-950">Excluir produto?</h2>
         <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -1129,15 +1089,13 @@ function DeleteConfirmModal({ product, onCancel, onConfirm }) {
           <Button variant="secondary" onClick={onCancel}>Voltar</Button>
           <Button variant="danger" onClick={onConfirm}>Excluir</Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 
 function CustomerNameModal({ cart, customerName, setCustomerName, onCancel, onConfirm }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
-      <Card as="form" onSubmit={onConfirm} className="w-full max-w-md p-5 shadow-xl">
+    <Dialog as="form" onSubmit={onConfirm}>
         <Badge variant="success">Totem</Badge>
         <h2 className="mt-3 text-xl font-black text-slate-950">Finalizar pedido</h2>
         <p className="mt-1 text-sm text-slate-500">Informe o nome do cliente e confirme o total antes de enviar.</p>
@@ -1163,8 +1121,7 @@ function CustomerNameModal({ cart, customerName, setCustomerName, onCancel, onCo
             Enviar pedido
           </Button>
         </div>
-      </Card>
-    </div>
+    </Dialog>
   );
 }
 

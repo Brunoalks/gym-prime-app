@@ -89,3 +89,13 @@ export function Feedback({ children, className = '', variant = 'muted' }) {
     </section>
   );
 }
+
+export function Dialog({ children, className = '', as = 'section', ...props }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
+      <Card as={as} className={cn('w-full max-w-md p-5 shadow-xl', className)} {...props}>
+        {children}
+      </Card>
+    </div>
+  );
+}
