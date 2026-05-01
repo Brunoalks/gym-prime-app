@@ -1,65 +1,20 @@
-from decimal import Decimal
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.models.inventory import Inventory
 from app.models.order import Order
 from app.models.order_item import OrderItem
-from app.models.product import Product
-from app.models.product_variant import ProductVariant
 from app.models.user import User
-from app.schemas.cart import CartItemCreate, CartItemRead, CartRead, CheckoutRead
-from app.services.cart import add_to_cart, clear_cart, get_cart
+from app.schemas.cart import CartItemCreate, CartRead, CheckoutRead
+from app.services.cart import add_to_cart, build_cart_response, clear_cart, get_available_product, get_available_variant, get_cart
 from app.services.audit import create_audit_log
+from app.services.orders import decrement_inventory
 from app.services.whatsapp import build_order_message, build_wa_me_url
 
 
 router = APIRouter(prefix="/cart", tags=["cart"])
-
-
-def build_cart_response(user_id: int, db: Session) -> CartRead:
-    items: list[CartItemRead] = []
-    total_amount = Decimal("0")
-
-    for line in get_cart(user_id):
-        product = db.get(Product, line.product_id)
-        if product is None:
-            continue
-
-        variant = None
-        unit_price = product.price
-        name = product.name
-        if line.variant_id is not None:
-            variant = db.scalar(
-                select(ProductVariant).where(
-                    ProductVariant.id == line.variant_id,
-                    ProductVariant.product_id == product.id,
-                )
-            )
-            if variant is None:
-                continue
-            unit_price = variant.price if variant.price is not None else product.price
-            name = f"{product.name} - {variant.name}"
-
-        total_price = unit_price * line.quantity
-        total_amount += total_price
-        items.append(
-            CartItemRead(
-                product_id=product.id,
-                variant_id=variant.id if variant is not None else None,
-                name=name,
-                quantity=line.quantity,
-                unit_price=unit_price,
-                total_price=total_price,
-            )
-        )
-
-    return CartRead(items=items, total_amount=total_amount)
 
 
 @router.post("/items", response_model=CartRead)
@@ -68,19 +23,9 @@ def add_cart_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> CartRead:
-    product = db.get(Product, payload.product_id)
-    if product is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto nao encontrado")
-
+    get_available_product(db, payload.product_id)
     if payload.variant_id is not None:
-        variant = db.scalar(
-            select(ProductVariant).where(
-                ProductVariant.id == payload.variant_id,
-                ProductVariant.product_id == payload.product_id,
-            )
-        )
-        if variant is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Variante nao encontrada")
+        get_available_variant(db, payload.product_id, payload.variant_id)
 
     add_to_cart(current_user.id, payload.product_id, payload.variant_id, payload.quantity)
     return build_cart_response(current_user.id, db)
@@ -113,24 +58,7 @@ def checkout(
     db.flush()
 
     for line, item in zip(cart, cart_response.items, strict=False):
-        inventory = None
-        if line.variant_id is not None:
-            inventory = db.scalar(select(Inventory).where(Inventory.variant_id == line.variant_id))
-        else:
-            inventory = db.scalar(
-                select(Inventory).where(
-                    Inventory.product_id == line.product_id,
-                    Inventory.variant_id.is_(None),
-                )
-            )
-
-        if inventory is not None:
-            if inventory.quantity < line.quantity:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail=f"Estoque insuficiente para {item.name}",
-                )
-            inventory.quantity -= line.quantity
+        decrement_inventory(db, line, item)
 
         db.add(
             OrderItem(

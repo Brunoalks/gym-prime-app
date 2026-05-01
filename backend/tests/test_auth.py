@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 
-def test_register_customer_creates_user_without_password_hash_in_response(client: TestClient):
+def test_register_customer_creates_user_without_sensitive_data_in_response(client: TestClient):
     response = client.post(
         "/auth/register",
         json={
@@ -17,6 +17,7 @@ def test_register_customer_creates_user_without_password_hash_in_response(client
     assert data["full_name"] == "Cliente Teste"
     assert data["email"] == "cliente.teste@example.com"
     assert "password_hash" not in data
+    assert "cpf" not in data
 
 
 def test_login_returns_user_and_sets_http_only_cookie(client: TestClient):

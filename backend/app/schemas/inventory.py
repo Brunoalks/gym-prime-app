@@ -1,6 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class InventoryUpdate(BaseModel):
+    quantity: int | None = Field(default=None, ge=0)
+    min_quantity: int | None = Field(default=None, ge=0)
 
 
 class InventoryRead(BaseModel):

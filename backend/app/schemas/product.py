@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class ProductVariantBase(BaseModel):
-    name: str = Field(min_length=1, max_length=120)
-    code: str = Field(min_length=1, max_length=60)
+    name: str = Field(min_length=1, max_length=120, pattern=r".*\S.*")
+    code: str = Field(min_length=1, max_length=60, pattern=r".*\S.*")
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal | None = Field(default=None, ge=0)
@@ -17,8 +17,8 @@ class ProductVariantCreate(ProductVariantBase):
 
 
 class ProductVariantUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=120)
-    code: str | None = Field(default=None, min_length=1, max_length=60)
+    name: str | None = Field(default=None, min_length=1, max_length=120, pattern=r".*\S.*")
+    code: str | None = Field(default=None, min_length=1, max_length=60, pattern=r".*\S.*")
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal | None = Field(default=None, ge=0)
@@ -33,8 +33,8 @@ class ProductVariantRead(ProductVariantBase):
 
 
 class ProductBase(BaseModel):
-    name: str = Field(min_length=1, max_length=120)
-    code: str = Field(min_length=1, max_length=60)
+    name: str = Field(min_length=1, max_length=120, pattern=r".*\S.*")
+    code: str = Field(min_length=1, max_length=60, pattern=r".*\S.*")
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal = Field(ge=0)
@@ -42,12 +42,12 @@ class ProductBase(BaseModel):
 
 
 class ProductCreate(ProductBase):
-    variants: list[ProductVariantCreate] = []
+    variants: list[ProductVariantCreate] = Field(default_factory=list)
 
 
 class ProductUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=120)
-    code: str | None = Field(default=None, min_length=1, max_length=60)
+    name: str | None = Field(default=None, min_length=1, max_length=120, pattern=r".*\S.*")
+    code: str | None = Field(default=None, min_length=1, max_length=60, pattern=r".*\S.*")
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal | None = Field(default=None, ge=0)
@@ -56,6 +56,6 @@ class ProductUpdate(BaseModel):
 
 class ProductRead(ProductBase):
     id: int
-    variants: list[ProductVariantRead] = []
+    variants: list[ProductVariantRead] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}

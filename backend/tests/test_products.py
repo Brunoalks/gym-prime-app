@@ -57,3 +57,17 @@ def test_admin_variant_creation_belongs_to_product(admin_client: TestClient):
     variant = variant_response.json()
     assert variant["product_id"] == product["id"]
     assert variant["name"] == "Zero"
+
+
+def test_duplicate_product_code_returns_conflict(admin_client: TestClient):
+    payload = {
+        "name": "Produto Unico",
+        "code": "produto-unico",
+        "price": "10.00",
+    }
+    assert admin_client.post("/products", json=payload).status_code == 201
+
+    response = admin_client.post("/products", json={**payload, "name": "Produto Duplicado"})
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Codigo de produto ou variante ja cadastrado"
