@@ -5,7 +5,7 @@ import { Badge, Button, Card, Feedback, TextInput } from '../../components/ui.js
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
-import { filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
+import { buildProductMap, filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
 import { BrandMark, ErrorDialog, OrderSuccessModal, ProductDetailsModal, ProductImage, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
@@ -194,32 +194,86 @@ function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
   );
 }
 
+function CustomerOrdersPanel({ orders, productMap, onRefresh }) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-4xl font-black">Meus pedidos</h1>
+          <p className="mt-2 text-lg font-medium text-slate-300">Historico do seu acesso atual.</p>
+        </div>
+        <Button variant="secondary" className="border-white/10 bg-white/10 text-white hover:bg-white/15" onClick={onRefresh}>Atualizar</Button>
+      </div>
+      {orders.length === 0 ? <Feedback>Nenhum pedido encontrado.</Feedback> : orders.map((order) => (
+        <article key={order.id} className="rounded-lg border border-white/10 bg-white p-4 text-[#101214]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <Badge variant="neutral">#{order.id}</Badge>
+              <h2 className="mt-2 text-xl font-black">{formatCurrency(order.total_amount)}</h2>
+              <p className="mt-1 text-sm font-bold text-slate-500">{new Date(order.created_at).toLocaleString('pt-BR')}</p>
+            </div>
+            <Badge variant={order.status === 'canceled' ? 'danger' : 'success'}>{order.status}</Badge>
+          </div>
+          <div className="mt-3 space-y-2">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm">
+                <span>{item.quantity}x {productMap.get(item.product_id)?.name || `Produto #${item.product_id}`}</span>
+                <strong>{formatCurrency(item.total_price)}</strong>
+              </div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
+  );
+}
+
 function CustomerMenuPage({ user, onLogout }) {
   const [products, setProducts] = useState([]);
+  const [publicSettings, setPublicSettings] = useState({ establishment_name: 'Gym Prime', menu_is_open: true, totem_message: '' });
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [category, setCategory] = useState('all');
   const [cart, setCart] = useState({ items: [], total_amount: 0 });
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
+  const [view, setView] = useState('menu');
+  const [myOrders, setMyOrders] = useState([]);
   const [detailsProduct, setDetailsProduct] = useState(null);
   const [successResult, setSuccessResult] = useState(null);
   const [errorDialog, setErrorDialog] = useState('');
 
   const activeProducts = useMemo(() => products.filter((product) => product.is_active), [products]);
   const visibleProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
+  const productMap = useMemo(() => buildProductMap(products), [products]);
 
   useEffect(() => {
-    gymPrimeApi.listProducts()
-      .then(setProducts)
+    Promise.all([gymPrimeApi.listProducts(), gymPrimeApi.getPublicSettings().catch(() => null)])
+      .then(([productData, settingsData]) => {
+        setProducts(productData);
+        if (settingsData) setPublicSettings(settingsData);
+      })
       .catch((error) => {
         setProductsError(error.message);
         toast.error(error.message);
       })
       .finally(() => setProductsLoading(false));
     gymPrimeApi.getCart().then(setCart).catch(() => {});
+    refreshMyOrders();
   }, []);
 
+  async function refreshMyOrders() {
+    try {
+      setMyOrders(await gymPrimeApi.listMyOrders());
+    } catch {
+      setMyOrders([]);
+    }
+  }
+
   async function handleAdd(productId, variantId) {
+    if (!publicSettings.menu_is_open) {
+      toast.error('Cardapio fechado no momento');
+      return;
+    }
     try {
       const data = await gymPrimeApi.addCartItem({ product_id: productId, variant_id: variantId, quantity: 1 });
       setCart(data);
@@ -231,11 +285,17 @@ function CustomerMenuPage({ user, onLogout }) {
   }
 
   async function handleCheckout() {
+    if (!publicSettings.menu_is_open) {
+      setShowCheckoutConfirm(false);
+      toast.error('Cardapio fechado no momento');
+      return;
+    }
     try {
       const result = await gymPrimeApi.checkoutCart();
       setCart({ items: [], total_amount: 0 });
       setShowCheckoutConfirm(false);
       setSuccessResult(result);
+      refreshMyOrders();
       toast.success(`Pedido #${result.order_id} criado`);
     } catch (error) {
       setErrorDialog(error.message);
@@ -279,12 +339,18 @@ function CustomerMenuPage({ user, onLogout }) {
           ))}
         </div>
         <div className="mt-5">
-          <h1 className="text-4xl font-black">Cardapio</h1>
-          <p className="mt-2 text-lg font-medium text-slate-300">Peca rapido antes ou depois do treino.</p>
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-white/10 p-1">
+            <Button variant={view === 'menu' ? 'primary' : 'secondary'} className={view === 'menu' ? '' : 'border-white/10 bg-transparent text-white hover:bg-white/10'} onClick={() => setView('menu')}>Cardapio</Button>
+            <Button variant={view === 'orders' ? 'primary' : 'secondary'} className={view === 'orders' ? '' : 'border-white/10 bg-transparent text-white hover:bg-white/10'} onClick={() => setView('orders')}>Meus pedidos</Button>
+          </div>
         </div>
 
         <div className="mt-6 space-y-3">
-          {productsError ? (
+          {view === 'orders' ? (
+            <CustomerOrdersPanel orders={myOrders} productMap={productMap} onRefresh={refreshMyOrders} />
+          ) : !publicSettings.menu_is_open ? (
+            <Feedback variant="danger">Cardapio fechado no momento. Volte em instantes.</Feedback>
+          ) : productsError ? (
             <Feedback variant="danger">{productsError}</Feedback>
           ) : productsLoading ? (
             <Feedback>Carregando produtos...</Feedback>

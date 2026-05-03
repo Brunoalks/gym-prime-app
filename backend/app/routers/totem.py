@@ -3,12 +3,12 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
 from app.core.database import get_db
 from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.schemas.cart import CheckoutRead, TotemCheckoutCreate
 from app.services.audit import create_audit_log
+from app.services.app_settings import get_app_settings
 from app.services.cart import build_cart_item
 from app.services.orders import decrement_inventory
 from app.services.whatsapp import build_order_message, build_wa_me_url
@@ -41,7 +41,7 @@ def checkout_totem(payload: TotemCheckoutCreate, db: Session = Depends(get_db)) 
         )
 
     message = build_order_message(payload.customer_name, items, total_amount)
-    whatsapp_url = build_wa_me_url(message, get_settings().whatsapp_phone)
+    whatsapp_url = build_wa_me_url(message, get_app_settings(db).whatsapp_phone)
     create_audit_log(
         db,
         action="order.created",

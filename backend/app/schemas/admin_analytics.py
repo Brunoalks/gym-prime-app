@@ -46,6 +46,18 @@ class AdminHourlySalesPoint(BaseModel):
     orders_count: int
 
 
+class AdminSalesSeriesPoint(BaseModel):
+    key: str
+    label: str
+    total_amount: Decimal
+    orders_count: int
+
+
+class AdminSalesSeries(BaseModel):
+    period: str
+    points: list[AdminSalesSeriesPoint]
+
+
 class AdminAnalyticsSummary(BaseModel):
     kpis: AdminKpiSummary
     recent_orders: list[AdminRecentOrder]

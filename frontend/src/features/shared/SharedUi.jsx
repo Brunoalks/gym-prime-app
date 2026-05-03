@@ -110,6 +110,7 @@ export function OrderSuccessModal({ result, onClose, totem = false }) {
       <p className="mt-2 text-sm text-slate-600">
         {totem ? 'Pedido enviado. Avise a administracao para pagamento e retirada.' : 'O resumo esta pronto para envio pelo WhatsApp.'}
       </p>
+      {totem && <p className="mt-2 text-xs font-black uppercase text-slate-500">Retorno automatico ao cardapio</p>}
       <div className="mt-4 rounded-lg bg-[#101214] p-4 text-white">
         <span className="text-sm font-bold text-slate-300">Total</span>
         <strong className="mt-1 block text-2xl font-black">{formatCurrency(result.total_amount)}</strong>

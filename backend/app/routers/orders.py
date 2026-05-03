@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.auth import require_admin
+from app.core.auth import get_current_user, require_admin
 from app.core.database import get_db
 from app.models.order import Order
 from app.models.user import User
@@ -24,6 +24,22 @@ def list_orders(
             .options(selectinload(Order.items))
             .order_by(Order.created_at.desc())
             .limit(100)
+        )
+    )
+
+
+@router.get("/me", response_model=list[OrderRead])
+def list_my_orders(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[Order]:
+    return list(
+        db.scalars(
+            select(Order)
+            .where(Order.user_id == current_user.id)
+            .options(selectinload(Order.items))
+            .order_by(Order.created_at.desc())
+            .limit(50)
         )
     )
 

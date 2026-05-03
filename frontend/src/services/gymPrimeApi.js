@@ -53,6 +53,10 @@ export const gymPrimeApi = {
     return api('/orders');
   },
 
+  listMyOrders() {
+    return api('/orders/me');
+  },
+
   updateOrderStatus(orderId, status) {
     return api(`/orders/${orderId}/status`, {
       method: 'PATCH',
@@ -70,6 +74,29 @@ export const gymPrimeApi = {
 
   getAdminAnalyticsSummary() {
     return api('/admin/analytics/summary');
+  },
+
+  getAdminSalesSeries(period = 'hour') {
+    return api(`/admin/analytics/sales-series?period=${encodeURIComponent(period)}`);
+  },
+
+  listAdminCustomers() {
+    return api('/admin/customers');
+  },
+
+  getAdminSettings() {
+    return api('/admin/settings');
+  },
+
+  updateAdminSettings(payload) {
+    return api('/admin/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getPublicSettings() {
+    return api('/settings/public');
   },
 
   createProduct(payload) {
@@ -95,6 +122,17 @@ export const gymPrimeApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+  },
+
+  updateVariant(productId, variantId, payload) {
+    return api(`/products/${productId}/variants/${variantId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteVariant(productId, variantId) {
+    return api(`/products/${productId}/variants/${variantId}`, { method: 'DELETE' });
   },
 
   updateInventory(inventoryId, payload) {

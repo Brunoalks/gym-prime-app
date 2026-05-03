@@ -175,6 +175,7 @@ function TotemNameModal({ cart, customerName, setCustomerName, onCancel, onConfi
 
 export function TotemPage() {
   const [products, setProducts] = useState([]);
+  const [publicSettings, setPublicSettings] = useState({ establishment_name: 'Gym Prime', menu_is_open: true, totem_message: 'Escolhas inteligentes para seu treino' });
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [category, setCategory] = useState('all');
@@ -190,8 +191,11 @@ export function TotemPage() {
   const cart = useMemo(() => buildLocalCart(cartLines, products), [cartLines, products]);
 
   useEffect(() => {
-    gymPrimeApi.listProducts()
-      .then(setProducts)
+    Promise.all([gymPrimeApi.listProducts(), gymPrimeApi.getPublicSettings().catch(() => null)])
+      .then(([productData, settingsData]) => {
+        setProducts(productData);
+        if (settingsData) setPublicSettings(settingsData);
+      })
       .catch((error) => {
         setProductsError(error.message);
         toast.error(error.message);
@@ -199,7 +203,17 @@ export function TotemPage() {
       .finally(() => setProductsLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!successResult) return undefined;
+    const timeoutId = window.setTimeout(() => setSuccessResult(null), 8000);
+    return () => window.clearTimeout(timeoutId);
+  }, [successResult]);
+
   function handleAdd(productId, variantId) {
+    if (!publicSettings.menu_is_open) {
+      toast.error('Cardapio fechado no momento');
+      return;
+    }
     setCartLines((current) => {
       const existing = current.find((line) => line.product_id === productId && line.variant_id === variantId);
       if (existing) {
@@ -212,6 +226,11 @@ export function TotemPage() {
 
   async function handleConfirmCheckout(event) {
     event.preventDefault();
+    if (!publicSettings.menu_is_open) {
+      setShowNameModal(false);
+      toast.error('Cardapio fechado no momento');
+      return;
+    }
     try {
       const result = await gymPrimeApi.checkoutTotem({ customer_name: customerName, items: cartLines });
       setCartLines([]);
@@ -268,7 +287,7 @@ export function TotemPage() {
         <div className="mt-auto rounded-lg border border-white/10 bg-[radial-gradient(circle_at_20%_20%,rgba(182,255,59,0.24),transparent_35%),rgba(255,255,255,0.05)] p-5">
           <Zap className="text-[#B6FF3B]" size={40} />
           <strong className="mt-3 block text-xl font-black italic leading-tight">ENERGIA<br />FOCO<br />RESULTADO</strong>
-          <span className="mt-5 block text-xs font-black uppercase text-[#B6FF3B]">Escolhas inteligentes para seu treino</span>
+          <span className="mt-5 block text-xs font-black uppercase text-[#B6FF3B]">{publicSettings.totem_message}</span>
         </div>
       </nav>
 
@@ -285,7 +304,9 @@ export function TotemPage() {
           <Badge className="bg-[#B6FF3B] text-[#101214]">Atendimento publico</Badge>
         </header>
 
-        {productsError ? (
+        {!publicSettings.menu_is_open ? (
+          <Feedback variant="danger">Cardapio fechado no momento. Aguarde a reabertura.</Feedback>
+        ) : productsError ? (
           <Feedback variant="danger">{productsError}</Feedback>
         ) : productsLoading ? (
           <Feedback>Carregando produtos...</Feedback>

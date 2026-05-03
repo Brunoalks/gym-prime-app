@@ -111,3 +111,17 @@ def test_admin_order_status_rejects_invalid_value(admin_client: TestClient, db_s
     response = admin_client.patch(f"/orders/{order.id}/status", json={"status": "unknown"})
 
     assert response.status_code == 422
+
+
+def test_authenticated_user_lists_only_own_orders(authenticated_client: TestClient, db_session: Session):
+    own_order = Order(user_id=1, customer_name="Cliente Teste", total_amount="10.00")
+    other_order = Order(user_id=999, customer_name="Outro Cliente", total_amount="99.00")
+    db_session.add_all([own_order, other_order])
+    db_session.commit()
+
+    response = authenticated_client.get("/orders/me")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert [item["id"] for item in data] == [own_order.id]
+    assert data[0]["customer_name"] == "Cliente Teste"

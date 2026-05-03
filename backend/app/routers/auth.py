@@ -78,8 +78,20 @@ def login(payload: UserLogin, response: Response, db: Session = Depends(get_db))
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response) -> None:
+def logout(
+    response: Response,
+    access_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+) -> None:
     settings = get_settings()
+    if access_token is not None:
+        try:
+            user_id = int(decode_access_token(access_token))
+        except ValueError:
+            user_id = None
+        if user_id is not None and db.get(User, user_id) is not None:
+            create_audit_log(db, action="logout", entity="user", entity_id=user_id, user_id=user_id)
+            db.commit()
     response.delete_cookie(
         key="access_token",
         httponly=True,

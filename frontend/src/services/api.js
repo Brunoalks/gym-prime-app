@@ -1,5 +1,14 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+const STATUS_FALLBACK_MESSAGES = {
+  400: 'Revise os dados enviados',
+  401: 'Sessao expirada. Entre novamente',
+  403: 'Voce nao tem permissao para esta acao',
+  404: 'Registro nao encontrado',
+  409: 'Conflito com dados ja cadastrados',
+  500: 'Erro interno do servidor',
+};
+
 export class ApiError extends Error {
   constructor(message, status) {
     super(message);
@@ -29,7 +38,7 @@ export async function api(path, options = {}) {
         return item.msg;
       }).join(' ')
       : error.detail;
-    throw new ApiError(detail || 'Erro inesperado', response.status);
+    throw new ApiError(detail || STATUS_FALLBACK_MESSAGES[response.status] || 'Erro inesperado', response.status);
   }
 
   if (response.status === 204) return null;
