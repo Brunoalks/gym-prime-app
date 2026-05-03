@@ -75,3 +75,28 @@ def test_session_without_cookie_returns_empty_user(client: TestClient):
 
     assert response.status_code == 200
     assert response.json() == {"user": None}
+
+
+def test_logout_clears_session_cookie(client: TestClient):
+    client.post(
+        "/auth/register",
+        json={
+            "full_name": "Cliente Logout",
+            "email": "cliente.logout@example.com",
+            "cpf": "11122233345",
+            "password": "password123",
+        },
+    )
+    login_response = client.post(
+        "/auth/login",
+        json={"email": "cliente.logout@example.com", "password": "password123"},
+    )
+    assert login_response.status_code == 200
+    assert client.get("/auth/session").json()["user"]["email"] == "cliente.logout@example.com"
+
+    logout_response = client.post("/auth/logout")
+
+    assert logout_response.status_code == 204
+    assert "access_token=" in logout_response.headers["set-cookie"]
+    assert "Max-Age=0" in logout_response.headers["set-cookie"]
+    assert client.get("/auth/session").json() == {"user": None}

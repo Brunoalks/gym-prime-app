@@ -6,7 +6,8 @@ from app.core.auth import require_admin
 from app.core.database import get_db
 from app.models.order import Order
 from app.models.user import User
-from app.schemas.order import OrderRead
+from app.schemas.order import OrderRead, OrderStatusUpdate
+from app.services.order_status import update_order_status
 
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -25,3 +26,13 @@ def list_orders(
             .limit(100)
         )
     )
+
+
+@router.patch("/{order_id}/status", response_model=OrderRead)
+def patch_order_status(
+    order_id: int,
+    payload: OrderStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+) -> Order:
+    return update_order_status(db, order_id, payload.status, current_user)

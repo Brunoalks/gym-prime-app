@@ -48,8 +48,11 @@ database/data/*
 
 # Agent/local planning files
 tasks/
+docs/
 AGENT.md
 run_agent.md
 STATE.json
 QUALITY_REPORT.md
 PLAN.md
+AGENTS.md
+run_generate.md

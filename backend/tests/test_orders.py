@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models.audit_log import AuditLog
 from app.models.inventory import Inventory
+from app.models.order import Order
 
 
 def create_product_with_variant(client: TestClient) -> tuple[int, int]:
@@ -72,3 +74,40 @@ def test_checkout_generates_wa_me_link(admin_client: TestClient):
     assert whatsapp_url.startswith("https://wa.me/")
     assert "Cliente%3A%20Admin%20Teste" in whatsapp_url
     assert "Total%3A%20R%24%2017.00" in whatsapp_url
+
+
+def test_non_admin_cannot_update_order_status(authenticated_client: TestClient, db_session: Session):
+    order = Order(customer_name="Cliente QA", total_amount="10.00")
+    db_session.add(order)
+    db_session.commit()
+
+    response = authenticated_client.patch(f"/orders/{order.id}/status", json={"status": "ready"})
+
+    assert response.status_code == 403
+
+
+def test_admin_can_update_order_status_and_audit(admin_client: TestClient, db_session: Session):
+    order = Order(customer_name="Cliente QA", total_amount="10.00")
+    db_session.add(order)
+    db_session.commit()
+
+    response = admin_client.patch(f"/orders/{order.id}/status", json={"status": "ready"})
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ready"
+
+    db_session.refresh(order)
+    assert order.status == "ready"
+    audit_log = db_session.query(AuditLog).filter_by(action="order.status_updated", entity_id=order.id).one()
+    assert audit_log.metadata_json == {"previous_status": "pending", "next_status": "ready"}
+
+
+def test_admin_order_status_rejects_invalid_value(admin_client: TestClient, db_session: Session):
+    order = Order(customer_name="Cliente QA", total_amount="10.00")
+    db_session.add(order)
+    db_session.commit()
+
+    response = admin_client.patch(f"/orders/{order.id}/status", json={"status": "unknown"})
+
+    assert response.status_code == 422

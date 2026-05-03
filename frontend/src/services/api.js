@@ -1,5 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 export async function api(path, options = {}) {
   const isFormData = options.body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
@@ -21,7 +29,7 @@ export async function api(path, options = {}) {
         return item.msg;
       }).join(' ')
       : error.detail;
-    throw new Error(detail || 'Erro inesperado');
+    throw new ApiError(detail || 'Erro inesperado', response.status);
   }
 
   if (response.status === 204) return null;
