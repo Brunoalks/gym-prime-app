@@ -76,6 +76,10 @@ export const gymPrimeApi = {
     return api('/admin/analytics/summary');
   },
 
+  getAdminSalesSeries(period = 'hour') {
+    return api(`/admin/analytics/sales-series?period=${encodeURIComponent(period)}`);
+  },
+
   listAdminCustomers() {
     return api('/admin/customers');
   },

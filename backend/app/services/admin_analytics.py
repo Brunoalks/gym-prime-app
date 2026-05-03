@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -14,6 +14,8 @@ from app.schemas.admin_analytics import (
     AdminKpiSummary,
     AdminLowInventoryItem,
     AdminRecentOrder,
+    AdminSalesSeries,
+    AdminSalesSeriesPoint,
     AdminTopProduct,
 )
 
@@ -137,4 +139,113 @@ def get_admin_analytics_summary(db: Session, now: datetime | None = None) -> Adm
         low_inventory=low_inventory,
         top_products=top_products,
         hourly_sales=hourly_sales,
+    )
+
+
+def _load_orders_for_series(db: Session) -> list[Order]:
+    return list(db.scalars(select(Order).order_by(Order.created_at.asc())))
+
+
+def _week_start(value: date) -> date:
+    return value - timedelta(days=value.weekday())
+
+
+def get_admin_sales_series(db: Session, period: str, now: datetime | None = None) -> AdminSalesSeries:
+    reference_now = now or datetime.now()
+    orders = _load_orders_for_series(db)
+
+    if period == "hour":
+        today = reference_now.date()
+        buckets = {
+            f"{hour:02d}": {
+                "label": f"{hour:02d}h",
+                "total_amount": Decimal("0"),
+                "orders_count": 0,
+            }
+            for hour in range(24)
+        }
+        for order in orders:
+            if order.created_at.date() != today:
+                continue
+            key = f"{order.created_at.hour:02d}"
+            buckets[key]["total_amount"] = Decimal(buckets[key]["total_amount"]) + Decimal(order.total_amount)
+            buckets[key]["orders_count"] = int(buckets[key]["orders_count"]) + 1
+
+    elif period == "day":
+        start = reference_now.date() - timedelta(days=13)
+        days = [start + timedelta(days=offset) for offset in range(14)]
+        buckets = {
+            day.isoformat(): {
+                "label": day.strftime("%d/%m"),
+                "total_amount": Decimal("0"),
+                "orders_count": 0,
+            }
+            for day in days
+        }
+        for order in orders:
+            key_date = order.created_at.date()
+            key = key_date.isoformat()
+            if key not in buckets:
+                continue
+            buckets[key]["total_amount"] = Decimal(buckets[key]["total_amount"]) + Decimal(order.total_amount)
+            buckets[key]["orders_count"] = int(buckets[key]["orders_count"]) + 1
+
+    elif period == "week":
+        current_week = _week_start(reference_now.date())
+        weeks = [current_week - timedelta(weeks=offset) for offset in reversed(range(8))]
+        buckets = {
+            week.isoformat(): {
+                "label": week.strftime("%d/%m"),
+                "total_amount": Decimal("0"),
+                "orders_count": 0,
+            }
+            for week in weeks
+        }
+        for order in orders:
+            key = _week_start(order.created_at.date()).isoformat()
+            if key not in buckets:
+                continue
+            buckets[key]["total_amount"] = Decimal(buckets[key]["total_amount"]) + Decimal(order.total_amount)
+            buckets[key]["orders_count"] = int(buckets[key]["orders_count"]) + 1
+
+    elif period == "month":
+        month_cursor = date(reference_now.year, reference_now.month, 1)
+        months: list[date] = []
+        for _ in range(12):
+            months.append(month_cursor)
+            if month_cursor.month == 1:
+                month_cursor = date(month_cursor.year - 1, 12, 1)
+            else:
+                month_cursor = date(month_cursor.year, month_cursor.month - 1, 1)
+        months.reverse()
+        buckets = {
+            month.isoformat(): {
+                "label": month.strftime("%m/%Y"),
+                "total_amount": Decimal("0"),
+                "orders_count": 0,
+            }
+            for month in months
+        }
+        for order in orders:
+            order_month = date(order.created_at.year, order.created_at.month, 1)
+            key = order_month.isoformat()
+            if key not in buckets:
+                continue
+            buckets[key]["total_amount"] = Decimal(buckets[key]["total_amount"]) + Decimal(order.total_amount)
+            buckets[key]["orders_count"] = int(buckets[key]["orders_count"]) + 1
+
+    else:
+        buckets = {}
+
+    return AdminSalesSeries(
+        period=period,
+        points=[
+            AdminSalesSeriesPoint(
+                key=key,
+                label=str(data["label"]),
+                total_amount=Decimal(data["total_amount"]),
+                orders_count=int(data["orders_count"]),
+            )
+            for key, data in buckets.items()
+        ],
     )

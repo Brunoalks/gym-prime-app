@@ -43,7 +43,8 @@ O seed tambem cria produtos, variantes e estoque inicial de demonstracao. Ele po
 
 ## Endpoints administrativos principais
 
-- `GET /admin/analytics/summary`: KPIs, grafico por hora, pedidos recentes, estoque baixo e produtos mais vendidos.
+- `GET /admin/analytics/summary`: KPIs, pedidos recentes, estoque baixo e produtos mais vendidos.
+- `GET /admin/analytics/sales-series?period=hour|day|week|month`: serie real de vendas para o grafico administrativo.
 - `GET /admin/customers`: clientes com CPF mascarado e totais agregados.
 - `GET /admin/settings` e `PATCH /admin/settings`: configuracoes operacionais persistidas.
 - `PATCH /orders/{order_id}/status`: alteracao administrativa de status do pedido.

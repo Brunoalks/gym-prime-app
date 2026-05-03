@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CalendarDays, Clock, Copy, DollarSign, Eye, LayoutDashboard, Package, Plus, Settings, Shield, ShoppingBag, Trash2, TrendingUp, Users } from 'lucide-react';
-import { Badge, Button, Card, Feedback, TextInput } from '../../components/ui.jsx';
+import { AlertTriangle, BarChart3, CalendarDays, ChevronDown, ClipboardList, Clock, Copy, DollarSign, Eye, FileImage, LayoutDashboard, Package, Plus, Settings, Shield, ShoppingBag, Trash2, TrendingUp, Users } from 'lucide-react';
+import { Badge, Button, Feedback, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { ApiError } from '../../services/api.js';
@@ -29,8 +29,95 @@ const ORDER_STATUS_OPTIONS = [
 
 const ORDER_STATUS_LABELS = Object.fromEntries(ORDER_STATUS_OPTIONS.map((statusOption) => [statusOption.value, statusOption.label]));
 
+const SALES_PERIOD_OPTIONS = [
+  { value: 'hour', label: 'Por hora' },
+  { value: 'day', label: 'Por dia' },
+  { value: 'week', label: 'Por semana' },
+  { value: 'month', label: 'Por mes' },
+];
+
+const ADMIN_FIELD_CLASS = 'min-h-11 rounded-md border border-white/10 bg-[#0B0D0E] px-3 text-sm font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-[#B6FF3B] focus:ring-2 focus:ring-[#B6FF3B]/20';
+
+const STATUS_STYLES = {
+  pending: 'border-[#B6FF3B]/50 bg-[#B6FF3B]/10 text-[#B6FF3B]',
+  preparing: 'border-sky-400/50 bg-sky-400/10 text-sky-300',
+  ready: 'border-slate-400/50 bg-white/8 text-slate-200',
+  completed: 'border-[#B6FF3B]/50 bg-[#B6FF3B]/10 text-[#B6FF3B]',
+  canceled: 'border-slate-500/60 bg-white/5 text-slate-400',
+};
+
 function getOrderOrigin(order) {
   return order.user_id ? 'Cliente' : 'Totem';
+}
+
+function formatTime(value) {
+  if (!value) return '--:--';
+  return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatAxisValue(value) {
+  if (value >= 1000) return `${(value / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}k`;
+  return Math.round(value).toLocaleString('pt-BR');
+}
+
+function AdminSelect({ className = '', children, ...props }) {
+  return (
+    <select className={`${ADMIN_FIELD_CLASS} ${className}`} {...props}>
+      {children}
+    </select>
+  );
+}
+
+function AdminTextInput({ className = '', ...props }) {
+  return <TextInput className={`${ADMIN_FIELD_CLASS} ${className}`} {...props} />;
+}
+
+function AdminCheckbox({ checked, onChange, label }) {
+  return (
+    <label className="flex min-h-11 items-center gap-3 rounded-md border border-white/10 bg-[#0B0D0E] px-3 text-sm font-bold text-slate-300">
+      <span className={`flex h-5 w-5 items-center justify-center rounded border ${checked ? 'border-[#B6FF3B] bg-[#B6FF3B] text-[#101214]' : 'border-white/20 bg-white/5'}`}>
+        {checked && <span className="h-2 w-2 rounded-sm bg-[#101214]" />}
+      </span>
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      {label}
+    </label>
+  );
+}
+
+function AdminFileInput({ onChange }) {
+  return (
+    <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-white/20 bg-[#0B0D0E] px-3 text-sm font-black text-slate-300 transition hover:border-[#B6FF3B]/60 hover:text-white">
+      <FileImage size={17} />
+      Selecionar imagem
+      <input type="file" accept="image/*" onChange={onChange} className="sr-only" />
+    </label>
+  );
+}
+
+function StatusPill({ status }) {
+  return (
+    <span className={`inline-flex min-h-7 items-center gap-2 rounded-full border px-3 text-xs font-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {ORDER_STATUS_LABELS[status] || status}
+    </span>
+  );
+}
+
+function Sparkline({ danger = false }) {
+  const stroke = danger ? '#F59E0B' : '#B6FF3B';
+  const bars = [18, 30, 22, 42, 28, 52];
+  if (danger) {
+    return (
+      <div className="flex h-10 items-end gap-1">
+        {bars.map((height, index) => <span key={index} className="w-1.5 rounded-sm bg-amber-500/80" style={{ height }} />)}
+      </div>
+    );
+  }
+  return (
+    <svg viewBox="0 0 92 42" className="h-11 w-24" aria-hidden="true">
+      <polyline points="0,34 12,35 22,30 34,31 46,22 57,14 68,24 80,15 92,10" fill="none" stroke={stroke} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function buildOrderSummary(order, productMap) {
@@ -100,7 +187,7 @@ function AccessDenied({ status, onTryLogin }) {
   );
 }
 
-function Dashboard({ orders, inventory, productMap, analytics, setTab }) {
+function Dashboard({ orders, inventory, productMap, analytics, salesSeries, salesPeriod, onSalesPeriodChange, setTab }) {
   const revenue = orders.reduce((total, order) => total + Number(order.total_amount), 0);
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity);
   const recentOrders = analytics?.recent_orders || orders.slice(0, 5);
@@ -138,82 +225,92 @@ function Dashboard({ orders, inventory, productMap, analytics, setTab }) {
   });
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-4">
       <div className="grid gap-4 xl:grid-cols-4 md:grid-cols-2">
-        <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" icon={<DollarSign size={24} />} />
-        <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" icon={<ShoppingBag size={24} />} />
-        <KpiCard title="Ticket medio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" icon={<TrendingUp size={24} />} />
-        <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Atencao' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
+        <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" helper="vs ontem" icon={<DollarSign size={24} />} />
+        <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" helper="vs ontem" icon={<ShoppingBag size={24} />} />
+        <KpiCard title="Ticket medio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
+        <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atencao' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-        <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
-          <div className="flex items-center justify-between border-b border-white/10 p-4">
-            <h2 className="text-lg font-black">Pedidos recentes</h2>
-            <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setTab('orders')}>Ver todos</Button>
+      <div className="grid gap-4 xl:grid-cols-[1fr_430px]">
+        <section className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+            <h2 className="flex items-center gap-3 text-lg font-black"><ClipboardList size={20} className="text-slate-300" /> Pedidos recentes</h2>
+            <Button size="sm" variant="secondary" className="border-white/15 bg-white/5 text-white hover:bg-white/10" onClick={() => setTab('orders')}>Ver todos</Button>
           </div>
           {recentOrders.length === 0 ? (
             <div className="p-4"><Feedback>Nenhum pedido registrado ainda.</Feedback></div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
-                  <tr><th className="px-4 py-3">Pedido</th><th>Origem/Cliente</th><th>Itens</th><th>Status</th><th className="text-right">Total</th></tr>
+              <table className="w-full min-w-[820px] text-left text-sm">
+                <thead className="bg-white/[0.025] text-xs font-black uppercase text-slate-400">
+                  <tr><th className="px-5 py-3"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-6 text-right">Total</th><th className="pl-3">Status</th></tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {recentOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td className="px-4 py-4 font-black">#{order.id}</td>
+                    <tr key={order.id} className="hover:bg-white/[0.025]">
+                      <td className="px-5 py-3.5 font-black">#{order.id}</td>
+                      <td className="text-slate-300">{formatTime(order.created_at)}</td>
                       <td className="text-slate-200">
                         {order.customer_label || order.customer_name || `Usuario ${order.user_id}`}
-                        <Badge className="ml-2 bg-blue-500/15 text-blue-300">{order.origin || (order.user_id ? 'Cliente' : 'Totem')}</Badge>
+                        <Badge className="ml-2 min-h-6 border border-sky-400/40 bg-sky-400/10 px-2 text-sky-300">{order.origin || (order.user_id ? 'Cliente' : 'Totem')}</Badge>
                       </td>
                       <td className="text-slate-300">{order.items_count ?? order.items?.length ?? 0} itens</td>
-                      <td><Badge variant="success">{order.status}</Badge></td>
-                      <td className="pr-4 text-right font-black">{formatCurrency(order.total_amount)}</td>
+                      <td className="pr-6 text-right font-black">{formatCurrency(order.total_amount)}</td>
+                      <td className="pl-3 pr-5"><StatusPill status={order.status} /></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
+          <div className="flex items-center justify-between border-t border-white/10 px-5 py-3 text-sm text-slate-400">
+            <span>Mostrando {Math.min(recentOrders.length, 8)} de {orders.length} pedidos</span>
+            <button type="button" className="font-black text-white hover:text-[#B6FF3B]" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
+          </div>
         </section>
 
         <div className="space-y-4">
-          <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-black">Estoque baixo</h2>
-              <Badge variant={lowInventoryItems.length > 0 ? 'danger' : 'success'}>{lowInventoryItems.length || 'Ok'}</Badge>
+          <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+              <h2 className="flex items-center gap-3 text-lg font-black"><AlertTriangle size={20} className="text-amber-400" /> Estoque baixo</h2>
+              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300" onClick={() => setTab('inventory')}>Ver estoque</button>
             </div>
             {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do minimo.</Feedback> : (
-              <div className="space-y-2">
-                {lowInventoryItems.slice(0, 4).map((item) => {
-                  return (
-                    <div key={item.inventory_id} className="rounded-lg bg-red-50 p-3 text-sm">
-                      <strong className="text-red-700">{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
-                      <span className="mt-1 block font-bold text-red-600">{item.quantity} em estoque, minimo {item.min_quantity}</span>
-                    </div>
-                  );
-                })}
+              <div className="divide-y divide-white/10">
+                {lowInventoryItems.slice(0, 4).map((item) => (
+                  <div key={item.inventory_id} className="grid grid-cols-[54px_1fr_52px_52px_90px] items-center gap-3 py-3 text-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-black/30 text-[#B6FF3B]"><Package size={22} /></div>
+                    <strong>{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
+                    <span className="font-black">{item.quantity}</span>
+                    <span className="text-slate-400">{item.min_quantity}</span>
+                    <Badge variant={item.severity === 'critical' ? 'danger' : 'neutral'} className={item.severity === 'critical' ? 'border border-red-500/40 bg-red-500/10 text-red-300' : 'border border-amber-500/40 bg-amber-500/10 text-amber-300'}>{item.severity === 'critical' ? 'Critico' : 'Baixo'}</Badge>
+                  </div>
+                ))}
               </div>
             )}
           </section>
 
-          <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-            <h2 className="mb-4 text-lg font-black">Produtos mais vendidos</h2>
+          <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+              <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Produtos mais vendidos</h2>
+              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatorio</button>
+            </div>
             {topProducts.length === 0 ? <Feedback>Nenhum ranking disponivel.</Feedback> : (
               <div className="space-y-3">
                 {topProducts.map((item, index) => (
                   <div key={item.productId || item.product_id}>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="grid grid-cols-[24px_1fr_78px_98px] items-center gap-3 text-sm">
+                      <span className="font-black text-slate-400">{index + 1}</span>
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="font-black text-slate-400">{index + 1}</span>
                         {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-9 w-9 rounded-md object-cover" />}
                         <strong className="truncate">{item.product_name || item.product?.name || `Produto #${item.productId || item.product_id}`}</strong>
                       </div>
-                      <span className="font-bold text-slate-400">{item.quantity} un. | {formatCurrency(item.revenue)}</span>
+                      <span className="font-black text-slate-300">{item.quantity} un.</span>
+                      <span className="text-right font-black">{formatCurrency(item.revenue)}</span>
                     </div>
-                    <div className="mt-2 h-2 rounded-full bg-white/10">
+                    <div className="ml-8 mt-2 h-2 rounded-full bg-white/10">
                       <div className="h-2 rounded-full bg-[#B6FF3B]" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
                     </div>
                   </div>
@@ -223,58 +320,100 @@ function Dashboard({ orders, inventory, productMap, analytics, setTab }) {
           </section>
         </div>
       </div>
-      <SalesChart hourlySales={analytics?.hourly_sales || []} />
+      <SalesChart
+        salesSeries={salesSeries}
+        period={salesPeriod}
+        onPeriodChange={onSalesPeriodChange}
+        fallbackHourlySales={analytics?.hourly_sales || []}
+      />
     </section>
   );
 }
 
-function SalesChart({ hourlySales }) {
-  const points = hourlySales.length > 0
-    ? hourlySales
-    : Array.from({ length: 24 }, (_, hour) => ({ hour, total_amount: 0, orders_count: 0 }));
+function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }) {
+  const fallbackPoints = fallbackHourlySales.map((point) => ({
+    key: String(point.hour).padStart(2, '0'),
+    label: `${String(point.hour).padStart(2, '0')}h`,
+    total_amount: point.total_amount,
+    orders_count: point.orders_count,
+  }));
+  const points = salesSeries?.points?.length > 0
+    ? salesSeries.points
+    : fallbackPoints.length > 0
+      ? fallbackPoints
+      : Array.from({ length: 24 }, (_, hour) => ({ key: String(hour).padStart(2, '0'), label: `${String(hour).padStart(2, '0')}h`, total_amount: 0, orders_count: 0 }));
   const maxValue = Math.max(...points.map((point) => Number(point.total_amount)), 1);
+  const yAxisValues = [1, 0.75, 0.5, 0.25, 0].map((ratio) => maxValue * ratio);
   const chartPoints = points.map((point, index) => {
-    const x = (index / Math.max(points.length - 1, 1)) * 100;
-    const y = 100 - (Number(point.total_amount) / maxValue) * 82 - 8;
+    const x = 7 + (index / Math.max(points.length - 1, 1)) * 88;
+    const y = 94 - (Number(point.total_amount) / maxValue) * 78;
     return `${x},${y}`;
   }).join(' ');
+  const areaPoints = `7,94 ${chartPoints} 95,94`;
+  const labelInterval = points.length > 14 ? 2 : 1;
+  const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-      <div className="mb-4 flex items-center justify-between">
+    <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-black">Evolucao das vendas hoje</h2>
-          <p className="mt-1 text-sm text-slate-400">Serie por hora calculada pelo backend.</p>
+          <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Evolucao das vendas</h2>
+          <p className="mt-1 text-sm text-slate-400">Serie real de pedidos agregada {activePeriodLabel.toLowerCase()}.</p>
         </div>
-        <Badge variant="neutral">Por hora</Badge>
+        <AdminSelect value={period} onChange={(event) => onPeriodChange(event.target.value)} className="w-36">
+          {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </AdminSelect>
       </div>
-      <div className="h-48 rounded-lg bg-black/20 p-3">
+      <div className="relative h-64 rounded-lg bg-black/25 px-4 pb-8 pl-14 pt-5">
+        <div className="absolute bottom-8 left-4 top-5 flex flex-col-reverse justify-between text-xs font-bold leading-none text-slate-400">
+          {yAxisValues.slice().reverse().map((value) => <span key={value}>{formatAxisValue(value)}</span>)}
+        </div>
+        <div className="absolute bottom-2 left-14 right-4 grid text-center text-[11px] font-bold leading-none text-slate-400" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
+          {points.map((point, index) => (
+            <span key={point.key} className={index % labelInterval === 0 || index === points.length - 1 ? 'truncate' : 'opacity-0'}>{point.label}</span>
+          ))}
+        </div>
         <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" preserveAspectRatio="none" role="img" aria-label="Grafico de vendas por hora">
           <defs>
             <linearGradient id="salesArea" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#B6FF3B" stopOpacity="0.42" />
-              <stop offset="100%" stopColor="#B6FF3B" stopOpacity="0.02" />
+              <stop offset="0%" stopColor="#B6FF3B" stopOpacity="0.46" />
+              <stop offset="100%" stopColor="#B6FF3B" stopOpacity="0.03" />
             </linearGradient>
           </defs>
-          <polyline points={`0,100 ${chartPoints} 100,100`} fill="url(#salesArea)" stroke="none" />
-          <polyline points={chartPoints} fill="none" stroke="#B6FF3B" strokeWidth="2.4" vectorEffect="non-scaling-stroke" />
+          {yAxisValues.map((value) => {
+            const y = 94 - (value / maxValue) * 78;
+            return <line key={value} x1="7" x2="95" y1={y} y2={y} stroke="rgba(255,255,255,0.10)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />;
+          })}
+          <polyline points={areaPoints} fill="url(#salesArea)" stroke="none" />
+          <polyline points={chartPoints} fill="none" stroke="#B6FF3B" strokeWidth="2.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          {points.map((point, index) => {
+            if (index % 2 !== 0) return null;
+            const x = 7 + (index / Math.max(points.length - 1, 1)) * 88;
+            const y = 94 - (Number(point.total_amount) / maxValue) * 78;
+            return <circle key={point.key} cx={x} cy={y} r="1.1" fill="#B6FF3B" vectorEffect="non-scaling-stroke" />;
+          })}
         </svg>
       </div>
     </section>
   );
 }
 
-function KpiCard({ title, value, badge, danger = false, icon }) {
+function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_38px_rgba(0,0,0,0.18)]">
-      <div className="flex items-center justify-between gap-3">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-lg border ${danger ? 'border-amber-500/40 text-amber-400' : 'border-[#B6FF3B]/40 text-[#B6FF3B]'}`}>
+    <section className="relative overflow-hidden rounded-lg border border-white/10 bg-[#121415]/90 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className={`flex h-12 w-12 items-center justify-center rounded-lg border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-[#B6FF3B]/55 text-[#B6FF3B]'}`}>
           {icon}
         </div>
-        <Badge variant={danger ? 'danger' : 'success'}>{badge}</Badge>
+        <Sparkline danger={danger} />
       </div>
       <p className="mt-4 text-sm font-bold text-slate-300">{title}</p>
       <strong className="mt-2 block text-3xl font-black text-white">{value}</strong>
+      <div className={`mt-4 flex items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-[#B6FF3B]'}`}>
+        {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
+        <span>{badge}</span>
+        {helper && <span className="font-medium text-white">{helper}</span>}
+      </div>
     </section>
   );
 }
@@ -305,16 +444,16 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
     <>
       <DataCard title="Pedidos" subtitle="Pedidos salvos pelo cliente mobile e pelo totem." count={`${filteredOrders.length}/${orders.length} pedidos`}>
         <div className="mb-4 grid gap-3 md:grid-cols-[180px_180px_220px_1fr]">
-          <TextInput type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
-          <select className="min-h-11 rounded-md border border-white/10 bg-black/20 px-3 text-sm font-bold text-white outline-none" value={filters.origin} onChange={(event) => setFilters({ ...filters, origin: event.target.value })}>
+          <AdminTextInput type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
+          <AdminSelect value={filters.origin} onChange={(event) => setFilters({ ...filters, origin: event.target.value })}>
             <option value="all">Todas as origens</option>
             <option value="Cliente">Cliente</option>
             <option value="Totem">Totem</option>
-          </select>
-          <select className="min-h-11 rounded-md border border-white/10 bg-black/20 px-3 text-sm font-bold text-white outline-none" value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
+          </AdminSelect>
+          <AdminSelect value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
             <option value="all">Todos os status</option>
             {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
-          </select>
+          </AdminSelect>
           <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10 md:justify-self-end" onClick={() => setFilters({ date: '', origin: 'all', status: 'all' })}>
             Limpar filtros
           </Button>
@@ -341,9 +480,9 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                     </div>
                   </td>
                   <td>
-                    <select className="min-h-10 rounded-md border border-white/10 bg-black/20 px-2 text-xs font-black text-white outline-none" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
+                    <AdminSelect className="min-h-9 px-2 text-xs" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
                       {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
-                    </select>
+                    </AdminSelect>
                   </td>
                   <td className="text-slate-400">{new Date(order.created_at).toLocaleString('pt-BR')}</td>
                   <td className="pr-4 text-right font-black">{formatCurrency(order.total_amount)}</td>
@@ -392,9 +531,9 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
           <InfoBlock label="Pagamento" value={order.payment_method || 'Nao informado'} />
           <label className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
             <span className="text-xs font-black uppercase text-slate-500">Status</span>
-            <select className="mt-2 min-h-11 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm font-black text-white outline-none" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
+            <AdminSelect className="mt-2 w-full" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
               {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
-            </select>
+            </AdminSelect>
           </label>
         </div>
 
@@ -469,7 +608,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
         <div>
           <h2 className="text-lg font-black">Produtos</h2>
           <p className="mt-1 text-sm text-slate-400">Cardapio, variantes, imagem e disponibilidade.</p>
@@ -479,7 +618,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
       <div className="grid gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <article key={product.id} className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+          <article key={product.id} className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
             <div className="grid min-h-44 grid-cols-[150px_1fr]">
               {product.image_url ? (
                 <img src={product.image_url} alt={product.name} className="h-full min-h-44 w-full object-cover" />
@@ -521,15 +660,12 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                       return (
                         <div key={variant.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
                           <div className="grid gap-2 sm:grid-cols-2">
-                            <TextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
-                            <TextInput placeholder="Codigo" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
-                            <TextInput placeholder="Descricao" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
-                            <TextInput placeholder="Preco" type="number" min="0" step="0.01" value={variantForm.price} onChange={(event) => updateVariantForm(variant.id, { price: event.target.value })} />
+                            <AdminTextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
+                            <AdminTextInput placeholder="Codigo" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
+                            <AdminTextInput placeholder="Descricao" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
+                            <AdminTextInput placeholder="Preco" type="number" min="0" step="0.01" value={variantForm.price} onChange={(event) => updateVariantForm(variant.id, { price: event.target.value })} />
                           </div>
-                          <label className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-300">
-                            <input type="checkbox" checked={variantForm.is_active} onChange={(event) => updateVariantForm(variant.id, { is_active: event.target.checked })} />
-                            Variante ativa
-                          </label>
+                          <div className="mt-3"><AdminCheckbox checked={variantForm.is_active} onChange={(event) => updateVariantForm(variant.id, { is_active: event.target.checked })} label="Variante ativa" /></div>
                           <div className="mt-3 flex justify-end gap-2">
                             <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => {
                               const nextForms = { ...variantForms };
@@ -563,7 +699,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                 <h3 className="text-sm font-black text-slate-300">Nova variante</h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {['name', 'code', 'description', 'price'].map((field) => (
-                    <TextInput
+                    <AdminTextInput
                       key={field}
                       placeholder={{ name: 'Variante', code: 'Codigo', description: 'Descricao', price: 'Preco' }[field]}
                       type={field === 'price' ? 'number' : 'text'}
@@ -641,18 +777,15 @@ function ProductFormDialog({ product, onClose, onSave }) {
             <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/20">
               {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-500">Preview</span>}
             </div>
-            <TextInput className="mt-3" type="file" accept="image/*" onChange={handleImageChange} />
+            <AdminFileInput onChange={handleImageChange} />
           </div>
 
           <div className="space-y-3">
-            <TextInput placeholder="Nome" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
-            <TextInput placeholder="Codigo" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
-            <TextInput placeholder="Descricao" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-            <TextInput placeholder="Preco" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
-            <label className="flex items-center gap-2 text-sm font-bold text-slate-300">
-              <input type="checkbox" checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} />
-              Produto ativo no cardapio
-            </label>
+            <AdminTextInput placeholder="Nome" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+            <AdminTextInput placeholder="Codigo" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
+            <AdminTextInput placeholder="Descricao" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+            <AdminTextInput placeholder="Preco" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
+            <AdminCheckbox checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} label="Produto ativo no cardapio" />
           </div>
         </div>
 
@@ -680,11 +813,8 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
   return (
     <DataCard title="Estoque" subtitle="Controle por produto, variante, minimo e alerta operacional." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
       <div className="mb-4 grid gap-3 md:grid-cols-[1fr_190px_140px]">
-        <TextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
-        <label className="flex min-h-11 items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 text-sm font-bold text-slate-300">
-          <input type="checkbox" checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} />
-          Baixo estoque
-        </label>
+        <AdminTextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
+        <AdminCheckbox checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} label="Baixo estoque" />
         <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
       </div>
 
@@ -703,8 +833,8 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
                 <tr key={item.id}>
                   <td className="px-4 py-4 font-black">{product?.name || `Produto #${item.product_id}`}</td>
                   <td className="text-slate-300">{variant?.name || (item.variant_id ? `Variante #${item.variant_id}` : 'Produto base')}</td>
-                  <td className="py-4"><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
-                  <td><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
+                  <td className="py-4"><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
+                  <td><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
                   <td><Badge variant={isLow ? 'danger' : 'success'}>{isCritical ? 'Critico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
                   <td className="pr-4 text-right"><Button size="sm" onClick={() => onSaveInventory(item.id)}>Salvar</Button></td>
                 </tr>
@@ -722,16 +852,16 @@ function AuditPanel({ auditLogs }) {
     <DataCard title="Auditoria" subtitle="Acoes administrativas e eventos criticos registrados." count={`${auditLogs.length} logs`}>
       {auditLogs.length === 0 ? <Feedback>Nenhum log registrado.</Feedback> : (
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-black uppercase text-slate-500">
+          <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
             <tr><th className="px-4 py-3">Acao</th><th>Entidade</th><th>Usuario</th><th>Data</th></tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-white/10">
             {auditLogs.map((log) => (
               <tr key={log.id}>
                 <td className="px-4 py-4 font-black">{log.action}</td>
-                <td>{log.entity || 'Sistema'} {log.entity_id ? `#${log.entity_id}` : ''}</td>
-                <td>{log.user_id ? `#${log.user_id}` : 'Sistema'}</td>
-                <td>{new Date(log.created_at).toLocaleString('pt-BR')}</td>
+                <td className="text-slate-300">{log.entity || 'Sistema'} {log.entity_id ? `#${log.entity_id}` : ''}</td>
+                <td className="text-slate-300">{log.user_id ? `#${log.user_id}` : 'Sistema'}</td>
+                <td className="text-slate-400">{new Date(log.created_at).toLocaleString('pt-BR')}</td>
               </tr>
             ))}
           </tbody>
@@ -753,7 +883,7 @@ function CustomersPanel({ customers }) {
     <>
       <DataCard title="Clientes" subtitle="Contas cadastradas, historico resumido e dados sensiveis mascarados." count={`${filteredCustomers.length}/${customers.length} clientes`}>
         <div className="mb-4 grid gap-3 md:grid-cols-[1fr_140px]">
-          <TextInput placeholder="Buscar por nome, email ou CPF mascarado" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <AdminTextInput placeholder="Buscar por nome, email ou CPF mascarado" value={search} onChange={(event) => setSearch(event.target.value)} />
           <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSearch('')}>Limpar</Button>
         </div>
         {filteredCustomers.length === 0 ? <Feedback>Nenhum cliente encontrado.</Feedback> : (
@@ -826,7 +956,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
   return (
     <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
-      <form onSubmit={submitSettings} className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+      <form onSubmit={submitSettings} className="rounded-lg border border-white/10 bg-[#121415]/85 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-black">Configuracoes</h2>
@@ -837,27 +967,24 @@ function SettingsPanel({ settings, onSaveSettings }) {
         <div className="grid gap-4 md:grid-cols-2">
           <label>
             <span className="mb-1 block text-xs font-black uppercase text-slate-500">Nome exibido</span>
-            <TextInput value={form.establishment_name} onChange={(event) => setForm({ ...form, establishment_name: event.target.value })} required />
+            <AdminTextInput value={form.establishment_name} onChange={(event) => setForm({ ...form, establishment_name: event.target.value })} required />
           </label>
           <label>
             <span className="mb-1 block text-xs font-black uppercase text-slate-500">WhatsApp</span>
-            <TextInput placeholder="5511999999999" value={form.whatsapp_phone} onChange={(event) => setForm({ ...form, whatsapp_phone: event.target.value })} />
+            <AdminTextInput placeholder="5511999999999" value={form.whatsapp_phone} onChange={(event) => setForm({ ...form, whatsapp_phone: event.target.value })} />
           </label>
           <label className="md:col-span-2">
             <span className="mb-1 block text-xs font-black uppercase text-slate-500">Mensagem do totem</span>
-            <TextInput value={form.totem_message} onChange={(event) => setForm({ ...form, totem_message: event.target.value })} required />
+            <AdminTextInput value={form.totem_message} onChange={(event) => setForm({ ...form, totem_message: event.target.value })} required />
           </label>
-          <label className="flex min-h-12 items-center gap-3 rounded-lg border border-white/10 bg-black/20 px-3 text-sm font-bold text-slate-300">
-            <input type="checkbox" checked={form.menu_is_open} onChange={(event) => setForm({ ...form, menu_is_open: event.target.checked })} />
-            Cardapio aberto para Cliente e Totem
-          </label>
+          <AdminCheckbox checked={form.menu_is_open} onChange={(event) => setForm({ ...form, menu_is_open: event.target.checked })} label="Cardapio aberto para Cliente e Totem" />
         </div>
         <div className="mt-5 flex justify-end">
           <Button type="submit">Salvar configuracoes</Button>
         </div>
       </form>
 
-      <aside className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+      <aside className="rounded-lg border border-white/10 bg-[#121415]/85 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
         <Badge variant="neutral">Preview</Badge>
         <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
         <pre className="mt-4 whitespace-pre-wrap rounded-lg bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
@@ -871,7 +998,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+    <section className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
         <div>
           <h2 className="text-lg font-black">{title}</h2>
@@ -880,6 +1007,35 @@ function DataCard({ title, subtitle, count, danger = false, children }) {
         <Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>
       </div>
       <div className="overflow-x-auto p-4">{children}</div>
+    </section>
+  );
+}
+
+function AdminSummaryCard({ analytics, orders, inventory }) {
+  const revenue = analytics?.kpis?.sales_today ?? orders.reduce((total, order) => total + Number(order.total_amount), 0);
+  const ordersToday = analytics?.kpis?.orders_today ?? orders.length;
+  const itemsSold = analytics?.kpis?.items_sold_today ?? orders.reduce((total, order) => total + order.items.reduce((sum, item) => sum + item.quantity, 0), 0);
+  const customersServed = analytics?.kpis?.customers_served ?? new Set(orders.map((order) => order.user_id || order.customer_name).filter(Boolean)).size;
+  const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
+
+  return (
+    <section className="rounded-lg border border-white/15 bg-[#0B0D0E]/90 p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-black">Resumo do dia</h2>
+        <ChevronDown size={17} className="text-slate-300" />
+      </div>
+      {[
+        ['Vendas', formatCurrency(revenue)],
+        ['Pedidos', ordersToday],
+        ['Itens vendidos', itemsSold],
+        ['Clientes atendidos', customersServed],
+        ['Alertas estoque', lowInventory],
+      ].map(([label, value]) => (
+        <div key={label} className="border-t border-white/10 py-3 first:border-t-0 first:pt-0">
+          <span className="block text-xs font-medium text-slate-300">{label}</span>
+          <strong className="mt-1 block text-lg font-black text-[#B6FF3B]">{value}</strong>
+        </div>
+      ))}
     </section>
   );
 }
@@ -897,6 +1053,8 @@ export function AdminPage() {
   const [customers, setCustomers] = useState([]);
   const [settings, setSettings] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [salesSeries, setSalesSeries] = useState(null);
+  const [salesPeriod, setSalesPeriod] = useState('hour');
   const [inventoryForms, setInventoryForms] = useState({});
   const [productToDelete, setProductToDelete] = useState(null);
   const [errorDialog, setErrorDialog] = useState('');
@@ -959,12 +1117,18 @@ export function AdminPage() {
         gymPrimeApi.getAdminSettings(),
       ]);
       try {
-        setAnalytics(await gymPrimeApi.getAdminAnalyticsSummary());
+        const [summaryData, salesSeriesData] = await Promise.all([
+          gymPrimeApi.getAdminAnalyticsSummary(),
+          gymPrimeApi.getAdminSalesSeries(salesPeriod),
+        ]);
+        setAnalytics(summaryData);
+        setSalesSeries(salesSeriesData);
       } catch (error) {
         if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
           throw error;
         }
         setAnalytics(null);
+        setSalesSeries(null);
         toast.error(`Analytics indisponivel: ${error.message}`);
       }
       setProducts(productData);
@@ -976,6 +1140,15 @@ export function AdminPage() {
       setInventoryForms(Object.fromEntries(inventoryData.map((item) => [item.id, { quantity: String(item.quantity), min_quantity: String(item.min_quantity) }])));
     } finally {
       setAdminDataLoading(false);
+    }
+  }
+
+  async function changeSalesPeriod(nextPeriod) {
+    setSalesPeriod(nextPeriod);
+    try {
+      setSalesSeries(await gymPrimeApi.getAdminSalesSeries(nextPeriod));
+    } catch (error) {
+      handleAdminError(error);
     }
   }
 
@@ -1089,46 +1262,59 @@ export function AdminPage() {
       setUser(adminUser);
     }} />;
   }
+  const activeTabLabel = ADMIN_TABS.find((item) => item.key === tab)?.label || 'Dashboard';
 
   return (
-    <main className="grid min-h-screen grid-cols-[250px_1fr] bg-[#050606] text-white">
-      <aside className="flex min-h-0 flex-col border-r border-white/10 bg-[#101214] p-5 text-white">
+    <main className="grid min-h-screen grid-cols-[228px_1fr] bg-[#050606] text-white">
+      <aside className="flex min-h-0 flex-col border-r border-white/10 bg-[#07090A] p-5 text-white">
         <BrandMark label="Gym Prime" tone="dark" />
-        <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-400">Admin</span>
+        <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-300">ADMIN</span>
         <nav className="mt-8 space-y-2">
           {ADMIN_TABS.map(({ key, label, icon }) => (
-            <Button
+            <button
               key={key}
-              variant={tab === key ? 'primary' : 'secondary'}
-              className={`w-full justify-start ${tab === key ? '' : 'border-white/10 bg-white/5 text-white hover:bg-white/10'}`}
+              type="button"
+              className={`flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-black transition ${tab === key ? 'bg-[#B6FF3B] text-[#101214] shadow-[0_0_24px_rgba(182,255,59,0.22)]' : 'text-slate-200 hover:bg-white/8 hover:text-white'}`}
               onClick={() => setTab(key)}
             >
               {icon}
               {label}
-            </Button>
+            </button>
           ))}
         </nav>
-        <Link to={APP_ROUTES.totem} className="mt-auto flex min-h-11 items-center justify-center rounded-md border border-white/10 text-sm font-black text-white hover:bg-white/10">
-          Abrir Totem
-        </Link>
+        <div className="mt-auto space-y-4">
+          <AdminSummaryCard analytics={analytics} orders={orders} inventory={inventory} />
+          <Link to={APP_ROUTES.totem} className="flex min-h-10 items-center justify-center rounded-md border border-white/10 text-xs font-black text-slate-300 hover:bg-white/10 hover:text-white">
+            Abrir Totem
+          </Link>
+          <div className="text-xs font-medium leading-6 text-slate-500">
+            <span className="block">© 2026 Gym Prime</span>
+            <span className="block">v1.0.0</span>
+          </div>
+        </div>
       </aside>
 
-      <section className="min-w-0 p-6">
+      <section className="min-w-0 bg-[radial-gradient(circle_at_48%_4%,rgba(182,255,59,0.05),transparent_34%)] p-7">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black">Dashboard</h1>
-            <p className="mt-1 text-sm font-medium text-slate-400">Operacao local da lanchonete Gym Prime.</p>
+            <h1 className="text-4xl font-black leading-none">{activeTabLabel}</h1>
+            {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operacao local da lanchonete Gym Prime.</p>}
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="success">Servidor local online</Badge>
-            <div className="flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-black">
+            <div className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
+              <span className="h-3 w-3 rounded-full bg-[#B6FF3B] shadow-[0_0_18px_rgba(182,255,59,0.62)]" />
+              Servidor local online
+            </div>
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
               <CalendarDays size={16} />
               Hoje
-            </div>
-            <div className="flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-black">
+              <ChevronDown size={15} />
+            </button>
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
               <Shield size={16} />
               Administrador
-            </div>
+              <ChevronDown size={15} />
+            </button>
             <button type="button" className="text-xs font-black text-slate-400 underline-offset-4 hover:text-white hover:underline" onClick={handleLogout}>
               Sair
             </button>
@@ -1136,7 +1322,18 @@ export function AdminPage() {
         </header>
 
         {adminDataLoading && <Feedback className="mb-4 py-3">Carregando dados...</Feedback>}
-        {tab === 'dashboard' && <Dashboard orders={orders} inventory={inventory} productMap={productMap} analytics={analytics} setTab={setTab} />}
+        {tab === 'dashboard' && (
+          <Dashboard
+            orders={orders}
+            inventory={inventory}
+            productMap={productMap}
+            analytics={analytics}
+            salesSeries={salesSeries}
+            salesPeriod={salesPeriod}
+            onSalesPeriodChange={changeSalesPeriod}
+            setTab={setTab}
+          />
+        )}
         {tab === 'orders' && <OrdersPanel orders={orders} productMap={productMap} onUpdateStatus={updateOrderStatus} />}
         {tab === 'products' && <ProductsPanel products={products} onSaveProduct={saveProduct} onCreateVariant={createVariant} onUpdateVariant={updateVariant} onDeleteVariant={deleteVariant} onDeleteProduct={setProductToDelete} />}
         {tab === 'inventory' && <InventoryPanel inventory={inventory} inventoryForms={inventoryForms} setInventoryForms={setInventoryForms} onSaveInventory={saveInventory} productMap={productMap} />}
