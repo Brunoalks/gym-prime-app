@@ -2,8 +2,8 @@ import { createElement } from 'react';
 import { cn } from './classNames.js';
 
 const buttonVariants = {
-  primary: 'bg-emerald-500 text-slate-950 hover:bg-emerald-400',
-  dark: 'bg-slate-950 text-white hover:bg-slate-800',
+  primary: 'bg-[#B6FF3B] text-[#101214] hover:bg-[#C7FF64]',
+  dark: 'bg-[#101214] text-white hover:bg-slate-800',
   secondary: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
   danger: 'bg-red-50 text-red-700 hover:bg-red-100',
   ghost: 'text-slate-600 hover:bg-slate-100',
@@ -17,13 +17,13 @@ const buttonSizes = {
 
 const badgeVariants = {
   neutral: 'bg-slate-100 text-slate-700',
-  success: 'bg-emerald-50 text-emerald-700',
+  success: 'bg-lime-100 text-[#101214]',
   danger: 'bg-red-50 text-red-700',
 };
 
 const feedbackVariants = {
   muted: 'border-slate-200 bg-white text-slate-500',
-  success: 'border-emerald-100 bg-emerald-50 text-emerald-700',
+  success: 'border-lime-100 bg-lime-50 text-[#101214]',
   danger: 'border-red-100 bg-red-50 text-red-700',
 };
 
@@ -55,7 +55,7 @@ export function TextInput({ className = '', ...props }) {
   return (
     <input
       className={cn(
-        'w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100',
+        'w-full rounded-md border border-slate-200 bg-white px-3 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-[#B6FF3B] focus:ring-2 focus:ring-lime-100',
         className,
       )}
       {...props}

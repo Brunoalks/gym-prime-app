@@ -1,7 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel
+
+OrderStatus = Literal["pending", "preparing", "ready", "completed", "canceled"]
 
 
 class OrderItemRead(BaseModel):
@@ -27,3 +30,7 @@ class OrderRead(BaseModel):
     items: list[OrderItemRead]
 
     model_config = {"from_attributes": True}
+
+
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus

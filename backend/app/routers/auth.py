@@ -77,6 +77,17 @@ def login(payload: UserLogin, response: Response, db: Session = Depends(get_db))
     return user
 
 
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response) -> None:
+    settings = get_settings()
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        samesite=settings.cookie_samesite,
+        secure=settings.cookie_secure,
+    )
+
+
 @router.get("/me", response_model=UserRead)
 def read_me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
