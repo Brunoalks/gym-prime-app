@@ -1,4 +1,7 @@
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.models.audit_log import AuditLog
 
 
 def test_register_customer_creates_user_without_sensitive_data_in_response(client: TestClient):
@@ -77,7 +80,7 @@ def test_session_without_cookie_returns_empty_user(client: TestClient):
     assert response.json() == {"user": None}
 
 
-def test_logout_clears_session_cookie(client: TestClient):
+def test_logout_clears_session_cookie(client: TestClient, db_session: Session):
     client.post(
         "/auth/register",
         json={
@@ -100,3 +103,4 @@ def test_logout_clears_session_cookie(client: TestClient):
     assert "access_token=" in logout_response.headers["set-cookie"]
     assert "Max-Age=0" in logout_response.headers["set-cookie"]
     assert client.get("/auth/session").json() == {"user": None}
+    assert db_session.query(AuditLog).filter_by(action="logout").count() == 1

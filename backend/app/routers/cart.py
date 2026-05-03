@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
-from app.core.config import get_settings
 from app.core.database import get_db
 from app.models.order import Order
 from app.models.order_item import OrderItem
@@ -10,6 +9,7 @@ from app.models.user import User
 from app.schemas.cart import CartItemCreate, CartRead, CheckoutRead
 from app.services.cart import add_to_cart, build_cart_response, clear_cart, get_available_product, get_available_variant, get_cart
 from app.services.audit import create_audit_log
+from app.services.app_settings import get_app_settings
 from app.services.orders import decrement_inventory
 from app.services.whatsapp import build_order_message, build_wa_me_url
 
@@ -72,7 +72,7 @@ def checkout(
         )
 
     message = build_order_message(current_user.full_name, cart_response.items, cart_response.total_amount)
-    whatsapp_url = build_wa_me_url(message, get_settings().whatsapp_phone)
+    whatsapp_url = build_wa_me_url(message, get_app_settings(db).whatsapp_phone)
     create_audit_log(db, action="order.created", entity="order", entity_id=order.id, user_id=current_user.id)
     db.commit()
     clear_cart(current_user.id)

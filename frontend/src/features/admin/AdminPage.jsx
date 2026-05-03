@@ -431,117 +431,281 @@ function InfoBlock({ label, value }) {
   );
 }
 
-function ProductsPanel({ products, onSaveProduct, onCreateVariant, onDeleteProduct }) {
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [productImage, setProductImage] = useState(null);
-  const [productForm, setProductForm] = useState({ name: '', code: '', description: '', price: '' });
+function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVariant, onDeleteVariant, onDeleteProduct }) {
+  const [productModal, setProductModal] = useState(null);
   const [variantForms, setVariantForms] = useState({});
 
-  function startEdit(product) {
-    setEditingProduct(product);
-    setProductForm({ name: product.name, code: product.code, description: product.description || '', price: product.price });
+  function startVariantEdit(productId, variant) {
+    setVariantForms({
+      ...variantForms,
+      [variant.id]: {
+        productId,
+        name: variant.name,
+        code: variant.code,
+        description: variant.description || '',
+        price: variant.price || '',
+        is_active: variant.is_active,
+      },
+    });
   }
 
-  function resetForm() {
-    setEditingProduct(null);
-    setProductImage(null);
-    setProductForm({ name: '', code: '', description: '', price: '' });
+  function updateVariantForm(variantId, patch) {
+    setVariantForms({ ...variantForms, [variantId]: { ...(variantForms[variantId] || {}), ...patch } });
   }
 
-  async function submitProduct(event) {
-    event.preventDefault();
-    await onSaveProduct(editingProduct, productForm, productImage);
-    resetForm();
+  async function submitVariant(productId, variant) {
+    const form = variantForms[variant.id];
+    await onUpdateVariant(productId, variant.id, {
+      name: form.name,
+      code: form.code,
+      description: form.description || null,
+      price: form.price || null,
+      is_active: form.is_active,
+    });
+    const nextForms = { ...variantForms };
+    delete nextForms[variant.id];
+    setVariantForms(nextForms);
   }
 
   return (
-    <section className="grid gap-5 xl:grid-cols-[360px_1fr]">
-      <Card as="form" onSubmit={submitProduct} className="h-fit p-4">
-        <h2 className="mb-4 text-lg font-black">{editingProduct ? 'Editar produto' : 'Novo produto'}</h2>
-        <div className="space-y-3">
-          <TextInput placeholder="Nome" value={productForm.name} onChange={(event) => setProductForm({ ...productForm, name: event.target.value })} required />
-          <TextInput placeholder="Codigo" value={productForm.code} onChange={(event) => setProductForm({ ...productForm, code: event.target.value })} required />
-          <TextInput placeholder="Descricao" value={productForm.description} onChange={(event) => setProductForm({ ...productForm, description: event.target.value })} />
-          <TextInput placeholder="Preco" type="number" min="0" step="0.01" value={productForm.price} onChange={(event) => setProductForm({ ...productForm, price: event.target.value })} required />
-          <TextInput type="file" accept="image/*" onChange={(event) => setProductImage(event.target.files?.[0] || null)} />
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+        <div>
+          <h2 className="text-lg font-black">Produtos</h2>
+          <p className="mt-1 text-sm text-slate-400">Cardapio, variantes, imagem e disponibilidade.</p>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button variant="secondary" onClick={resetForm}>Limpar</Button>
-          <Button type="submit">Salvar</Button>
-        </div>
-      </Card>
+        <Button onClick={() => setProductModal({ product: null })}><Plus size={16} /> Novo produto</Button>
+      </div>
 
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <Card key={product.id} as="article" className="p-4">
-            {product.image_url && <img src={product.image_url} alt={product.name} className="mb-3 h-32 w-full rounded-md object-cover" />}
+          <article key={product.id} className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+            <div className="grid min-h-44 grid-cols-[150px_1fr]">
+              {product.image_url ? (
+                <img src={product.image_url} alt={product.name} className="h-full min-h-44 w-full object-cover" />
+              ) : (
+                <div className="flex h-full min-h-44 items-center justify-center bg-white/[0.03] text-xs font-black uppercase text-slate-500">Sem imagem</div>
+              )}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="font-black">{product.name}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-400">{product.description || 'Sem descricao'}</p>
+                  </div>
+                  <Badge variant={product.is_active ? 'success' : 'neutral'}>{product.is_active ? 'Ativo' : 'Inativo'}</Badge>
+                </div>
+                <strong className="mt-3 block text-xl">{formatCurrency(product.price)}</strong>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button variant="secondary" size="sm" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setProductModal({ product })}>Editar</Button>
+                  <Button variant="secondary" size="sm" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => onSaveProduct(product, { ...product, is_active: !product.is_active }, null)}>
+                    {product.is_active ? 'Desativar' : 'Ativar'}
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => onDeleteProduct(product)}><Trash2 size={14} /> Remover</Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-black">{product.name}</h2>
-                <p className="mt-1 text-sm text-slate-500">{product.description || 'Sem descricao'}</p>
+                <h3 className="text-sm font-black text-slate-300">Variantes</h3>
+                <p className="mt-1 text-xs text-slate-500">{product.variants.length} opcoes cadastradas</p>
               </div>
-              <Badge variant={product.is_active ? 'success' : 'neutral'}>{product.is_active ? 'Ativo' : 'Inativo'}</Badge>
             </div>
-            <strong className="mt-3 block">{formatCurrency(product.price)}</strong>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {product.variants.map((variant) => <Badge key={variant.id}>{variant.name}</Badge>)}
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button variant="secondary" size="sm" onClick={() => startEdit(product)}>Editar</Button>
-              <Button variant="danger" size="sm" onClick={() => onDeleteProduct(product)}><Trash2 size={14} /> Excluir</Button>
-            </div>
-            <div className="mt-4 border-t border-slate-100 pt-4">
-              <h3 className="text-sm font-black text-slate-700">Nova variante</h3>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {['name', 'code', 'description', 'price'].map((field) => (
-                  <TextInput
-                    key={field}
-                    placeholder={{ name: 'Variante', code: 'Codigo', description: 'Descricao', price: 'Preco' }[field]}
-                    type={field === 'price' ? 'number' : 'text'}
-                    min={field === 'price' ? '0' : undefined}
-                    step={field === 'price' ? '0.01' : undefined}
-                    value={variantForms[product.id]?.[field] || ''}
-                    onChange={(event) => setVariantForms({
-                      ...variantForms,
-                      [product.id]: { ...(variantForms[product.id] || {}), [field]: event.target.value },
-                    })}
-                  />
-                ))}
+
+              {product.variants.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {product.variants.map((variant) => {
+                    const variantForm = variantForms[variant.id];
+                    if (variantForm) {
+                      return (
+                        <div key={variant.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <TextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
+                            <TextInput placeholder="Codigo" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
+                            <TextInput placeholder="Descricao" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
+                            <TextInput placeholder="Preco" type="number" min="0" step="0.01" value={variantForm.price} onChange={(event) => updateVariantForm(variant.id, { price: event.target.value })} />
+                          </div>
+                          <label className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-300">
+                            <input type="checkbox" checked={variantForm.is_active} onChange={(event) => updateVariantForm(variant.id, { is_active: event.target.checked })} />
+                            Variante ativa
+                          </label>
+                          <div className="mt-3 flex justify-end gap-2">
+                            <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => {
+                              const nextForms = { ...variantForms };
+                              delete nextForms[variant.id];
+                              setVariantForms(nextForms);
+                            }}>Cancelar</Button>
+                            <Button size="sm" onClick={() => submitVariant(product.id, variant)}>Salvar variante</Button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-black/20 p-3 text-sm">
+                        <div>
+                          <strong>{variant.name}</strong>
+                          <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preco base'}</span>
+                          <Badge className="ml-2" variant={variant.is_active ? 'success' : 'neutral'}>{variant.is_active ? 'Ativa' : 'Inativa'}</Badge>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => startVariantEdit(product.id, variant)}>Editar</Button>
+                          <Button size="sm" variant="danger" onClick={() => onDeleteVariant(product.id, variant.id)}>Desativar</Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
+                <h3 className="text-sm font-black text-slate-300">Nova variante</h3>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {['name', 'code', 'description', 'price'].map((field) => (
+                    <TextInput
+                      key={field}
+                      placeholder={{ name: 'Variante', code: 'Codigo', description: 'Descricao', price: 'Preco' }[field]}
+                      type={field === 'price' ? 'number' : 'text'}
+                      min={field === 'price' ? '0' : undefined}
+                      step={field === 'price' ? '0.01' : undefined}
+                      value={variantForms[`new-${product.id}`]?.[field] || ''}
+                      onChange={(event) => setVariantForms({
+                        ...variantForms,
+                        [`new-${product.id}`]: { ...(variantForms[`new-${product.id}`] || {}), [field]: event.target.value },
+                      })}
+                    />
+                  ))}
+                </div>
+                <Button className="mt-3 w-full" size="sm" onClick={async () => {
+                  await onCreateVariant(product.id, variantForms[`new-${product.id}`] || {});
+                  setVariantForms({ ...variantForms, [`new-${product.id}`]: { name: '', code: '', description: '', price: '' } });
+                }}>
+                  <Plus size={16} /> Criar variante
+                </Button>
               </div>
-              <Button className="mt-3 w-full" size="sm" onClick={async () => {
-                await onCreateVariant(product.id, variantForms[product.id] || {});
-                setVariantForms({ ...variantForms, [product.id]: { name: '', code: '', description: '', price: '' } });
-              }}>
-                <Plus size={16} /> Criar variante
-              </Button>
             </div>
-          </Card>
+          </article>
         ))}
       </div>
+
+      {productModal && (
+        <ProductFormDialog
+          product={productModal.product}
+          onClose={() => setProductModal(null)}
+          onSave={async (product, form, image) => {
+            await onSaveProduct(product, form, image);
+            setProductModal(null);
+          }}
+        />
+      )}
     </section>
   );
 }
 
-function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveInventory, productMap }) {
-  const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity);
+function ProductFormDialog({ product, onClose, onSave }) {
+  const [form, setForm] = useState({
+    name: product?.name || '',
+    code: product?.code || '',
+    description: product?.description || '',
+    price: product?.price || '',
+    is_active: product?.is_active ?? true,
+  });
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(product?.image_url || '');
+
+  async function submitProduct(event) {
+    event.preventDefault();
+    await onSave(product, form, image);
+  }
+
+  function handleImageChange(event) {
+    const nextImage = event.target.files?.[0] || null;
+    setImage(nextImage);
+    setImagePreview(nextImage ? URL.createObjectURL(nextImage) : product?.image_url || '');
+  }
+
   return (
-    <DataCard title="Estoque" subtitle="Controle simples por produto e variante." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
-      {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : (
-        <table className="w-full min-w-[680px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-black uppercase text-slate-500">
-            <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Minimo</th><th>Status</th><th className="text-right">Acao</th></tr>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-[#101214] p-5 text-white shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
+            <h2 className="mt-3 text-2xl font-black">{product ? 'Editar produto' : 'Novo produto'}</h2>
+          </div>
+          <Button type="button" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onClose}>Fechar</Button>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-[220px_1fr]">
+          <div>
+            <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/20">
+              {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-500">Preview</span>}
+            </div>
+            <TextInput className="mt-3" type="file" accept="image/*" onChange={handleImageChange} />
+          </div>
+
+          <div className="space-y-3">
+            <TextInput placeholder="Nome" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+            <TextInput placeholder="Codigo" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
+            <TextInput placeholder="Descricao" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+            <TextInput placeholder="Preco" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-300">
+              <input type="checkbox" checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} />
+              Produto ativo no cardapio
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <Button type="button" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onClose}>Cancelar</Button>
+          <Button type="submit">Salvar produto</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveInventory, productMap }) {
+  const [filters, setFilters] = useState({ search: '', onlyLow: false });
+  const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity);
+  const filteredInventory = inventory.filter((item) => {
+    const product = productMap.get(item.product_id);
+    const variant = product?.variants?.find((productVariant) => productVariant.id === item.variant_id);
+    const searchableText = `${product?.name || ''} ${variant?.name || ''} ${item.product_id} ${item.variant_id || ''}`.toLowerCase();
+    const matchesSearch = searchableText.includes(filters.search.toLowerCase());
+    const matchesLow = !filters.onlyLow || item.quantity <= item.min_quantity;
+    return matchesSearch && matchesLow;
+  });
+
+  return (
+    <DataCard title="Estoque" subtitle="Controle por produto, variante, minimo e alerta operacional." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
+      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_190px_140px]">
+        <TextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
+        <label className="flex min-h-11 items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 text-sm font-bold text-slate-300">
+          <input type="checkbox" checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} />
+          Baixo estoque
+        </label>
+        <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
+      </div>
+
+      {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
+        <table className="w-full min-w-[760px] text-left text-sm">
+          <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+            <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Minimo</th><th>Severidade</th><th className="text-right">Acao</th></tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {inventory.map((item) => {
+          <tbody className="divide-y divide-white/10">
+            {filteredInventory.map((item) => {
               const isLow = item.quantity <= item.min_quantity;
+              const isCritical = item.quantity === 0;
               const product = productMap.get(item.product_id);
+              const variant = product?.variants?.find((productVariant) => productVariant.id === item.variant_id);
               return (
                 <tr key={item.id}>
                   <td className="px-4 py-4 font-black">{product?.name || `Produto #${item.product_id}`}</td>
-                  <td>{item.variant_id ? `#${item.variant_id}` : 'Produto base'}</td>
-                  <td className="py-4"><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity || ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
-                  <td><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity || ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
-                  <td><Badge variant={isLow ? 'danger' : 'success'}>{isLow ? 'Baixo' : 'Ok'}</Badge></td>
+                  <td className="text-slate-300">{variant?.name || (item.variant_id ? `Variante #${item.variant_id}` : 'Produto base')}</td>
+                  <td className="py-4"><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
+                  <td><TextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
+                  <td><Badge variant={isLow ? 'danger' : 'success'}>{isCritical ? 'Critico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
                   <td className="pr-4 text-right"><Button size="sm" onClick={() => onSaveInventory(item.id)}>Salvar</Button></td>
                 </tr>
               );
@@ -577,12 +741,130 @@ function AuditPanel({ auditLogs }) {
   );
 }
 
-function PlaceholderPanel({ title, message }) {
+function CustomersPanel({ customers }) {
+  const [search, setSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const filteredCustomers = customers.filter((customer) => {
+    const text = `${customer.full_name} ${customer.email} ${customer.cpf_masked || ''}`.toLowerCase();
+    return text.includes(search.toLowerCase());
+  });
+
   return (
-    <section className="rounded-lg border border-white/10 bg-white/[0.04] p-6">
-      <Badge variant="neutral">Preparado</Badge>
-      <h2 className="mt-3 text-2xl font-black">{title}</h2>
-      <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">{message}</p>
+    <>
+      <DataCard title="Clientes" subtitle="Contas cadastradas, historico resumido e dados sensiveis mascarados." count={`${filteredCustomers.length}/${customers.length} clientes`}>
+        <div className="mb-4 grid gap-3 md:grid-cols-[1fr_140px]">
+          <TextInput placeholder="Buscar por nome, email ou CPF mascarado" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSearch('')}>Limpar</Button>
+        </div>
+        {filteredCustomers.length === 0 ? <Feedback>Nenhum cliente encontrado.</Feedback> : (
+          <table className="w-full min-w-[860px] text-left text-sm">
+            <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+              <tr><th className="px-4 py-3">Cliente</th><th>Email</th><th>CPF</th><th>Pedidos</th><th>Ultimo pedido</th><th className="text-right">Total gasto</th><th className="text-right">Acao</th></tr>
+            </thead>
+            <tbody className="divide-y divide-white/10">
+              {filteredCustomers.map((customer) => (
+                <tr key={customer.id}>
+                  <td className="px-4 py-4 font-black">{customer.full_name}</td>
+                  <td className="text-slate-300">{customer.email}</td>
+                  <td><Badge variant="neutral">{customer.cpf_masked || 'Nao informado'}</Badge></td>
+                  <td>{customer.total_orders}</td>
+                  <td className="text-slate-400">{customer.last_order_at ? new Date(customer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'}</td>
+                  <td className="pr-4 text-right font-black">{formatCurrency(customer.total_spent)}</td>
+                  <td className="pr-4 text-right">
+                    <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSelectedCustomer(customer)}><Eye size={14} /> Detalhe</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </DataCard>
+
+      {selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 p-4">
+          <section className="w-full max-w-md rounded-lg border border-white/10 bg-[#101214] p-5 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Badge variant="neutral">Cliente</Badge>
+                <h2 className="mt-3 text-2xl font-black">{selectedCustomer.full_name}</h2>
+                <p className="mt-1 text-sm text-slate-400">{selectedCustomer.email}</p>
+              </div>
+              <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSelectedCustomer(null)}>Fechar</Button>
+            </div>
+            <div className="mt-5 grid gap-3">
+              <InfoBlock label="CPF" value={selectedCustomer.cpf_masked || 'Nao informado'} />
+              <InfoBlock label="Pedidos" value={selectedCustomer.total_orders} />
+              <InfoBlock label="Total gasto" value={formatCurrency(selectedCustomer.total_spent)} />
+              <InfoBlock label="Ultimo pedido" value={selectedCustomer.last_order_at ? new Date(selectedCustomer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'} />
+            </div>
+          </section>
+        </div>
+      )}
+    </>
+  );
+}
+
+function SettingsPanel({ settings, onSaveSettings }) {
+  const [form, setForm] = useState({
+    establishment_name: settings?.establishment_name || 'Gym Prime',
+    whatsapp_phone: settings?.whatsapp_phone || '',
+    menu_is_open: settings?.menu_is_open ?? true,
+    totem_message: settings?.totem_message || 'Finalize seu pedido e retire no balcao.',
+  });
+
+  async function submitSettings(event) {
+    event.preventDefault();
+    await onSaveSettings({
+      establishment_name: form.establishment_name,
+      whatsapp_phone: form.whatsapp_phone || null,
+      menu_is_open: form.menu_is_open,
+      totem_message: form.totem_message,
+    });
+  }
+
+  const preview = `Novo pedido\nCliente: Cliente Exemplo\nItens:\n- 1x Coca-Cola: R$ 7.00\nTotal: R$ 7.00`;
+
+  return (
+    <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
+      <form onSubmit={submitSettings} className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black">Configuracoes</h2>
+            <p className="mt-1 text-sm text-slate-400">Dados operacionais persistidos no backend.</p>
+          </div>
+          <Badge variant={form.menu_is_open ? 'success' : 'danger'}>{form.menu_is_open ? 'Cardapio aberto' : 'Cardapio fechado'}</Badge>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label>
+            <span className="mb-1 block text-xs font-black uppercase text-slate-500">Nome exibido</span>
+            <TextInput value={form.establishment_name} onChange={(event) => setForm({ ...form, establishment_name: event.target.value })} required />
+          </label>
+          <label>
+            <span className="mb-1 block text-xs font-black uppercase text-slate-500">WhatsApp</span>
+            <TextInput placeholder="5511999999999" value={form.whatsapp_phone} onChange={(event) => setForm({ ...form, whatsapp_phone: event.target.value })} />
+          </label>
+          <label className="md:col-span-2">
+            <span className="mb-1 block text-xs font-black uppercase text-slate-500">Mensagem do totem</span>
+            <TextInput value={form.totem_message} onChange={(event) => setForm({ ...form, totem_message: event.target.value })} required />
+          </label>
+          <label className="flex min-h-12 items-center gap-3 rounded-lg border border-white/10 bg-black/20 px-3 text-sm font-bold text-slate-300">
+            <input type="checkbox" checked={form.menu_is_open} onChange={(event) => setForm({ ...form, menu_is_open: event.target.checked })} />
+            Cardapio aberto para Cliente e Totem
+          </label>
+        </div>
+        <div className="mt-5 flex justify-end">
+          <Button type="submit">Salvar configuracoes</Button>
+        </div>
+      </form>
+
+      <aside className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+        <Badge variant="neutral">Preview</Badge>
+        <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
+        <pre className="mt-4 whitespace-pre-wrap rounded-lg bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
+        <div className="mt-4 rounded-lg bg-black/20 p-4 text-sm text-slate-300">
+          {form.totem_message}
+        </div>
+      </aside>
     </section>
   );
 }
@@ -612,6 +894,8 @@ export function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [inventoryForms, setInventoryForms] = useState({});
   const [productToDelete, setProductToDelete] = useState(null);
@@ -666,11 +950,13 @@ export function AdminPage() {
   async function refreshAdminData() {
     setAdminDataLoading(true);
     try {
-      const [productData, orderData, inventoryData, auditData] = await Promise.all([
+      const [productData, orderData, inventoryData, auditData, customerData, settingsData] = await Promise.all([
         gymPrimeApi.listProducts(),
         gymPrimeApi.listOrders(),
         gymPrimeApi.listInventory(),
         gymPrimeApi.listAuditLogs(),
+        gymPrimeApi.listAdminCustomers(),
+        gymPrimeApi.getAdminSettings(),
       ]);
       try {
         setAnalytics(await gymPrimeApi.getAdminAnalyticsSummary());
@@ -685,6 +971,8 @@ export function AdminPage() {
       setOrders(orderData);
       setInventory(inventoryData);
       setAuditLogs(auditData);
+      setCustomers(customerData);
+      setSettings(settingsData);
       setInventoryForms(Object.fromEntries(inventoryData.map((item) => [item.id, { quantity: String(item.quantity), min_quantity: String(item.min_quantity) }])));
     } finally {
       setAdminDataLoading(false);
@@ -692,7 +980,13 @@ export function AdminPage() {
   }
 
   async function saveProduct(editingProduct, productForm, productImage) {
-    const payload = { name: productForm.name, code: productForm.code, description: productForm.description || null, price: productForm.price };
+    const payload = {
+      name: productForm.name,
+      code: productForm.code,
+      description: productForm.description || null,
+      price: productForm.price,
+      is_active: productForm.is_active,
+    };
     try {
       const savedProduct = editingProduct
         ? await gymPrimeApi.updateProduct(editingProduct.id, payload)
@@ -700,6 +994,26 @@ export function AdminPage() {
       if (productImage) await gymPrimeApi.uploadProductImage(savedProduct.id, productImage);
       await refreshAdminData();
       toast.success('Produto salvo');
+    } catch (error) {
+      handleAdminError(error);
+    }
+  }
+
+  async function updateVariant(productId, variantId, form) {
+    try {
+      await gymPrimeApi.updateVariant(productId, variantId, form);
+      await refreshAdminData();
+      toast.success('Variante atualizada');
+    } catch (error) {
+      handleAdminError(error);
+    }
+  }
+
+  async function deleteVariant(productId, variantId) {
+    try {
+      await gymPrimeApi.deleteVariant(productId, variantId);
+      await refreshAdminData();
+      toast.success('Variante desativada');
     } catch (error) {
       handleAdminError(error);
     }
@@ -742,6 +1056,16 @@ export function AdminPage() {
       await refreshAdminData();
       setProductToDelete(null);
       toast.success('Produto removido');
+    } catch (error) {
+      handleAdminError(error);
+    }
+  }
+
+  async function saveSettings(payload) {
+    try {
+      const updatedSettings = await gymPrimeApi.updateAdminSettings(payload);
+      setSettings(updatedSettings);
+      toast.success('Configuracoes salvas');
     } catch (error) {
       handleAdminError(error);
     }
@@ -814,11 +1138,11 @@ export function AdminPage() {
         {adminDataLoading && <Feedback className="mb-4 py-3">Carregando dados...</Feedback>}
         {tab === 'dashboard' && <Dashboard orders={orders} inventory={inventory} productMap={productMap} analytics={analytics} setTab={setTab} />}
         {tab === 'orders' && <OrdersPanel orders={orders} productMap={productMap} onUpdateStatus={updateOrderStatus} />}
-        {tab === 'products' && <ProductsPanel products={products} onSaveProduct={saveProduct} onCreateVariant={createVariant} onDeleteProduct={setProductToDelete} />}
+        {tab === 'products' && <ProductsPanel products={products} onSaveProduct={saveProduct} onCreateVariant={createVariant} onUpdateVariant={updateVariant} onDeleteVariant={deleteVariant} onDeleteProduct={setProductToDelete} />}
         {tab === 'inventory' && <InventoryPanel inventory={inventory} inventoryForms={inventoryForms} setInventoryForms={setInventoryForms} onSaveInventory={saveInventory} productMap={productMap} />}
         {tab === 'audit' && <AuditPanel auditLogs={auditLogs} />}
-        {tab === 'customers' && <PlaceholderPanel title="Clientes" message="A area de clientes esta preparada para quando houver endpoint dedicado. Hoje os dados disponiveis aparecem nos pedidos." />}
-        {tab === 'settings' && <PlaceholderPanel title="Configuracoes" message="Configuracoes de WhatsApp, Totem e pagamentos futuros dependem de endpoints especificos. Nenhuma chamada nova foi criada." />}
+        {tab === 'customers' && <CustomersPanel customers={customers} />}
+        {tab === 'settings' && <SettingsPanel key={settings ? JSON.stringify(settings) : 'settings'} settings={settings} onSaveSettings={saveSettings} />}
       </section>
 
       {productToDelete && (
