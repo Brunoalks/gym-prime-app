@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, CheckCircle2, ChevronRight, Dumbbell, Flame, Grid2X2, Leaf, LogIn, Plus, Search, ShoppingBag, UserPlus, Zap } from 'lucide-react';
-import { Badge, Button, Card, Feedback, TextInput } from '../../components/ui.jsx';
+import { Check, ChevronRight, Dumbbell, Grid2X2, Leaf, LogIn, Plus, Search, ShoppingBag, UserPlus, Zap } from 'lucide-react';
+import { Badge, Button, Card, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
 import { buildProductMap, filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
-import { BrandMark, ErrorDialog, OrderSuccessModal, ProductDetailsModal, ProductImage, VariantPickerModal } from '../shared/SharedUi.jsx';
+import { BrandMark, ErrorDialog, OrderSuccessModal, PriceSummary, ProductDetailsModal, ProductImage, ProductPromoBadge, ProductStockBadge, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
   all: <Grid2X2 size={18} />,
@@ -109,10 +109,10 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
       <div className="min-w-0">
         <div className="flex items-start justify-between gap-2">
           <h2 className="line-clamp-1 text-xl font-gp-black text-gp-text-inverse">{product.name}</h2>
-          <Badge variant="warning"><Flame size={13} /> Popular</Badge>
+          <ProductPromoBadge showIcon />
         </div>
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-base leading-5 text-slate-600">{product.description || 'Produto disponivel para pedido.'}</p>
-        <Badge className="mt-3" variant="success"><CheckCircle2 size={13} /> Em estoque</Badge>
+        <ProductStockBadge className="mt-3" showIcon />
         <div className="mt-4">
           <strong className="text-xl font-gp-black text-gp-text-inverse">{formatCurrency(price)}</strong>
           <div className="mt-3 grid grid-cols-[1fr_44px] gap-2">
@@ -181,14 +181,11 @@ function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
             </div>
           ))}
         </div>
-        <div className="mt-4 flex items-center justify-between rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary">
-          <span className="text-gp-sm font-gp-bold text-gp-text-secondary">Total</span>
-          <strong className="text-2xl font-gp-black">{formatCurrency(cart.total_amount)}</strong>
-        </div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <PriceSummary className="mt-4" value={cart.total_amount} />
+        <ModalActions>
           <Button variant="secondary" onClick={onCancel}>Voltar</Button>
           <Button onClick={onConfirm}><Check size={18} /> Confirmar</Button>
-        </div>
+        </ModalActions>
       </section>
     </div>
   );

@@ -107,3 +107,48 @@ export function Dialog({ children, className = '', as = 'section', ...props }) {
     </div>
   );
 }
+
+export function EmptyState({ icon = null, title, children, className = '', iconClassName = '', ...props }) {
+  return (
+    <div
+      className={cn('rounded-gp border border-dashed border-gp-border-inverse bg-white/5 px-4 py-8 text-center', className)}
+      {...props}
+    >
+      {icon && (
+        <div className={cn('mx-auto flex justify-center text-gp-text-muted', iconClassName)}>
+          {icon}
+        </div>
+      )}
+      {title && <strong className="mt-3 block text-gp-base">{title}</strong>}
+      {children && <span className="mt-1 block text-gp-sm font-gp-bold text-gp-text-muted">{children}</span>}
+    </div>
+  );
+}
+
+export function DataTable({ children, className = '', ...props }) {
+  return (
+    <table className={cn('gp-table w-full text-left text-gp-sm', className)} {...props}>
+      {children}
+    </table>
+  );
+}
+
+export function ModalActions({ children, className = '', ...props }) {
+  return (
+    <div className={cn('mt-5 grid grid-cols-2 gap-3', className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function PanelHeader({ title, subtitle, action = null, children = null, className = '', ...props }) {
+  return (
+    <div className={cn('flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse p-4', className)} {...props}>
+      <div>
+        {title && <h2 className="text-lg font-black">{title}</h2>}
+        {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+      </div>
+      {action || children}
+    </div>
+  );
+}

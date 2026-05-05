@@ -1,5 +1,6 @@
-import { Check, ShoppingBag, X, Zap } from 'lucide-react';
-import { Badge, Button, Dialog } from '../../components/ui.jsx';
+import { Check, CheckCircle2, Flame, ShoppingBag, X, Zap } from 'lucide-react';
+import { cn } from '../../components/classNames.js';
+import { Badge, Button, Dialog, ModalActions } from '../../components/ui.jsx';
 import { formatCurrency } from './catalog.js';
 
 export function BrandMark({ label = 'Gym Prime', tone = 'light' }) {
@@ -35,6 +36,44 @@ export function ProductImage({ product, className = '' }) {
   );
 }
 
+export function ProductPromoBadge({ children = 'Popular', showIcon = false, className = '' }) {
+  return (
+    <Badge className={className} variant="warning">
+      {showIcon && <Flame size={13} />}
+      {children}
+    </Badge>
+  );
+}
+
+export function ProductStockBadge({ showIcon = false, className = '' }) {
+  return (
+    <Badge className={className} variant="success">
+      {showIcon && <CheckCircle2 size={13} />}
+      Em estoque
+    </Badge>
+  );
+}
+
+export function PriceSummary({
+  label = 'Total',
+  value,
+  className = '',
+  labelClassName = 'text-gp-text-secondary',
+  valueClassName = 'text-2xl',
+  stacked = false,
+}) {
+  const formattedValue = typeof value === 'string' ? value : formatCurrency(value);
+
+  return (
+    <div className={cn('rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary', className)}>
+      <div className={stacked ? '' : 'flex items-center justify-between'}>
+        <span className={cn('text-gp-sm font-gp-bold', labelClassName)}>{label}</span>
+        <strong className={cn(stacked ? 'mt-1 block' : '', 'font-gp-black', valueClassName)}>{formattedValue}</strong>
+      </div>
+    </div>
+  );
+}
+
 export function ProductDetailsModal({ product, onClose }) {
   return (
     <Dialog className="max-w-lg overflow-hidden p-0">
@@ -56,10 +95,7 @@ export function ProductDetailsModal({ product, onClose }) {
             ))}
           </div>
         )}
-        <div className="mt-5 flex items-center justify-between rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary">
-          <span className="text-gp-sm font-gp-bold text-gp-text-secondary">A partir de</span>
-          <strong className="text-2xl font-gp-black">{formatCurrency(product.price)}</strong>
-        </div>
+        <PriceSummary className="mt-5" label="A partir de" value={product.price} />
         <Button className="mt-5 w-full" onClick={onClose}>Fechar</Button>
       </div>
     </Dialog>
@@ -88,14 +124,11 @@ export function VariantPickerModal({ product, selectedVariantId, setSelectedVari
           </Button>
         ))}
       </div>
-      <div className="mt-4 flex items-center justify-between rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary">
-        <span className="text-gp-sm font-gp-bold text-gp-text-secondary">Total</span>
-        <strong className="text-2xl font-gp-black">{formatCurrency(price)}</strong>
-      </div>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <PriceSummary className="mt-4" value={price} />
+      <ModalActions>
         <Button variant="secondary" onClick={onCancel}>Voltar</Button>
         <Button onClick={onConfirm}>Adicionar</Button>
-      </div>
+      </ModalActions>
     </Dialog>
   );
 }
@@ -111,16 +144,13 @@ export function OrderSuccessModal({ result, onClose, totem = false }) {
         {totem ? 'Pedido enviado. Avise a administracao para pagamento e retirada.' : 'O resumo esta pronto para envio pelo WhatsApp.'}
       </p>
       {totem && <p className="mt-2 text-gp-xs font-gp-black uppercase text-slate-500">Retorno automatico ao cardapio</p>}
-      <div className="mt-4 rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary">
-        <span className="text-gp-sm font-gp-bold text-gp-text-secondary">Total</span>
-        <strong className="mt-1 block text-2xl font-gp-black">{formatCurrency(result.total_amount)}</strong>
-      </div>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <PriceSummary className="mt-4" value={result.total_amount} stacked />
+      <ModalActions>
         <Button variant="secondary" onClick={onClose}>Fechar</Button>
         <Button onClick={() => window.open(result.whatsapp_url, '_blank', 'noopener,noreferrer')}>
           WhatsApp
         </Button>
-      </div>
+      </ModalActions>
     </Dialog>
   );
 }
@@ -149,10 +179,10 @@ export function ConfirmDialog({ title, message, confirmLabel = 'Confirmar', onCa
         </Button>
       </div>
       <p className="mt-2 text-gp-sm leading-6 text-slate-600">{message}</p>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <ModalActions>
         <Button variant="secondary" onClick={onCancel}>Voltar</Button>
         <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel}</Button>
-      </div>
+      </ModalActions>
     </Dialog>
   );
 }

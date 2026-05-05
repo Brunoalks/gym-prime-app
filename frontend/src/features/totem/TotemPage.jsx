@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Dumbbell, Gift, Grid2X2, Info, Leaf, Plus, RotateCcw, Search, ShoppingBag, Trash2, Zap } from 'lucide-react';
-import { Button, Badge, Feedback, TextInput } from '../../components/ui.jsx';
+import { Button, Badge, EmptyState, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
 import { buildLocalCart, filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
-import { BrandMark, ErrorDialog, OrderSuccessModal, ProductDetailsModal, ProductImage, VariantPickerModal } from '../shared/SharedUi.jsx';
+import { BrandMark, ErrorDialog, OrderSuccessModal, PriceSummary, ProductDetailsModal, ProductImage, ProductPromoBadge, ProductStockBadge, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
   all: <Grid2X2 size={25} />,
@@ -35,12 +35,12 @@ function TotemProductCard({ product, onAdd, onDetails }) {
       <div className="flex min-h-0 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <h3 className="line-clamp-1 text-lg font-gp-black leading-tight text-gp-text-inverse">{product.name}</h3>
-          <Badge variant="warning">{product.variants.length > 0 ? 'Variante' : 'Popular'}</Badge>
+          <ProductPromoBadge>{product.variants.length > 0 ? 'Variante' : 'Popular'}</ProductPromoBadge>
         </div>
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-600">
           {product.description || 'Produto disponivel no cardapio.'}
         </p>
-        <Badge className="mt-3 w-fit" variant="success">Em estoque</Badge>
+        <ProductStockBadge className="mt-3 w-fit" />
         <div className="mt-auto pt-4">
           <strong className="text-2xl font-gp-black text-gp-text-inverse">{formatCurrency(price)}</strong>
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -90,11 +90,9 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
         {!hasItems && (
-          <div className="rounded-gp border border-dashed border-gp-border-inverse bg-white/5 px-4 py-8 text-center">
-            <ShoppingBag className="mx-auto text-gp-text-muted" size={34} />
-            <strong className="mt-3 block text-gp-base">Carrinho vazio</strong>
-            <span className="mt-1 block text-gp-sm font-gp-bold text-gp-text-muted">Toque em Adicionar para comecar.</span>
-          </div>
+          <EmptyState icon={<ShoppingBag size={34} />} title="Carrinho vazio">
+            Toque em Adicionar para comecar.
+          </EmptyState>
         )}
         {cart.items.map((item) => (
           <div key={`${item.product_id}-${item.variant_id || 'base'}`} className="rounded-gp bg-white/10 p-3">
@@ -121,12 +119,12 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
         ))}
       </div>
 
-      <div className="mt-4 rounded-gp bg-white p-4 text-gp-text-inverse">
-        <div className="flex items-center justify-between">
-          <span className="text-gp-sm font-gp-black uppercase text-slate-500">Total</span>
-          <strong className="text-3xl font-gp-black">{formatCurrency(cart.total_amount)}</strong>
-        </div>
-      </div>
+      <PriceSummary
+        className="mt-4 bg-white text-gp-text-inverse"
+        labelClassName="font-gp-black uppercase text-slate-500"
+        value={cart.total_amount}
+        valueClassName="text-3xl"
+      />
       <Button className="mt-4 min-h-14 w-full text-gp-base" disabled={!hasItems} onClick={onCheckout}>
         <Check size={20} />
         Finalizar pedido
@@ -149,12 +147,7 @@ function TotemNameModal({ cart, customerName, setCustomerName, onCancel, onConfi
         <Badge variant="success">Totem</Badge>
         <h2 className="mt-3 text-3xl font-gp-black text-gp-text-inverse">Para quem e o pedido?</h2>
         <p className="mt-2 text-gp-base font-gp-medium text-slate-600">Informe apenas o nome para a administracao chamar no balcao.</p>
-        <div className="mt-5 rounded-gp bg-gp-bg-panel p-5 text-gp-text-primary">
-          <div className="flex items-center justify-between">
-            <span className="text-gp-sm font-gp-bold text-gp-text-secondary">{cart.items.length} itens</span>
-            <strong className="text-3xl font-gp-black">{formatCurrency(cart.total_amount)}</strong>
-          </div>
-        </div>
+        <PriceSummary className="mt-5 p-5" label={`${cart.items.length} itens`} value={cart.total_amount} valueClassName="text-3xl" />
         <TextInput
           className="mt-5 min-h-14 text-gp-lg"
           placeholder="Nome do pedido"
@@ -164,10 +157,10 @@ function TotemNameModal({ cart, customerName, setCustomerName, onCancel, onConfi
           required
           minLength={2}
         />
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <ModalActions className="mt-6 gap-4">
           <Button className="min-h-14 text-gp-base" variant="secondary" onClick={onCancel}>Voltar</Button>
           <Button className="min-h-14 text-gp-base" type="submit">Enviar pedido</Button>
-        </div>
+        </ModalActions>
       </form>
     </div>
   );

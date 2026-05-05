@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, BarChart3, CalendarDays, ChevronDown, ClipboardList, Clock, Copy, DollarSign, Eye, FileImage, LayoutDashboard, Package, Plus, Settings, Shield, ShoppingBag, Trash2, TrendingUp, Users } from 'lucide-react';
-import { Badge, Button, Feedback, TextInput } from '../../components/ui.jsx';
+import { Badge, Button, DataTable, Feedback, PanelHeader, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { ApiError } from '../../services/api.js';
@@ -243,7 +243,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
             <div className="p-4"><Feedback>Nenhum pedido registrado ainda.</Feedback></div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="gp-table w-full min-w-[820px] text-left text-sm">
+              <DataTable className="min-w-[820px]">
                 <thead>
                   <tr><th className="px-5 py-3"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-6 text-right">Total</th><th className="pl-3">Status</th></tr>
                 </thead>
@@ -262,7 +262,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
           <div className="flex items-center justify-between border-t border-gp-border-inverse px-5 py-3 text-sm text-slate-400">
@@ -460,7 +460,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
         </div>
 
         {filteredOrders.length === 0 ? <Feedback>Nenhum pedido encontrado para os filtros.</Feedback> : (
-          <table className="gp-table w-full min-w-[960px] text-left text-sm">
+          <DataTable className="min-w-[960px]">
             <thead>
               <tr><th className="px-4 py-3">Pedido</th><th>Cliente</th><th>Origem</th><th>Itens</th><th>Status</th><th>Criado em</th><th className="text-right">Total</th><th className="text-right">Acoes</th></tr>
             </thead>
@@ -495,7 +495,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </DataTable>
         )}
       </DataCard>
 
@@ -819,7 +819,7 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
       </div>
 
       {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
-        <table className="gp-table w-full min-w-[760px] text-left text-sm">
+        <DataTable className="min-w-[760px]">
           <thead>
             <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Minimo</th><th>Severidade</th><th className="text-right">Acao</th></tr>
           </thead>
@@ -841,7 +841,7 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
               );
             })}
           </tbody>
-        </table>
+        </DataTable>
       )}
     </DataCard>
   );
@@ -851,7 +851,7 @@ function AuditPanel({ auditLogs }) {
   return (
     <DataCard title="Auditoria" subtitle="Acoes administrativas e eventos criticos registrados." count={`${auditLogs.length} logs`}>
       {auditLogs.length === 0 ? <Feedback>Nenhum log registrado.</Feedback> : (
-        <table className="gp-table w-full min-w-[720px] text-left text-sm">
+        <DataTable className="min-w-[720px]">
           <thead>
             <tr><th className="px-4 py-3">Acao</th><th>Entidade</th><th>Usuario</th><th>Data</th></tr>
           </thead>
@@ -865,7 +865,7 @@ function AuditPanel({ auditLogs }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </DataTable>
       )}
     </DataCard>
   );
@@ -887,7 +887,7 @@ function CustomersPanel({ customers }) {
           <Button variant="inverse" onClick={() => setSearch('')}>Limpar</Button>
         </div>
         {filteredCustomers.length === 0 ? <Feedback>Nenhum cliente encontrado.</Feedback> : (
-          <table className="gp-table w-full min-w-[860px] text-left text-sm">
+          <DataTable className="min-w-[860px]">
             <thead>
               <tr><th className="px-4 py-3">Cliente</th><th>Email</th><th>CPF</th><th>Pedidos</th><th>Ultimo pedido</th><th className="text-right">Total gasto</th><th className="text-right">Acao</th></tr>
             </thead>
@@ -906,7 +906,7 @@ function CustomersPanel({ customers }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </DataTable>
         )}
       </DataCard>
 
@@ -999,13 +999,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
     <section className="overflow-hidden gp-card">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse p-4">
-        <div>
-          <h2 className="text-lg font-black">{title}</h2>
-          <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
-        </div>
-        <Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>
-      </div>
+      <PanelHeader title={title} subtitle={subtitle} action={<Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>} />
       <div className="overflow-x-auto p-4">{children}</div>
     </section>
   );
