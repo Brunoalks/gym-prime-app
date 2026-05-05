@@ -3,7 +3,168 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --gp-bg-main: #050606;
+    --gp-bg-main-rgb: 5 6 6;
+    --gp-bg-panel: #101214;
+    --gp-bg-panel-rgb: 16 18 20;
+    --gp-bg-card: #121415;
+    --gp-bg-card-rgb: 18 20 21;
+    --gp-bg-field: #0B0D0E;
+    --gp-bg-field-rgb: 11 13 14;
+
+    --gp-border: #E4E7EC;
+    --gp-border-rgb: 228 231 236;
+    --gp-border-inverse: rgba(255, 255, 255, 0.10);
+
+    --gp-text-primary: #F8FAFC;
+    --gp-text-primary-rgb: 248 250 252;
+    --gp-text-secondary: #CBD5E1;
+    --gp-text-secondary-rgb: 203 213 225;
+    --gp-text-muted: #94A3B8;
+    --gp-text-muted-rgb: 148 163 184;
+    --gp-text-inverse: #101214;
+    --gp-text-inverse-rgb: 16 18 20;
+
+    --gp-lime: #B6FF3B;
+    --gp-lime-rgb: 182 255 59;
+    --gp-lime-soft: rgba(182, 255, 59, 0.14);
+    --gp-danger: #EF4444;
+    --gp-danger-rgb: 239 68 68;
+    --gp-danger-soft: rgba(239, 68, 68, 0.12);
+    --gp-warning: #F59E0B;
+    --gp-warning-rgb: 245 158 11;
+    --gp-warning-soft: rgba(245, 158, 11, 0.14);
+    --gp-success: #22C55E;
+    --gp-success-rgb: 34 197 94;
+    --gp-success-soft: rgba(34, 197, 94, 0.14);
+
+    --gp-radius-sm: 6px;
+    --gp-radius: 8px;
+    --gp-radius-lg: 8px;
+    --gp-radius-pill: 999px;
+
+    --gp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.10);
+    --gp-shadow-card: 0 16px 34px rgba(0, 0, 0, 0.22);
+    --gp-shadow-panel: 0 18px 44px rgba(0, 0, 0, 0.24);
+    --gp-shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.36);
+    --gp-shadow-glow: 0 0 28px rgba(182, 255, 59, 0.28);
+
+    --gp-font-xs: 0.75rem;
+    --gp-font-sm: 0.875rem;
+    --gp-font-base: 1rem;
+    --gp-font-lg: 1.125rem;
+    --gp-font-xl: 1.25rem;
+    --gp-font-2xl: 1.5rem;
+    --gp-font-3xl: 1.875rem;
+    --gp-font-4xl: 2.25rem;
+    --gp-line-tight: 1.15;
+    --gp-line-normal: 1.5;
+    --gp-weight-regular: 400;
+    --gp-weight-medium: 500;
+    --gp-weight-bold: 700;
+    --gp-weight-black: 900;
+
+    --gp-space-1: 0.25rem;
+    --gp-space-2: 0.5rem;
+    --gp-space-3: 0.75rem;
+    --gp-space-4: 1rem;
+    --gp-space-5: 1.25rem;
+    --gp-space-6: 1.5rem;
+    --gp-space-7: 1.75rem;
+    --gp-space-8: 2rem;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
   body {
-    @apply bg-[#F9FAFB] text-gray-900 antialiased;
+    @apply bg-gp-bg-main font-sans text-gp-text-primary antialiased;
+  }
+
+  ::selection {
+    background: var(--gp-lime);
+    color: var(--gp-text-inverse);
+  }
+}
+
+@layer components {
+  .gp-panel {
+    border: 1px solid var(--gp-border-inverse);
+    border-radius: var(--gp-radius-lg);
+    background: var(--gp-bg-panel);
+    box-shadow: var(--gp-shadow-panel);
+  }
+
+  .gp-card {
+    border: 1px solid var(--gp-border-inverse);
+    border-radius: var(--gp-radius-lg);
+    background: rgb(var(--gp-bg-card-rgb) / 0.88);
+    box-shadow: var(--gp-shadow-panel);
+  }
+
+  .gp-card-light {
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-lg);
+    background: white;
+    color: var(--gp-text-inverse);
+    box-shadow: var(--gp-shadow-card);
+  }
+
+  .gp-field {
+    min-height: 2.75rem;
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    background: white;
+    color: var(--gp-text-inverse);
+    font-size: var(--gp-font-sm);
+    font-weight: var(--gp-weight-bold);
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .gp-field::placeholder {
+    color: rgb(var(--gp-text-muted-rgb));
+  }
+
+  .gp-field:focus {
+    border-color: var(--gp-lime);
+    box-shadow: 0 0 0 2px rgb(var(--gp-lime-rgb) / 0.20);
+  }
+
+  .gp-field-dark {
+    border-color: var(--gp-border-inverse);
+    background: var(--gp-bg-field);
+    color: var(--gp-text-primary);
+  }
+
+  .gp-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--gp-font-sm);
+  }
+
+  .gp-table thead {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--gp-text-muted);
+    font-size: var(--gp-font-xs);
+    font-weight: var(--gp-weight-black);
+    text-transform: uppercase;
+  }
+
+  .gp-table tbody {
+    color: var(--gp-text-secondary);
+  }
+
+  .gp-table tbody tr {
+    border-top: 1px solid var(--gp-border-inverse);
+  }
+
+  .gp-table th,
+  .gp-table td {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
   }
 }

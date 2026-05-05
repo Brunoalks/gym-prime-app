@@ -19,9 +19,9 @@ const CATEGORY_ICONS = {
 function AuthField({ label, hint, ...props }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-black uppercase text-slate-500">{label}</span>
+      <span className="mb-1 block text-gp-xs font-gp-black uppercase text-slate-500">{label}</span>
       <TextInput {...props} />
-      {hint && <span className="mt-1 block text-xs font-bold text-slate-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-gp-xs font-gp-bold text-slate-500">{hint}</span>}
     </label>
   );
 }
@@ -50,24 +50,24 @@ function LoginPage({ onLogin }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#101214] px-5 py-8 text-white">
+    <main className="min-h-screen bg-gp-bg-panel px-5 py-8 text-gp-text-primary">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-5xl items-center gap-8 lg:grid-cols-[1fr_420px]">
         <section className="max-w-xl">
           <BrandMark tone="dark" />
-          <h1 className="mt-8 max-w-md text-5xl font-black leading-tight">Peca rapido antes ou depois do treino</h1>
-          <p className="mt-4 max-w-md text-base font-medium leading-7 text-slate-300">
+          <h1 className="mt-8 max-w-md text-5xl font-gp-black leading-tight">Peca rapido antes ou depois do treino</h1>
+          <p className="mt-4 max-w-md text-gp-base font-gp-medium leading-7 text-gp-text-secondary">
             Entre para montar seu pedido pelo celular e enviar o resumo direto para a administracao.
           </p>
         </section>
 
-        <Card as="form" onSubmit={handleSubmit} className="space-y-4 p-5 text-[#101214]">
+        <Card as="form" onSubmit={handleSubmit} className="space-y-4 p-5 text-gp-text-inverse">
           <div>
-            <h2 className="text-2xl font-black">{isRegister ? 'Criar conta' : 'Entrar'}</h2>
-            <p className="mt-1 text-sm font-medium text-slate-500">
+            <h2 className="text-2xl font-gp-black">{isRegister ? 'Criar conta' : 'Entrar'}</h2>
+            <p className="mt-1 text-gp-sm font-gp-medium text-slate-500">
               {isRegister ? 'Informe seus dados para pedir pelo celular.' : 'Use seu email e senha cadastrados.'}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-gp bg-slate-100 p-1">
             <Button variant={isRegister ? 'ghost' : 'dark'} size="sm" className="w-full" onClick={() => setIsRegister(false)}>Entrar</Button>
             <Button variant={isRegister ? 'dark' : 'ghost'} size="sm" className="w-full" onClick={() => setIsRegister(true)}>Criar conta</Button>
           </div>
@@ -104,23 +104,23 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
   }
 
   return (
-    <article className="grid grid-cols-[112px_minmax(0,1fr)] gap-3 overflow-hidden rounded-lg border border-white/15 bg-white p-2 shadow-[0_16px_34px_rgba(0,0,0,0.34)]">
-      <ProductImage product={product} className="aspect-square rounded-lg" />
+    <article className="gp-card-light grid grid-cols-[112px_minmax(0,1fr)] gap-3 overflow-hidden p-2">
+      <ProductImage product={product} className="aspect-square rounded-gp" />
       <div className="min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="line-clamp-1 text-xl font-black text-[#101214]">{product.name}</h2>
-          <Badge className="bg-amber-50 text-amber-700"><Flame size={13} /> Popular</Badge>
+          <h2 className="line-clamp-1 text-xl font-gp-black text-gp-text-inverse">{product.name}</h2>
+          <Badge variant="warning"><Flame size={13} /> Popular</Badge>
         </div>
-        <p className="mt-2 line-clamp-2 min-h-10 text-base leading-5 text-slate-600">{product.description || 'Produto disponivel para pedido.'}</p>
-        <Badge className="mt-3 bg-lime-100 text-lime-800"><CheckCircle2 size={13} /> Em estoque</Badge>
+        <p className="mt-2 line-clamp-2 min-h-10 text-gp-base leading-5 text-slate-600">{product.description || 'Produto disponivel para pedido.'}</p>
+        <Badge className="mt-3" variant="success"><CheckCircle2 size={13} /> Em estoque</Badge>
         <div className="mt-4">
-          <strong className="text-xl font-black text-[#101214]">{formatCurrency(price)}</strong>
+          <strong className="text-xl font-gp-black text-gp-text-inverse">{formatCurrency(price)}</strong>
           <div className="mt-3 grid grid-cols-[1fr_44px] gap-2">
             <Button size="sm" variant="secondary" className="min-h-11 min-w-0 px-2" onClick={() => onDetails(product)}>
               Detalhes
               <ChevronRight size={16} />
             </Button>
-            <Button size="icon" className="h-11 w-11 bg-[#B6FF3B] text-[#101214]" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
+            <Button size="icon" className="h-11 w-11" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
               <Plus size={23} />
             </Button>
           </div>
@@ -145,19 +145,19 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
 function CustomerCartBar({ cart, onCheckout }) {
   const hasItems = cart.items.length > 0;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#101214] p-4 text-white shadow-2xl">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gp-border-inverse bg-gp-bg-panel p-4 text-gp-text-primary shadow-gp-modal">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-gp-pill bg-white/10">
             <ShoppingBag size={26} />
-            {cart.items.length > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-[#B6FF3B] px-2 py-0.5 text-xs font-black text-[#101214]">{cart.items.length}</span>}
+            {cart.items.length > 0 && <span className="absolute -right-1 -top-1 rounded-gp-pill bg-gp-lime px-2 py-0.5 text-gp-xs font-gp-black text-gp-text-inverse">{cart.items.length}</span>}
           </div>
           <div>
-            <span className="block text-xs font-black uppercase text-slate-400">{cart.items.length} itens</span>
-            <strong className="text-2xl font-black text-[#B6FF3B]">{formatCurrency(cart.total_amount)}</strong>
+            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">{cart.items.length} itens</span>
+            <strong className="text-2xl font-gp-black text-gp-lime">{formatCurrency(cart.total_amount)}</strong>
           </div>
         </div>
-        <Button className="min-h-14 px-6 text-base" disabled={!hasItems} onClick={onCheckout}>
+        <Button className="min-h-14 px-6 text-gp-base" disabled={!hasItems} onClick={onCheckout}>
           Ver carrinho
           <ChevronRight size={20} />
         </Button>
@@ -168,22 +168,22 @@ function CustomerCartBar({ cart, onCheckout }) {
 
 function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#101214]/70 p-4 sm:items-center">
-      <section className="w-full max-w-md rounded-t-lg bg-white p-5 shadow-xl sm:rounded-lg">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-gp-bg-panel/70 p-4 sm:items-center">
+      <section className="gp-card-light w-full max-w-md rounded-t-gp p-5 shadow-gp-modal sm:rounded-gp">
         <Badge variant="success">Confirmacao</Badge>
-        <h2 className="mt-3 text-xl font-black text-[#101214]">Finalizar pedido?</h2>
-        <p className="mt-1 text-sm text-slate-600">Confira o total antes de gerar o pedido para a administracao.</p>
+        <h2 className="mt-3 text-xl font-gp-black text-gp-text-inverse">Finalizar pedido?</h2>
+        <p className="mt-1 text-gp-sm text-slate-600">Confira o total antes de gerar o pedido para a administracao.</p>
         <div className="mt-4 max-h-56 space-y-2 overflow-y-auto">
           {cart.items.map((item) => (
-            <div key={`${item.product_id}-${item.variant_id || 'base'}`} className="flex justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+            <div key={`${item.product_id}-${item.variant_id || 'base'}`} className="flex justify-between gap-3 rounded-gp bg-slate-50 px-3 py-2 text-gp-sm">
               <span className="text-slate-700">{item.quantity}x {item.name}</span>
-              <strong className="text-[#101214]">{formatCurrency(item.total_price)}</strong>
+              <strong className="text-gp-text-inverse">{formatCurrency(item.total_price)}</strong>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-[#101214] p-4 text-white">
-          <span className="text-sm font-bold text-slate-300">Total</span>
-          <strong className="text-2xl font-black">{formatCurrency(cart.total_amount)}</strong>
+        <div className="mt-4 flex items-center justify-between rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary">
+          <span className="text-gp-sm font-gp-bold text-gp-text-secondary">Total</span>
+          <strong className="text-2xl font-gp-black">{formatCurrency(cart.total_amount)}</strong>
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Button variant="secondary" onClick={onCancel}>Voltar</Button>
@@ -199,24 +199,24 @@ function CustomerOrdersPanel({ orders, productMap, onRefresh }) {
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-4xl font-black">Meus pedidos</h1>
-          <p className="mt-2 text-lg font-medium text-slate-300">Historico do seu acesso atual.</p>
+          <h1 className="text-4xl font-gp-black">Meus pedidos</h1>
+          <p className="mt-2 text-lg font-gp-medium text-gp-text-secondary">Historico do seu acesso atual.</p>
         </div>
-        <Button variant="secondary" className="border-white/10 bg-white/10 text-white hover:bg-white/15" onClick={onRefresh}>Atualizar</Button>
+        <Button variant="inverse" onClick={onRefresh}>Atualizar</Button>
       </div>
       {orders.length === 0 ? <Feedback>Nenhum pedido encontrado.</Feedback> : orders.map((order) => (
-        <article key={order.id} className="rounded-lg border border-white/10 bg-white p-4 text-[#101214]">
+        <article key={order.id} className="gp-card-light p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <Badge variant="neutral">#{order.id}</Badge>
-              <h2 className="mt-2 text-xl font-black">{formatCurrency(order.total_amount)}</h2>
-              <p className="mt-1 text-sm font-bold text-slate-500">{new Date(order.created_at).toLocaleString('pt-BR')}</p>
+              <h2 className="mt-2 text-xl font-gp-black">{formatCurrency(order.total_amount)}</h2>
+              <p className="mt-1 text-gp-sm font-gp-bold text-slate-500">{new Date(order.created_at).toLocaleString('pt-BR')}</p>
             </div>
             <Badge variant={order.status === 'canceled' ? 'danger' : 'success'}>{order.status}</Badge>
           </div>
           <div className="mt-3 space-y-2">
             {order.items.map((item) => (
-              <div key={item.id} className="flex justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm">
+              <div key={item.id} className="flex justify-between gap-3 rounded-gp-sm bg-slate-50 px-3 py-2 text-gp-sm">
                 <span>{item.quantity}x {productMap.get(item.product_id)?.name || `Produto #${item.product_id}`}</span>
                 <strong>{formatCurrency(item.total_price)}</strong>
               </div>
@@ -304,23 +304,23 @@ function CustomerMenuPage({ user, onLogout }) {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#050606] pb-32 text-white">
+    <main className="min-h-screen overflow-x-hidden bg-gp-bg-main pb-32 text-gp-text-primary">
       <header className="px-4 py-6">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
           <BrandMark tone="dark" />
           <div className="flex items-center gap-3 text-right">
-            <button type="button" onClick={onLogout} className="text-xs font-black text-slate-400 underline-offset-4 hover:text-white hover:underline">
+            <button type="button" onClick={onLogout} className="text-gp-xs font-gp-black text-gp-text-muted underline-offset-4 hover:text-gp-text-primary hover:underline">
               Sair
             </button>
-            <div className="rounded-full bg-white/10 px-3 py-2 text-sm font-bold">
-              Oi, <span className="text-[#B6FF3B]">{user.full_name?.split(' ')[0]}</span>
+            <div className="rounded-gp-pill bg-white/10 px-3 py-2 text-gp-sm font-gp-bold">
+              Oi, <span className="text-gp-lime">{user.full_name?.split(' ')[0]}</span>
             </div>
           </div>
         </div>
       </header>
 
       <section className="mx-auto max-w-xl px-4 py-5">
-        <div className="flex min-h-16 items-center gap-4 rounded-lg border border-white/10 bg-white/12 px-5 text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex min-h-16 items-center gap-4 rounded-gp border border-gp-border-inverse bg-white/10 px-5 text-gp-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           <Search size={27} />
           <span className="text-lg font-medium">Buscar no cardapio</span>
         </div>
@@ -330,7 +330,7 @@ function CustomerMenuPage({ user, onLogout }) {
               key={item.key}
               size="sm"
               variant={category === item.key ? 'primary' : 'secondary'}
-              className={`min-h-14 shrink-0 rounded-lg px-5 text-base ${category === item.key ? 'border border-[#B6FF3B]' : 'border-white/10 bg-white/10 text-white hover:bg-white/15'}`}
+              className={`min-h-14 shrink-0 rounded-gp px-5 text-gp-base ${category === item.key ? 'border border-gp-lime' : 'border-gp-border-inverse bg-white/10 text-gp-text-primary hover:bg-white/20'}`}
               onClick={() => setCategory(item.key)}
             >
               {CATEGORY_ICONS[item.key]}
@@ -339,9 +339,9 @@ function CustomerMenuPage({ user, onLogout }) {
           ))}
         </div>
         <div className="mt-5">
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-white/10 p-1">
-            <Button variant={view === 'menu' ? 'primary' : 'secondary'} className={view === 'menu' ? '' : 'border-white/10 bg-transparent text-white hover:bg-white/10'} onClick={() => setView('menu')}>Cardapio</Button>
-            <Button variant={view === 'orders' ? 'primary' : 'secondary'} className={view === 'orders' ? '' : 'border-white/10 bg-transparent text-white hover:bg-white/10'} onClick={() => setView('orders')}>Meus pedidos</Button>
+          <div className="grid grid-cols-2 gap-2 rounded-gp bg-white/10 p-1">
+            <Button variant={view === 'menu' ? 'primary' : 'inverse'} className={view === 'menu' ? '' : 'bg-transparent'} onClick={() => setView('menu')}>Cardapio</Button>
+            <Button variant={view === 'orders' ? 'primary' : 'inverse'} className={view === 'orders' ? '' : 'bg-transparent'} onClick={() => setView('orders')}>Meus pedidos</Button>
           </div>
         </div>
 
@@ -395,7 +395,7 @@ export function CustomerApp() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#101214] text-white">Carregando</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-gp-bg-panel text-gp-text-primary">Carregando</div>;
   }
 
   return user ? <CustomerMenuPage user={user} onLogout={handleLogout} /> : <LoginPage onLogin={setUser} />;

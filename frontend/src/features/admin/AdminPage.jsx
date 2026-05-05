@@ -36,14 +36,14 @@ const SALES_PERIOD_OPTIONS = [
   { value: 'month', label: 'Por mes' },
 ];
 
-const ADMIN_FIELD_CLASS = 'min-h-11 rounded-md border border-white/10 bg-[#0B0D0E] px-3 text-sm font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-[#B6FF3B] focus:ring-2 focus:ring-[#B6FF3B]/20';
+const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 rounded-gp px-3 text-gp-sm font-gp-bold';
 
 const STATUS_STYLES = {
-  pending: 'border-[#B6FF3B]/50 bg-[#B6FF3B]/10 text-[#B6FF3B]',
+  pending: 'border-gp-lime/50 bg-gp-lime/10 text-gp-lime',
   preparing: 'border-sky-400/50 bg-sky-400/10 text-sky-300',
-  ready: 'border-slate-400/50 bg-white/8 text-slate-200',
-  completed: 'border-[#B6FF3B]/50 bg-[#B6FF3B]/10 text-[#B6FF3B]',
-  canceled: 'border-slate-500/60 bg-white/5 text-slate-400',
+  ready: 'border-gp-border-inverse bg-white/10 text-gp-text-secondary',
+  completed: 'border-gp-lime/50 bg-gp-lime/10 text-gp-lime',
+  canceled: 'border-gp-danger/40 bg-gp-danger-soft text-gp-danger',
 };
 
 function getOrderOrigin(order) {
@@ -74,9 +74,9 @@ function AdminTextInput({ className = '', ...props }) {
 
 function AdminCheckbox({ checked, onChange, label }) {
   return (
-    <label className="flex min-h-11 items-center gap-3 rounded-md border border-white/10 bg-[#0B0D0E] px-3 text-sm font-bold text-slate-300">
-      <span className={`flex h-5 w-5 items-center justify-center rounded border ${checked ? 'border-[#B6FF3B] bg-[#B6FF3B] text-[#101214]' : 'border-white/20 bg-white/5'}`}>
-        {checked && <span className="h-2 w-2 rounded-sm bg-[#101214]" />}
+    <label className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-3 text-gp-sm font-gp-bold text-gp-text-secondary">
+      <span className={`flex h-5 w-5 items-center justify-center rounded-gp-sm border ${checked ? 'border-gp-lime bg-gp-lime text-gp-text-inverse' : 'border-white/20 bg-white/5'}`}>
+        {checked && <span className="h-2 w-2 rounded-gp-sm bg-gp-text-inverse" />}
       </span>
       <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
       {label}
@@ -86,7 +86,7 @@ function AdminCheckbox({ checked, onChange, label }) {
 
 function AdminFileInput({ onChange }) {
   return (
-    <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-white/20 bg-[#0B0D0E] px-3 text-sm font-black text-slate-300 transition hover:border-[#B6FF3B]/60 hover:text-white">
+    <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-gp border border-dashed border-white/20 bg-gp-bg-field px-3 text-gp-sm font-gp-black text-gp-text-secondary transition hover:border-gp-lime/60 hover:text-gp-text-primary">
       <FileImage size={17} />
       Selecionar imagem
       <input type="file" accept="image/*" onChange={onChange} className="sr-only" />
@@ -96,20 +96,20 @@ function AdminFileInput({ onChange }) {
 
 function StatusPill({ status }) {
   return (
-    <span className={`inline-flex min-h-7 items-center gap-2 rounded-full border px-3 text-xs font-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+    <span className={`inline-flex min-h-7 items-center gap-2 rounded-gp-pill border px-3 text-gp-xs font-gp-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
+      <span className="h-1.5 w-1.5 rounded-gp-pill bg-current" />
       {ORDER_STATUS_LABELS[status] || status}
     </span>
   );
 }
 
 function Sparkline({ danger = false }) {
-  const stroke = danger ? '#F59E0B' : '#B6FF3B';
+  const stroke = danger ? 'var(--gp-warning)' : 'var(--gp-lime)';
   const bars = [18, 30, 22, 42, 28, 52];
   if (danger) {
     return (
       <div className="flex h-10 items-end gap-1">
-        {bars.map((height, index) => <span key={index} className="w-1.5 rounded-sm bg-amber-500/80" style={{ height }} />)}
+        {bars.map((height, index) => <span key={index} className="w-1.5 rounded-gp-sm bg-amber-500/80" style={{ height }} />)}
       </div>
     );
   }
@@ -155,8 +155,8 @@ function AdminLogin({ onLogin }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#050606] p-5 text-white">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 rounded-lg border border-white/10 bg-[#101214] p-6 text-white shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-gp-bg-main p-5 text-white">
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 gp-panel p-6 text-white shadow-gp-modal">
         <BrandMark label="Gym Prime" tone="dark" />
         <div>
           <h1 className="text-2xl font-black">Entrar no admin</h1>
@@ -172,8 +172,8 @@ function AdminLogin({ onLogin }) {
 
 function AccessDenied({ status, onTryLogin }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#050606] p-5">
-      <section className="max-w-md rounded-lg border border-white/10 bg-[#101214] p-6 text-center text-white shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-gp-bg-main p-5">
+      <section className="max-w-md gp-panel p-6 text-center text-white shadow-gp-modal">
         <Badge variant="danger">{status === 403 ? '403' : '401'}</Badge>
         <h1 className="mt-3 text-2xl font-black">Acesso negado</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -234,20 +234,20 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_430px]">
-        <section className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <section className="overflow-hidden gp-card">
+          <div className="flex items-center justify-between border-b border-gp-border-inverse px-5 py-4">
             <h2 className="flex items-center gap-3 text-lg font-black"><ClipboardList size={20} className="text-slate-300" /> Pedidos recentes</h2>
-            <Button size="sm" variant="secondary" className="border-white/15 bg-white/5 text-white hover:bg-white/10" onClick={() => setTab('orders')}>Ver todos</Button>
+            <Button size="sm" variant="inverse" onClick={() => setTab('orders')}>Ver todos</Button>
           </div>
           {recentOrders.length === 0 ? (
             <div className="p-4"><Feedback>Nenhum pedido registrado ainda.</Feedback></div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[820px] text-left text-sm">
-                <thead className="bg-white/[0.025] text-xs font-black uppercase text-slate-400">
+              <table className="gp-table w-full min-w-[820px] text-left text-sm">
+                <thead>
                   <tr><th className="px-5 py-3"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-6 text-right">Total</th><th className="pl-3">Status</th></tr>
                 </thead>
-                <tbody className="divide-y divide-white/10">
+                <tbody>
                   {recentOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-white/[0.025]">
                       <td className="px-5 py-3.5 font-black">#{order.id}</td>
@@ -265,23 +265,23 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
               </table>
             </div>
           )}
-          <div className="flex items-center justify-between border-t border-white/10 px-5 py-3 text-sm text-slate-400">
+          <div className="flex items-center justify-between border-t border-gp-border-inverse px-5 py-3 text-sm text-slate-400">
             <span>Mostrando {Math.min(recentOrders.length, 8)} de {orders.length} pedidos</span>
-            <button type="button" className="font-black text-white hover:text-[#B6FF3B]" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
+            <button type="button" className="font-black text-white hover:text-gp-lime" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
           </div>
         </section>
 
         <div className="space-y-4">
-          <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
-            <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+          <section className="gp-card p-4">
+            <div className="mb-4 flex items-center justify-between border-b border-gp-border-inverse pb-4">
               <h2 className="flex items-center gap-3 text-lg font-black"><AlertTriangle size={20} className="text-amber-400" /> Estoque baixo</h2>
               <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300" onClick={() => setTab('inventory')}>Ver estoque</button>
             </div>
             {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do minimo.</Feedback> : (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y divide-gp-border-inverse">
                 {lowInventoryItems.slice(0, 4).map((item) => (
                   <div key={item.inventory_id} className="grid grid-cols-[54px_1fr_52px_52px_90px] items-center gap-3 py-3 text-sm">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-black/30 text-[#B6FF3B]"><Package size={22} /></div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-gp-sm border border-gp-border-inverse bg-black/30 text-gp-lime"><Package size={22} /></div>
                     <strong>{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
                     <span className="font-black">{item.quantity}</span>
                     <span className="text-slate-400">{item.min_quantity}</span>
@@ -292,8 +292,8 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
             )}
           </section>
 
-          <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
-            <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
+          <section className="gp-card p-4">
+            <div className="mb-4 flex items-center justify-between border-b border-gp-border-inverse pb-4">
               <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Produtos mais vendidos</h2>
               <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatorio</button>
             </div>
@@ -304,14 +304,14 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
                     <div className="grid grid-cols-[24px_1fr_78px_98px] items-center gap-3 text-sm">
                       <span className="font-black text-slate-400">{index + 1}</span>
                       <div className="flex min-w-0 items-center gap-3">
-                        {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-9 w-9 rounded-md object-cover" />}
+                        {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-9 w-9 rounded-gp-sm object-cover" />}
                         <strong className="truncate">{item.product_name || item.product?.name || `Produto #${item.productId || item.product_id}`}</strong>
                       </div>
                       <span className="font-black text-slate-300">{item.quantity} un.</span>
                       <span className="text-right font-black">{formatCurrency(item.revenue)}</span>
                     </div>
-                    <div className="ml-8 mt-2 h-2 rounded-full bg-white/10">
-                      <div className="h-2 rounded-full bg-[#B6FF3B]" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
+                    <div className="ml-8 mt-2 h-2 rounded-gp-pill bg-white/10">
+                      <div className="h-2 rounded-gp-pill bg-gp-lime" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
                     </div>
                   </div>
                 ))}
@@ -354,7 +354,7 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
   const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+    <section className="gp-card p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Evolucao das vendas</h2>
@@ -364,7 +364,7 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
           {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </AdminSelect>
       </div>
-      <div className="relative h-64 rounded-lg bg-black/25 px-4 pb-8 pl-14 pt-5">
+      <div className="relative h-64 rounded-gp bg-black/25 px-4 pb-8 pl-14 pt-5">
         <div className="absolute bottom-8 left-4 top-5 flex flex-col-reverse justify-between text-xs font-bold leading-none text-slate-400">
           {yAxisValues.slice().reverse().map((value) => <span key={value}>{formatAxisValue(value)}</span>)}
         </div>
@@ -376,8 +376,8 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
         <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" preserveAspectRatio="none" role="img" aria-label="Grafico de vendas por hora">
           <defs>
             <linearGradient id="salesArea" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#B6FF3B" stopOpacity="0.46" />
-              <stop offset="100%" stopColor="#B6FF3B" stopOpacity="0.03" />
+              <stop offset="0%" stopColor="var(--gp-lime)" stopOpacity="0.46" />
+              <stop offset="100%" stopColor="var(--gp-lime)" stopOpacity="0.03" />
             </linearGradient>
           </defs>
           {yAxisValues.map((value) => {
@@ -385,12 +385,12 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
             return <line key={value} x1="7" x2="95" y1={y} y2={y} stroke="rgba(255,255,255,0.10)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />;
           })}
           <polyline points={areaPoints} fill="url(#salesArea)" stroke="none" />
-          <polyline points={chartPoints} fill="none" stroke="#B6FF3B" strokeWidth="2.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          <polyline points={chartPoints} fill="none" stroke="var(--gp-lime)" strokeWidth="2.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
           {points.map((point, index) => {
             if (index % 2 !== 0) return null;
             const x = 7 + (index / Math.max(points.length - 1, 1)) * 88;
             const y = 94 - (Number(point.total_amount) / maxValue) * 78;
-            return <circle key={point.key} cx={x} cy={y} r="1.1" fill="#B6FF3B" vectorEffect="non-scaling-stroke" />;
+            return <circle key={point.key} cx={x} cy={y} r="1.1" fill="var(--gp-lime)" vectorEffect="non-scaling-stroke" />;
           })}
         </svg>
       </div>
@@ -400,16 +400,16 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
 
 function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="relative overflow-hidden rounded-lg border border-white/10 bg-[#121415]/90 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+    <section className="relative overflow-hidden gp-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-lg border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-[#B6FF3B]/55 text-[#B6FF3B]'}`}>
+        <div className={`flex h-12 w-12 items-center justify-center rounded-gp border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
           {icon}
         </div>
         <Sparkline danger={danger} />
       </div>
       <p className="mt-4 text-sm font-bold text-slate-300">{title}</p>
       <strong className="mt-2 block text-3xl font-black text-white">{value}</strong>
-      <div className={`mt-4 flex items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-[#B6FF3B]'}`}>
+      <div className={`mt-4 flex items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
         {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
         <span>{badge}</span>
         {helper && <span className="font-medium text-white">{helper}</span>}
@@ -454,26 +454,26 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
             <option value="all">Todos os status</option>
             {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
           </AdminSelect>
-          <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10 md:justify-self-end" onClick={() => setFilters({ date: '', origin: 'all', status: 'all' })}>
+          <Button variant="inverse" className="md:justify-self-end" onClick={() => setFilters({ date: '', origin: 'all', status: 'all' })}>
             Limpar filtros
           </Button>
         </div>
 
         {filteredOrders.length === 0 ? <Feedback>Nenhum pedido encontrado para os filtros.</Feedback> : (
-          <table className="w-full min-w-[960px] text-left text-sm">
-            <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+          <table className="gp-table w-full min-w-[960px] text-left text-sm">
+            <thead>
               <tr><th className="px-4 py-3">Pedido</th><th>Cliente</th><th>Origem</th><th>Itens</th><th>Status</th><th>Criado em</th><th className="text-right">Total</th><th className="text-right">Acoes</th></tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody>
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="align-top">
                   <td className="px-4 py-4 font-black">#{order.id}</td>
                   <td className="text-slate-200">{order.customer_name || `Usuario ${order.user_id}`}</td>
-                  <td><Badge className="bg-blue-500/15 text-blue-300">{getOrderOrigin(order)}</Badge></td>
+                  <td><Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge></td>
                   <td className="py-4">
                     <div className="flex max-w-sm flex-wrap gap-1">
                       {order.items.map((item) => (
-                        <span key={item.id} className="inline-flex rounded-full bg-white/10 px-2 py-1 text-xs font-bold text-slate-200">
+                        <span key={item.id} className="inline-flex rounded-gp-pill bg-white/10 px-2 py-1 text-xs font-bold text-slate-200">
                           {item.quantity}x {productMap.get(item.product_id)?.name || `produto #${item.product_id}`}
                         </span>
                       ))}
@@ -488,8 +488,8 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                   <td className="pr-4 text-right font-black">{formatCurrency(order.total_amount)}</td>
                   <td className="pr-4 text-right">
                     <div className="inline-flex gap-2">
-                      <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSelectedOrderId(order.id)}><Eye size={14} /> Detalhe</Button>
-                      <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => copySummary(order)}><Copy size={14} /> Copiar</Button>
+                      <Button size="sm" variant="inverse" onClick={() => setSelectedOrderId(order.id)}><Eye size={14} /> Detalhe</Button>
+                      <Button size="sm" variant="inverse" onClick={() => copySummary(order)}><Copy size={14} /> Copiar</Button>
                     </div>
                   </td>
                 </tr>
@@ -515,21 +515,21 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
 function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 p-4">
-      <section className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-lg border border-white/10 bg-[#101214] p-5 text-white shadow-2xl">
+      <section className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto gp-panel p-5 text-white shadow-gp-modal">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Badge className="bg-blue-500/15 text-blue-300">{getOrderOrigin(order)}</Badge>
+            <Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge>
             <h2 className="mt-3 text-2xl font-black">Pedido #{order.id}</h2>
             <p className="mt-1 flex items-center gap-2 text-sm text-slate-400"><Clock size={15} /> {new Date(order.created_at).toLocaleString('pt-BR')}</p>
           </div>
-          <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onClose}>Fechar</Button>
+          <Button variant="inverse" onClick={onClose}>Fechar</Button>
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <InfoBlock label="Cliente" value={order.customer_name || `Usuario ${order.user_id}`} />
           <InfoBlock label="Total" value={formatCurrency(order.total_amount)} />
           <InfoBlock label="Pagamento" value={order.payment_method || 'Nao informado'} />
-          <label className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+          <label className="rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
             <span className="text-xs font-black uppercase text-slate-500">Status</span>
             <AdminSelect className="mt-2 w-full" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
               {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
@@ -537,9 +537,9 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
           </label>
         </div>
 
-        <div className="mt-5 rounded-lg border border-white/10">
-          <div className="border-b border-white/10 p-3 text-sm font-black text-slate-300">Itens</div>
-          <div className="divide-y divide-white/10">
+        <div className="mt-5 rounded-gp border border-gp-border-inverse">
+          <div className="border-b border-gp-border-inverse p-3 text-sm font-black text-slate-300">Itens</div>
+          <div className="divide-y divide-gp-border-inverse">
             {order.items.map((item) => (
               <div key={item.id} className="flex items-center justify-between gap-4 p-3 text-sm">
                 <div>
@@ -553,7 +553,7 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
         </div>
 
         <div className="mt-5 flex flex-wrap justify-end gap-3">
-          <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onCopy}><Copy size={16} /> Copiar resumo</Button>
+          <Button variant="inverse" onClick={onCopy}><Copy size={16} /> Copiar resumo</Button>
           <Button onClick={onClose}>Concluir</Button>
         </div>
       </section>
@@ -563,7 +563,7 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
 
 function InfoBlock({ label, value }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+    <div className="rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
       <span className="text-xs font-black uppercase text-slate-500">{label}</span>
       <strong className="mt-2 block text-sm text-white">{value}</strong>
     </div>
@@ -608,7 +608,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#121415]/85 p-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+      <div className="flex flex-wrap items-center justify-between gap-3 gp-card p-4">
         <div>
           <h2 className="text-lg font-black">Produtos</h2>
           <p className="mt-1 text-sm text-slate-400">Cardapio, variantes, imagem e disponibilidade.</p>
@@ -618,7 +618,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
       <div className="grid gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <article key={product.id} className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+          <article key={product.id} className="overflow-hidden gp-card">
             <div className="grid min-h-44 grid-cols-[150px_1fr]">
               {product.image_url ? (
                 <img src={product.image_url} alt={product.name} className="h-full min-h-44 w-full object-cover" />
@@ -635,8 +635,8 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                 </div>
                 <strong className="mt-3 block text-xl">{formatCurrency(product.price)}</strong>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button variant="secondary" size="sm" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setProductModal({ product })}>Editar</Button>
-                  <Button variant="secondary" size="sm" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => onSaveProduct(product, { ...product, is_active: !product.is_active }, null)}>
+                  <Button variant="inverse" size="sm" onClick={() => setProductModal({ product })}>Editar</Button>
+                  <Button variant="inverse" size="sm" onClick={() => onSaveProduct(product, { ...product, is_active: !product.is_active }, null)}>
                     {product.is_active ? 'Desativar' : 'Ativar'}
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => onDeleteProduct(product)}><Trash2 size={14} /> Remover</Button>
@@ -644,7 +644,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
               </div>
             </div>
 
-            <div className="border-t border-white/10 p-4">
+            <div className="border-t border-gp-border-inverse p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-sm font-black text-slate-300">Variantes</h3>
@@ -658,7 +658,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                     const variantForm = variantForms[variant.id];
                     if (variantForm) {
                       return (
-                        <div key={variant.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                        <div key={variant.id} className="rounded-gp border border-gp-border-inverse bg-black/20 p-3">
                           <div className="grid gap-2 sm:grid-cols-2">
                             <AdminTextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
                             <AdminTextInput placeholder="Codigo" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
@@ -667,7 +667,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                           </div>
                           <div className="mt-3"><AdminCheckbox checked={variantForm.is_active} onChange={(event) => updateVariantForm(variant.id, { is_active: event.target.checked })} label="Variante ativa" /></div>
                           <div className="mt-3 flex justify-end gap-2">
-                            <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => {
+                            <Button size="sm" variant="inverse" onClick={() => {
                               const nextForms = { ...variantForms };
                               delete nextForms[variant.id];
                               setVariantForms(nextForms);
@@ -679,14 +679,14 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                     }
 
                     return (
-                      <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-black/20 p-3 text-sm">
+                      <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-gp bg-black/20 p-3 text-sm">
                         <div>
                           <strong>{variant.name}</strong>
                           <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preco base'}</span>
                           <Badge className="ml-2" variant={variant.is_active ? 'success' : 'neutral'}>{variant.is_active ? 'Ativa' : 'Inativa'}</Badge>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => startVariantEdit(product.id, variant)}>Editar</Button>
+                          <Button size="sm" variant="inverse" onClick={() => startVariantEdit(product.id, variant)}>Editar</Button>
                           <Button size="sm" variant="danger" onClick={() => onDeleteVariant(product.id, variant.id)}>Desativar</Button>
                         </div>
                       </div>
@@ -695,7 +695,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                 </div>
               )}
 
-              <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
+              <div className="mt-4 rounded-gp border border-gp-border-inverse bg-black/20 p-3">
                 <h3 className="text-sm font-black text-slate-300">Nova variante</h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {['name', 'code', 'description', 'price'].map((field) => (
@@ -763,18 +763,18 @@ function ProductFormDialog({ product, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-[#101214] p-5 text-white shadow-2xl">
+      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto gp-panel p-5 text-white shadow-gp-modal">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
             <h2 className="mt-3 text-2xl font-black">{product ? 'Editar produto' : 'Novo produto'}</h2>
           </div>
-          <Button type="button" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onClose}>Fechar</Button>
+          <Button type="button" variant="inverse" onClick={onClose}>Fechar</Button>
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-[220px_1fr]">
           <div>
-            <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/20">
+            <div className="flex aspect-square items-center justify-center overflow-hidden rounded-gp border border-gp-border-inverse bg-black/20">
               {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-500">Preview</span>}
             </div>
             <AdminFileInput onChange={handleImageChange} />
@@ -790,7 +790,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
         </div>
 
         <div className="mt-5 flex justify-end gap-3">
-          <Button type="button" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="inverse" onClick={onClose}>Cancelar</Button>
           <Button type="submit">Salvar produto</Button>
         </div>
       </form>
@@ -815,15 +815,15 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
       <div className="mb-4 grid gap-3 md:grid-cols-[1fr_190px_140px]">
         <AdminTextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
         <AdminCheckbox checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} label="Baixo estoque" />
-        <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
+        <Button variant="inverse" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
       </div>
 
       {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+        <table className="gp-table w-full min-w-[760px] text-left text-sm">
+          <thead>
             <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Minimo</th><th>Severidade</th><th className="text-right">Acao</th></tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody>
             {filteredInventory.map((item) => {
               const isLow = item.quantity <= item.min_quantity;
               const isCritical = item.quantity === 0;
@@ -851,11 +851,11 @@ function AuditPanel({ auditLogs }) {
   return (
     <DataCard title="Auditoria" subtitle="Acoes administrativas e eventos criticos registrados." count={`${auditLogs.length} logs`}>
       {auditLogs.length === 0 ? <Feedback>Nenhum log registrado.</Feedback> : (
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+        <table className="gp-table w-full min-w-[720px] text-left text-sm">
+          <thead>
             <tr><th className="px-4 py-3">Acao</th><th>Entidade</th><th>Usuario</th><th>Data</th></tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody>
             {auditLogs.map((log) => (
               <tr key={log.id}>
                 <td className="px-4 py-4 font-black">{log.action}</td>
@@ -884,14 +884,14 @@ function CustomersPanel({ customers }) {
       <DataCard title="Clientes" subtitle="Contas cadastradas, historico resumido e dados sensiveis mascarados." count={`${filteredCustomers.length}/${customers.length} clientes`}>
         <div className="mb-4 grid gap-3 md:grid-cols-[1fr_140px]">
           <AdminTextInput placeholder="Buscar por nome, email ou CPF mascarado" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSearch('')}>Limpar</Button>
+          <Button variant="inverse" onClick={() => setSearch('')}>Limpar</Button>
         </div>
         {filteredCustomers.length === 0 ? <Feedback>Nenhum cliente encontrado.</Feedback> : (
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="bg-white/[0.03] text-xs font-black uppercase text-slate-400">
+          <table className="gp-table w-full min-w-[860px] text-left text-sm">
+            <thead>
               <tr><th className="px-4 py-3">Cliente</th><th>Email</th><th>CPF</th><th>Pedidos</th><th>Ultimo pedido</th><th className="text-right">Total gasto</th><th className="text-right">Acao</th></tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody>
               {filteredCustomers.map((customer) => (
                 <tr key={customer.id}>
                   <td className="px-4 py-4 font-black">{customer.full_name}</td>
@@ -901,7 +901,7 @@ function CustomersPanel({ customers }) {
                   <td className="text-slate-400">{customer.last_order_at ? new Date(customer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'}</td>
                   <td className="pr-4 text-right font-black">{formatCurrency(customer.total_spent)}</td>
                   <td className="pr-4 text-right">
-                    <Button size="sm" variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSelectedCustomer(customer)}><Eye size={14} /> Detalhe</Button>
+                    <Button size="sm" variant="inverse" onClick={() => setSelectedCustomer(customer)}><Eye size={14} /> Detalhe</Button>
                   </td>
                 </tr>
               ))}
@@ -912,14 +912,14 @@ function CustomersPanel({ customers }) {
 
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 p-4">
-          <section className="w-full max-w-md rounded-lg border border-white/10 bg-[#101214] p-5 text-white shadow-2xl">
+          <section className="w-full max-w-md gp-panel p-5 text-white shadow-gp-modal">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <Badge variant="neutral">Cliente</Badge>
                 <h2 className="mt-3 text-2xl font-black">{selectedCustomer.full_name}</h2>
                 <p className="mt-1 text-sm text-slate-400">{selectedCustomer.email}</p>
               </div>
-              <Button variant="secondary" className="border-white/10 bg-white/5 text-white hover:bg-white/10" onClick={() => setSelectedCustomer(null)}>Fechar</Button>
+              <Button variant="inverse" onClick={() => setSelectedCustomer(null)}>Fechar</Button>
             </div>
             <div className="mt-5 grid gap-3">
               <InfoBlock label="CPF" value={selectedCustomer.cpf_masked || 'Nao informado'} />
@@ -956,7 +956,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
   return (
     <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
-      <form onSubmit={submitSettings} className="rounded-lg border border-white/10 bg-[#121415]/85 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+      <form onSubmit={submitSettings} className="gp-card p-5">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-black">Configuracoes</h2>
@@ -984,11 +984,11 @@ function SettingsPanel({ settings, onSaveSettings }) {
         </div>
       </form>
 
-      <aside className="rounded-lg border border-white/10 bg-[#121415]/85 p-5 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
+      <aside className="gp-card p-5">
         <Badge variant="neutral">Preview</Badge>
         <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
-        <pre className="mt-4 whitespace-pre-wrap rounded-lg bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
-        <div className="mt-4 rounded-lg bg-black/20 p-4 text-sm text-slate-300">
+        <pre className="mt-4 whitespace-pre-wrap rounded-gp bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
+        <div className="mt-4 rounded-gp bg-black/20 p-4 text-sm text-slate-300">
           {form.totem_message}
         </div>
       </aside>
@@ -998,8 +998,8 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-white/10 bg-[#121415]/85 shadow-[0_18px_44px_rgba(0,0,0,0.24)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
+    <section className="overflow-hidden gp-card">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse p-4">
         <div>
           <h2 className="text-lg font-black">{title}</h2>
           <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
@@ -1019,7 +1019,7 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
 
   return (
-    <section className="rounded-lg border border-white/15 bg-[#0B0D0E]/90 p-4">
+    <section className="rounded-gp border border-gp-border-inverse bg-gp-bg-field/90 p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-sm font-black">Resumo do dia</h2>
         <ChevronDown size={17} className="text-slate-300" />
@@ -1031,9 +1031,9 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
         ['Clientes atendidos', customersServed],
         ['Alertas estoque', lowInventory],
       ].map(([label, value]) => (
-        <div key={label} className="border-t border-white/10 py-3 first:border-t-0 first:pt-0">
+        <div key={label} className="border-t border-gp-border-inverse py-3 first:border-t-0 first:pt-0">
           <span className="block text-xs font-medium text-slate-300">{label}</span>
-          <strong className="mt-1 block text-lg font-black text-[#B6FF3B]">{value}</strong>
+          <strong className="mt-1 block text-lg font-black text-gp-lime">{value}</strong>
         </div>
       ))}
     </section>
@@ -1244,7 +1244,7 @@ export function AdminPage() {
     }
   }
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-[#050606] text-white">Carregando</div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-gp-bg-main text-white">Carregando</div>;
   if (accessDeniedStatus) {
     return (
       <AccessDenied
@@ -1265,8 +1265,8 @@ export function AdminPage() {
   const activeTabLabel = ADMIN_TABS.find((item) => item.key === tab)?.label || 'Dashboard';
 
   return (
-    <main className="grid min-h-screen grid-cols-[228px_1fr] bg-[#050606] text-white">
-      <aside className="flex min-h-0 flex-col border-r border-white/10 bg-[#07090A] p-5 text-white">
+    <main className="grid min-h-screen grid-cols-[228px_1fr] bg-gp-bg-main text-white">
+      <aside className="flex min-h-0 flex-col border-r border-gp-border-inverse bg-gp-bg-main p-5 text-white">
         <BrandMark label="Gym Prime" tone="dark" />
         <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-300">ADMIN</span>
         <nav className="mt-8 space-y-2">
@@ -1274,7 +1274,7 @@ export function AdminPage() {
             <button
               key={key}
               type="button"
-              className={`flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-black transition ${tab === key ? 'bg-[#B6FF3B] text-[#101214] shadow-[0_0_24px_rgba(182,255,59,0.22)]' : 'text-slate-200 hover:bg-white/8 hover:text-white'}`}
+              className={`flex min-h-12 w-full items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'bg-gp-lime text-gp-text-inverse shadow-gp-glow' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
               onClick={() => setTab(key)}
             >
               {icon}
@@ -1284,33 +1284,33 @@ export function AdminPage() {
         </nav>
         <div className="mt-auto space-y-4">
           <AdminSummaryCard analytics={analytics} orders={orders} inventory={inventory} />
-          <Link to={APP_ROUTES.totem} className="flex min-h-10 items-center justify-center rounded-md border border-white/10 text-xs font-black text-slate-300 hover:bg-white/10 hover:text-white">
+          <Link to={APP_ROUTES.totem} className="flex min-h-10 items-center justify-center rounded-gp-sm border border-gp-border-inverse text-xs font-black text-slate-300 hover:bg-white/10 hover:text-white">
             Abrir Totem
           </Link>
           <div className="text-xs font-medium leading-6 text-slate-500">
-            <span className="block">© 2026 Gym Prime</span>
+            <span className="block">(c) 2026 Gym Prime</span>
             <span className="block">v1.0.0</span>
           </div>
         </div>
       </aside>
 
-      <section className="min-w-0 bg-[radial-gradient(circle_at_48%_4%,rgba(182,255,59,0.05),transparent_34%)] p-7">
+      <section className="min-w-0 bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.05),transparent_34%)] p-7">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-4xl font-black leading-none">{activeTabLabel}</h1>
             {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operacao local da lanchonete Gym Prime.</p>}
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
-              <span className="h-3 w-3 rounded-full bg-[#B6FF3B] shadow-[0_0_18px_rgba(182,255,59,0.62)]" />
+            <div className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
+              <span className="h-3 w-3 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
               Servidor local online
             </div>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
               <CalendarDays size={16} />
               Hoje
               <ChevronDown size={15} />
             </button>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-lg border border-white/15 bg-[#0B0D0E] px-4 text-sm font-black">
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
               <Shield size={16} />
               Administrador
               <ChevronDown size={15} />
