@@ -50,7 +50,7 @@ function LoginPage({ onLogin }) {
   }
 
   return (
-    <main className="min-h-screen bg-gp-bg-panel px-5 py-8 text-gp-text-primary">
+    <main className="gp-app-bg min-h-screen px-5 py-8 text-gp-text-primary">
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-5xl items-center gap-8 lg:grid-cols-[1fr_420px]">
         <section className="max-w-xl">
           <BrandMark tone="dark" />
@@ -145,7 +145,7 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
 function CustomerCartBar({ cart, onCheckout }) {
   const hasItems = cart.items.length > 0;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gp-border-inverse bg-gp-bg-panel px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 text-gp-text-primary shadow-gp-modal">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gp-border-inverse bg-gp-bg-panel/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 text-gp-text-primary shadow-gp-modal backdrop-blur">
       <div className="mx-auto flex max-w-xl min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-gp-pill bg-white/10">
@@ -301,7 +301,7 @@ function CustomerMenuPage({ user, onLogout }) {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-gp-bg-main pb-[calc(10rem+env(safe-area-inset-bottom))] text-gp-text-primary">
+    <main className="gp-app-bg min-h-screen overflow-x-hidden pb-[calc(10rem+env(safe-area-inset-bottom))] text-gp-text-primary">
       <header className="px-4 py-6">
         <div className="mx-auto flex max-w-xl min-w-0 items-center justify-between gap-4">
           <BrandMark tone="dark" />
@@ -317,7 +317,7 @@ function CustomerMenuPage({ user, onLogout }) {
       </header>
 
       <section className="mx-auto max-w-xl px-4 py-5">
-        <div className="flex min-h-16 min-w-0 items-center gap-4 rounded-gp border border-gp-border-inverse bg-white/10 px-5 text-gp-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex min-h-16 min-w-0 items-center gap-4 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-5 text-gp-text-secondary shadow-gp-sm backdrop-blur">
           <Search className="shrink-0" size={27} />
           <span className="truncate text-lg font-medium">Buscar no cardápio</span>
         </div>
@@ -327,7 +327,7 @@ function CustomerMenuPage({ user, onLogout }) {
               key={item.key}
               size="sm"
               variant={category === item.key ? 'primary' : 'secondary'}
-              className={`min-h-14 max-w-[70vw] shrink-0 rounded-gp px-5 text-gp-base ${category === item.key ? 'border border-gp-lime' : 'border-gp-border-inverse bg-white/10 text-gp-text-primary hover:bg-white/20'}`}
+              className={`min-h-14 max-w-[70vw] shrink-0 rounded-gp px-5 text-gp-base ${category === item.key ? 'border border-gp-lime shadow-gp-lime-action' : 'border-gp-border-inverse bg-white/10 text-gp-text-primary hover:bg-white/20'}`}
               onClick={() => setCategory(item.key)}
             >
               {CATEGORY_ICONS[item.key]}
@@ -392,7 +392,7 @@ export function CustomerApp() {
   }
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-gp-bg-panel text-gp-text-primary">Carregando</div>;
+    return <div className="gp-app-bg flex min-h-screen items-center justify-center text-gp-text-primary">Carregando</div>;
   }
 
   return user ? <CustomerMenuPage user={user} onLogout={handleLogout} /> : <LoginPage onLogin={setUser} />;

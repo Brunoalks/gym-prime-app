@@ -62,7 +62,7 @@ function formatAxisValue(value) {
 
 function AdminSelect({ className = '', children, ...props }) {
   return (
-    <select className={`${ADMIN_FIELD_CLASS} ${className}`} {...props}>
+    <select className={`${ADMIN_FIELD_CLASS} gp-select ${className}`} {...props}>
       {children}
     </select>
   );
@@ -155,7 +155,7 @@ function AdminLogin({ onLogin }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gp-bg-main p-5 text-white">
+    <main className="gp-app-bg flex min-h-screen items-center justify-center p-5 text-white">
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 gp-panel p-6 text-white shadow-gp-modal">
         <BrandMark label="Gym Prime" tone="dark" />
         <div>
@@ -172,7 +172,7 @@ function AdminLogin({ onLogin }) {
 
 function AccessDenied({ status, onTryLogin }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gp-bg-main p-5">
+    <main className="gp-app-bg flex min-h-screen items-center justify-center p-5">
       <section className="max-w-md gp-panel p-6 text-center text-white shadow-gp-modal">
         <Badge variant="danger">{status === 403 ? '403' : '401'}</Badge>
         <h1 className="mt-3 text-2xl font-black">Acesso negado</h1>
@@ -1238,7 +1238,7 @@ export function AdminPage() {
     }
   }
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-gp-bg-main text-white">Carregando</div>;
+  if (loading) return <div className="gp-app-bg flex min-h-screen items-center justify-center text-white">Carregando</div>;
   if (accessDeniedStatus) {
     return (
       <AccessDenied
@@ -1259,8 +1259,8 @@ export function AdminPage() {
   const activeTabLabel = ADMIN_TABS.find((item) => item.key === tab)?.label || 'Dashboard';
 
   return (
-    <main className="grid h-screen min-h-0 grid-cols-[210px_minmax(0,1fr)] overflow-hidden bg-gp-bg-main text-white xl:grid-cols-[228px_minmax(0,1fr)]">
-      <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main p-4 text-white xl:p-5">
+    <main className="gp-app-bg grid h-screen min-h-0 grid-cols-[210px_minmax(0,1fr)] overflow-hidden text-white xl:grid-cols-[228px_minmax(0,1fr)]">
+      <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main/90 p-4 text-white backdrop-blur xl:p-5">
         <BrandMark label="Gym Prime" tone="dark" />
         <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-300">ADMIN</span>
         <nav className="mt-8 space-y-2">

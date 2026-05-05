@@ -259,7 +259,7 @@ export function TotemPage() {
   }
 
   return (
-    <main className="grid h-screen min-h-0 grid-cols-[minmax(180px,200px)_minmax(0,1fr)_minmax(300px,320px)] gap-4 overflow-hidden bg-gp-bg-main p-4 text-gp-text-primary 2xl:grid-cols-[220px_minmax(0,1fr)_360px]">
+    <main className="gp-app-bg grid h-screen min-h-0 grid-cols-[minmax(180px,200px)_minmax(0,1fr)_minmax(300px,320px)] gap-4 overflow-hidden p-4 text-gp-text-primary 2xl:grid-cols-[220px_minmax(0,1fr)_360px]">
       <nav className="gp-panel flex min-h-0 min-w-0 flex-col overflow-hidden p-4 text-gp-text-primary">
         <div className="shrink-0 border-b border-gp-border-inverse pb-5">
           <BrandMark label="Gym Prime" tone="dark" />
@@ -291,7 +291,7 @@ export function TotemPage() {
             <h1 className="text-3xl font-gp-black tracking-normal xl:text-4xl">Cardápio</h1>
             <p className="mt-1 text-gp-base font-gp-medium text-gp-text-secondary">Toque para adicionar ao pedido.</p>
           </div>
-          <div className="flex min-h-12 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/10 px-4 text-gp-text-secondary xl:w-80 xl:flex-none">
+          <div className="flex min-h-12 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
             <Search className="shrink-0" size={20} />
             <span className="truncate font-gp-bold">Escolha seus itens</span>
           </div>

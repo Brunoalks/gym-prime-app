@@ -54,6 +54,8 @@ export default {
         'gp-panel': 'var(--gp-shadow-panel)',
         'gp-modal': 'var(--gp-shadow-modal)',
         'gp-glow': 'var(--gp-shadow-glow)',
+        'gp-lime-action': 'var(--gp-shadow-lime-action)',
+        'gp-focus': 'var(--gp-shadow-focus)',
       },
       fontSize: {
         'gp-xs': ['var(--gp-font-xs)', { lineHeight: 'var(--gp-line-normal)' }],

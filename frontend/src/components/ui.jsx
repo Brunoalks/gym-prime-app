@@ -2,11 +2,11 @@ import { createElement } from 'react';
 import { cn } from './classNames.js';
 
 const buttonVariants = {
-  primary: 'bg-gp-lime text-gp-text-inverse shadow-gp-sm hover:bg-gp-lime/90',
-  dark: 'bg-gp-bg-panel text-gp-text-primary hover:bg-gp-bg-card',
-  secondary: 'border border-gp-border bg-white text-gp-text-inverse hover:bg-slate-50',
-  inverse: 'border border-gp-border-inverse bg-white/10 text-gp-text-primary hover:bg-white/20',
-  danger: 'bg-gp-danger-soft text-gp-danger hover:bg-gp-danger/20',
+  primary: 'bg-gp-lime text-gp-text-inverse shadow-gp-lime-action hover:bg-gp-lime/95 hover:shadow-gp-glow',
+  dark: 'border border-gp-border-inverse bg-gp-bg-panel text-gp-text-primary shadow-gp-sm hover:bg-gp-bg-card',
+  secondary: 'border border-gp-border bg-white text-gp-text-inverse shadow-gp-sm hover:border-slate-300 hover:bg-slate-50',
+  inverse: 'border border-gp-border-inverse bg-white/[0.08] text-gp-text-primary shadow-gp-sm hover:border-white/20 hover:bg-white/[0.14]',
+  danger: 'border border-gp-danger/20 bg-gp-danger-soft text-gp-danger hover:bg-gp-danger/20',
   ghost: 'text-gp-text-muted hover:bg-slate-100 hover:text-gp-text-inverse',
 };
 
@@ -47,7 +47,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex min-w-0 items-center justify-center gap-2 rounded-gp font-gp-black transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700 disabled:shadow-none',
+        'inline-flex min-w-0 items-center justify-center gap-2 rounded-gp font-gp-black transition duration-150 ease-out active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gp-bg-main disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700 disabled:shadow-none disabled:ring-0 disabled:ring-offset-0',
         buttonVariants[variant],
         buttonSizes[size],
         className,
@@ -100,7 +100,7 @@ export function Feedback({ children, className = '', variant = 'muted' }) {
 
 export function Dialog({ children, className = '', as = 'section', ...props }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-main/70 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-main/75 p-4 backdrop-blur-sm sm:items-center">
       <Card as={as} className={cn('max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-gp-modal', className)} {...props}>
         {children}
       </Card>
@@ -111,7 +111,7 @@ export function Dialog({ children, className = '', as = 'section', ...props }) {
 export function EmptyState({ icon = null, title, children, className = '', iconClassName = '', ...props }) {
   return (
     <div
-      className={cn('rounded-gp border border-dashed border-gp-border-inverse bg-white/5 px-4 py-8 text-center', className)}
+      className={cn('rounded-gp border border-dashed border-gp-border-inverse bg-white/[0.06] px-4 py-8 text-center shadow-gp-sm', className)}
       {...props}
     >
       {icon && (

@@ -1,18 +1,34 @@
 import { Check, CheckCircle2, Flame, ShoppingBag, X, Zap } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '../../components/classNames.js';
 import { Badge, Button, Dialog, ModalActions } from '../../components/ui.jsx';
+import gymPrimeLogo from '../../assets/gym-prime-logo.svg';
 import { formatCurrency } from './catalog.js';
 
 export function BrandMark({ label = 'Gym Prime', tone = 'light' }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const fallbackTextClass = tone === 'dark' ? 'text-gp-text-primary' : 'text-gp-text-inverse';
+
   return (
-    <div className="flex min-h-11 min-w-0 items-center gap-3">
-      <span className="flex h-11 w-11 items-center justify-center rounded-gp bg-gp-lime text-gp-text-inverse shadow-gp-glow">
-        <Zap size={24} strokeWidth={3} />
-      </span>
-      <span className={tone === 'dark' ? 'min-w-0 leading-none text-gp-text-primary' : 'min-w-0 leading-none text-gp-text-inverse'}>
-        <span className="block truncate text-xl font-gp-black uppercase italic tracking-normal">{label.split(' ')[0]}</span>
-        <span className="block truncate text-lg font-gp-black uppercase italic tracking-normal text-gp-lime">{label.split(' ').slice(1).join(' ') || 'Prime'}</span>
-      </span>
+    <div className="flex min-h-11 min-w-0 items-center">
+      {!logoFailed ? (
+        <img
+          src={gymPrimeLogo}
+          alt={label || 'Gym Prime'}
+          className="block h-auto max-h-12 w-auto max-w-[9.5rem] object-contain sm:max-h-14 sm:max-w-[11.5rem]"
+          onError={() => setLogoFailed(true)}
+        />
+      ) : (
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-gp bg-[linear-gradient(135deg,var(--gp-lime),#8FEA1E)] text-gp-text-inverse shadow-gp-glow">
+            <Zap size={24} strokeWidth={3} />
+          </span>
+          <span className={cn('min-w-0 leading-none', fallbackTextClass)}>
+            <span className="block truncate text-xl font-gp-black uppercase italic tracking-normal">{label.split(' ')[0]}</span>
+            <span className="block truncate text-lg font-gp-black uppercase italic tracking-normal text-gp-lime">{label.split(' ').slice(1).join(' ') || 'Prime'}</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -21,12 +37,12 @@ export function ProductImage({ product, className = '' }) {
   const canUseImage = product.image_url && !String(product.image_url).toLowerCase().endsWith('.svg');
 
   return (
-    <div className={`relative flex items-center justify-center overflow-hidden bg-gp-bg-card text-gp-text-muted ${className}`}>
+    <div className={`relative flex items-center justify-center overflow-hidden bg-gp-bg-card text-gp-text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${className}`}>
       {canUseImage ? (
         <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_25%_20%,rgb(var(--gp-lime-rgb)/0.32),transparent_28%),linear-gradient(135deg,#23272b,#070808)]">
-          <div className="rounded-gp border border-gp-border-inverse bg-white/10 px-4 py-3 text-center text-gp-text-primary shadow-gp-card backdrop-blur">
+        <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_24%_18%,rgb(var(--gp-lime-rgb)/0.22),transparent_30%),linear-gradient(135deg,#23272b,#070808)]">
+          <div className="rounded-gp border border-gp-border-inverse bg-white/[0.09] px-4 py-3 text-center text-gp-text-primary shadow-gp-card backdrop-blur">
             <ShoppingBag className="mx-auto text-gp-lime" size={30} />
             <strong className="mt-2 block max-w-28 truncate text-gp-sm font-gp-black">{product.name}</strong>
           </div>
@@ -65,7 +81,7 @@ export function PriceSummary({
   const formattedValue = typeof value === 'string' ? value : formatCurrency(value);
 
   return (
-    <div className={cn('min-w-0 rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary', className)}>
+    <div className={cn('min-w-0 rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary shadow-gp-sm ring-1 ring-white/5', className)}>
       <div className={stacked ? 'min-w-0' : 'flex min-w-0 items-center justify-between gap-3'}>
         <span className={cn('text-gp-sm font-gp-bold', labelClassName)}>{label}</span>
         <strong className={cn(stacked ? 'mt-1 block' : 'shrink-0', 'font-gp-black', valueClassName)}>{formattedValue}</strong>
