@@ -1,9 +1,9 @@
 export const PRODUCT_CATEGORIES = [
   { key: 'all', label: 'Todos' },
   { key: 'drinks', label: 'Bebidas' },
-  { key: 'protein', label: 'Proteinas' },
+  { key: 'protein', label: 'Proteínas' },
   { key: 'snacks', label: 'Snacks' },
-  { key: 'preworkout', label: 'Pre-treino' },
+  { key: 'preworkout', label: 'Pré-treino' },
   { key: 'combos', label: 'Combos' },
 ];
 

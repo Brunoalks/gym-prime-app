@@ -16,14 +16,14 @@ const ADMIN_TABS = [
   { key: 'inventory', label: 'Estoque', icon: <Package size={17} /> },
   { key: 'customers', label: 'Clientes', icon: <Users size={17} /> },
   { key: 'audit', label: 'Auditoria', icon: <AlertTriangle size={17} /> },
-  { key: 'settings', label: 'Configuracoes', icon: <Settings size={17} /> },
+  { key: 'settings', label: 'Configurações', icon: <Settings size={17} /> },
 ];
 
 const ORDER_STATUS_OPTIONS = [
   { value: 'pending', label: 'Pendente' },
   { value: 'preparing', label: 'Preparando' },
   { value: 'ready', label: 'Pronto' },
-  { value: 'completed', label: 'Concluido' },
+  { value: 'completed', label: 'Concluído' },
   { value: 'canceled', label: 'Cancelado' },
 ];
 
@@ -33,10 +33,10 @@ const SALES_PERIOD_OPTIONS = [
   { value: 'hour', label: 'Por hora' },
   { value: 'day', label: 'Por dia' },
   { value: 'week', label: 'Por semana' },
-  { value: 'month', label: 'Por mes' },
+  { value: 'month', label: 'Por mês' },
 ];
 
-const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 rounded-gp px-3 text-gp-sm font-gp-bold';
+const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 min-w-0 rounded-gp px-3 text-gp-sm font-gp-bold';
 
 const STATUS_STYLES = {
   pending: 'border-gp-lime/50 bg-gp-lime/10 text-gp-lime',
@@ -74,7 +74,7 @@ function AdminTextInput({ className = '', ...props }) {
 
 function AdminCheckbox({ checked, onChange, label }) {
   return (
-    <label className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-3 text-gp-sm font-gp-bold text-gp-text-secondary">
+    <label className="flex min-h-11 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-3 text-gp-sm font-gp-bold text-gp-text-secondary">
       <span className={`flex h-5 w-5 items-center justify-center rounded-gp-sm border ${checked ? 'border-gp-lime bg-gp-lime text-gp-text-inverse' : 'border-white/20 bg-white/5'}`}>
         {checked && <span className="h-2 w-2 rounded-gp-sm bg-gp-text-inverse" />}
       </span>
@@ -96,7 +96,7 @@ function AdminFileInput({ onChange }) {
 
 function StatusPill({ status }) {
   return (
-    <span className={`inline-flex min-h-7 items-center gap-2 rounded-gp-pill border px-3 text-gp-xs font-gp-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
+    <span className={`inline-flex min-h-7 max-w-full items-center gap-2 rounded-gp-pill border px-3 text-gp-xs font-gp-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
       <span className="h-1.5 w-1.5 rounded-gp-pill bg-current" />
       {ORDER_STATUS_LABELS[status] || status}
     </span>
@@ -127,7 +127,7 @@ function buildOrderSummary(order, productMap) {
   }).join('\n');
   return [
     `Pedido #${order.id}`,
-    `Cliente: ${order.customer_name || `Usuario ${order.user_id}`}`,
+    `Cliente: ${order.customer_name || `Usuário ${order.user_id}`}`,
     `Origem: ${getOrderOrigin(order)}`,
     `Status: ${ORDER_STATUS_LABELS[order.status] || order.status}`,
     `Total: ${formatCurrency(order.total_amount)}`,
@@ -144,7 +144,7 @@ function AdminLogin({ onLogin }) {
     try {
       const user = await gymPrimeApi.login({ email: form.email, password: form.password });
       if (!user.is_admin) {
-        toast.error('Permissao de admin necessaria');
+        toast.error('Permissão de admin necessária');
         return;
       }
       onLogin(user);
@@ -177,7 +177,7 @@ function AccessDenied({ status, onTryLogin }) {
         <Badge variant="danger">{status === 403 ? '403' : '401'}</Badge>
         <h1 className="mt-3 text-2xl font-black">Acesso negado</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          {status === 403 ? 'Sua conta nao tem permissao administrativa.' : 'Entre com uma conta administrativa para continuar.'}
+          {status === 403 ? 'Sua conta não tem permissão administrativa.' : 'Entre com uma conta administrativa para continuar.'}
         </p>
         <Button className="mt-5 w-full" onClick={onTryLogin}>
           Entrar com conta admin
@@ -226,17 +226,17 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
 
   return (
     <section className="space-y-4">
-      <div className="grid gap-4 xl:grid-cols-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" helper="vs ontem" icon={<DollarSign size={24} />} />
         <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" helper="vs ontem" icon={<ShoppingBag size={24} />} />
-        <KpiCard title="Ticket medio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
-        <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atencao' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
+        <KpiCard title="Ticket médio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
+        <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atenção' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_430px]">
-        <section className="overflow-hidden gp-card">
-          <div className="flex items-center justify-between border-b border-gp-border-inverse px-5 py-4">
-            <h2 className="flex items-center gap-3 text-lg font-black"><ClipboardList size={20} className="text-slate-300" /> Pedidos recentes</h2>
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,430px)]">
+        <section className="min-w-0 overflow-hidden gp-card">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse px-5 py-4">
+            <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><ClipboardList className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Pedidos recentes</span></h2>
             <Button size="sm" variant="inverse" onClick={() => setTab('orders')}>Ver todos</Button>
           </div>
           {recentOrders.length === 0 ? (
@@ -253,7 +253,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
                       <td className="px-5 py-3.5 font-black">#{order.id}</td>
                       <td className="text-slate-300">{formatTime(order.created_at)}</td>
                       <td className="text-slate-200">
-                        {order.customer_label || order.customer_name || `Usuario ${order.user_id}`}
+                        {order.customer_label || order.customer_name || `Usuário ${order.user_id}`}
                         <Badge className="ml-2 min-h-6 border border-sky-400/40 bg-sky-400/10 px-2 text-sky-300">{order.origin || (order.user_id ? 'Cliente' : 'Totem')}</Badge>
                       </td>
                       <td className="text-slate-300">{order.items_count ?? order.items?.length ?? 0} itens</td>
@@ -265,50 +265,50 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
               </DataTable>
             </div>
           )}
-          <div className="flex items-center justify-between border-t border-gp-border-inverse px-5 py-3 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gp-border-inverse px-5 py-3 text-sm text-slate-400">
             <span>Mostrando {Math.min(recentOrders.length, 8)} de {orders.length} pedidos</span>
             <button type="button" className="font-black text-white hover:text-gp-lime" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
           </div>
         </section>
 
-        <div className="space-y-4">
-          <section className="gp-card p-4">
-            <div className="mb-4 flex items-center justify-between border-b border-gp-border-inverse pb-4">
-              <h2 className="flex items-center gap-3 text-lg font-black"><AlertTriangle size={20} className="text-amber-400" /> Estoque baixo</h2>
+        <div className="min-w-0 space-y-4">
+          <section className="min-w-0 gp-card p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
+              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><AlertTriangle className="shrink-0 text-amber-400" size={20} /> <span className="truncate">Estoque baixo</span></h2>
               <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300" onClick={() => setTab('inventory')}>Ver estoque</button>
             </div>
-            {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do minimo.</Feedback> : (
+            {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do mínimo.</Feedback> : (
               <div className="divide-y divide-gp-border-inverse">
                 {lowInventoryItems.slice(0, 4).map((item) => (
-                  <div key={item.inventory_id} className="grid grid-cols-[54px_1fr_52px_52px_90px] items-center gap-3 py-3 text-sm">
+                  <div key={item.inventory_id} className="grid grid-cols-[48px_minmax(0,1fr)_auto_auto_auto] items-center gap-2 py-3 text-sm">
                     <div className="flex h-12 w-12 items-center justify-center rounded-gp-sm border border-gp-border-inverse bg-black/30 text-gp-lime"><Package size={22} /></div>
-                    <strong>{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
-                    <span className="font-black">{item.quantity}</span>
-                    <span className="text-slate-400">{item.min_quantity}</span>
-                    <Badge variant={item.severity === 'critical' ? 'danger' : 'neutral'} className={item.severity === 'critical' ? 'border border-red-500/40 bg-red-500/10 text-red-300' : 'border border-amber-500/40 bg-amber-500/10 text-amber-300'}>{item.severity === 'critical' ? 'Critico' : 'Baixo'}</Badge>
+                    <strong className="min-w-0 truncate">{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
+                    <span className="whitespace-nowrap font-black">{item.quantity}</span>
+                    <span className="whitespace-nowrap text-slate-400">{item.min_quantity}</span>
+                    <Badge variant={item.severity === 'critical' ? 'danger' : 'neutral'} className={item.severity === 'critical' ? 'border border-red-500/40 bg-red-100 text-red-700' : 'border border-amber-500/40 bg-amber-100 text-amber-800'}>{item.severity === 'critical' ? 'Crítico' : 'Baixo'}</Badge>
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          <section className="gp-card p-4">
-            <div className="mb-4 flex items-center justify-between border-b border-gp-border-inverse pb-4">
-              <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Produtos mais vendidos</h2>
-              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatorio</button>
+          <section className="min-w-0 gp-card p-4">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
+              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Produtos mais vendidos</span></h2>
+              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatório</button>
             </div>
-            {topProducts.length === 0 ? <Feedback>Nenhum ranking disponivel.</Feedback> : (
+            {topProducts.length === 0 ? <Feedback>Nenhum ranking disponível.</Feedback> : (
               <div className="space-y-3">
                 {topProducts.map((item, index) => (
                   <div key={item.productId || item.product_id}>
-                    <div className="grid grid-cols-[24px_1fr_78px_98px] items-center gap-3 text-sm">
+                    <div className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-3 text-sm">
                       <span className="font-black text-slate-400">{index + 1}</span>
                       <div className="flex min-w-0 items-center gap-3">
                         {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-9 w-9 rounded-gp-sm object-cover" />}
                         <strong className="truncate">{item.product_name || item.product?.name || `Produto #${item.productId || item.product_id}`}</strong>
                       </div>
-                      <span className="font-black text-slate-300">{item.quantity} un.</span>
-                      <span className="text-right font-black">{formatCurrency(item.revenue)}</span>
+                      <span className="whitespace-nowrap font-black text-slate-300">{item.quantity} un.</span>
+                      <span className="whitespace-nowrap text-right font-black">{formatCurrency(item.revenue)}</span>
                     </div>
                     <div className="ml-8 mt-2 h-2 rounded-gp-pill bg-white/10">
                       <div className="h-2 rounded-gp-pill bg-gp-lime" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
@@ -354,11 +354,11 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
   const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="gp-card p-4">
+    <section className="min-w-0 overflow-hidden gp-card p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="flex items-center gap-3 text-lg font-black"><BarChart3 size={20} className="text-slate-300" /> Evolucao das vendas</h2>
-          <p className="mt-1 text-sm text-slate-400">Serie real de pedidos agregada {activePeriodLabel.toLowerCase()}.</p>
+        <div className="min-w-0">
+          <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Evolução das vendas</span></h2>
+          <p className="mt-1 text-sm text-slate-400">Série real de pedidos agregada {activePeriodLabel.toLowerCase()}.</p>
         </div>
         <AdminSelect value={period} onChange={(event) => onPeriodChange(event.target.value)} className="w-36">
           {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -373,7 +373,7 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
             <span key={point.key} className={index % labelInterval === 0 || index === points.length - 1 ? 'truncate' : 'opacity-0'}>{point.label}</span>
           ))}
         </div>
-        <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" preserveAspectRatio="none" role="img" aria-label="Grafico de vendas por hora">
+        <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" preserveAspectRatio="none" role="img" aria-label="Gráfico de vendas por hora">
           <defs>
             <linearGradient id="salesArea" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="var(--gp-lime)" stopOpacity="0.46" />
@@ -400,16 +400,16 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
 
 function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="relative overflow-hidden gp-card p-5">
+    <section className="relative min-w-0 overflow-hidden gp-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-gp border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-gp border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
           {icon}
         </div>
         <Sparkline danger={danger} />
       </div>
       <p className="mt-4 text-sm font-bold text-slate-300">{title}</p>
-      <strong className="mt-2 block text-3xl font-black text-white">{value}</strong>
-      <div className={`mt-4 flex items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
+      <strong className="mt-2 block break-words text-2xl font-black text-white 2xl:text-3xl">{value}</strong>
+      <div className={`mt-4 flex flex-wrap items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
         {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
         <span>{badge}</span>
         {helper && <span className="font-medium text-white">{helper}</span>}
@@ -436,14 +436,14 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
       await navigator.clipboard.writeText(summary);
       toast.success('Resumo copiado');
     } catch {
-      toast.error('Nao foi possivel copiar o resumo');
+      toast.error('Não foi possível copiar o resumo');
     }
   }
 
   return (
     <>
       <DataCard title="Pedidos" subtitle="Pedidos salvos pelo cliente mobile e pelo totem." count={`${filteredOrders.length}/${orders.length} pedidos`}>
-        <div className="mb-4 grid gap-3 md:grid-cols-[180px_180px_220px_1fr]">
+        <div className="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[180px_180px_220px_minmax(0,1fr)]">
           <AdminTextInput type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
           <AdminSelect value={filters.origin} onChange={(event) => setFilters({ ...filters, origin: event.target.value })}>
             <option value="all">Todas as origens</option>
@@ -462,18 +462,18 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
         {filteredOrders.length === 0 ? <Feedback>Nenhum pedido encontrado para os filtros.</Feedback> : (
           <DataTable className="min-w-[960px]">
             <thead>
-              <tr><th className="px-4 py-3">Pedido</th><th>Cliente</th><th>Origem</th><th>Itens</th><th>Status</th><th>Criado em</th><th className="text-right">Total</th><th className="text-right">Acoes</th></tr>
+              <tr><th className="px-4 py-3">Pedido</th><th>Cliente</th><th>Origem</th><th>Itens</th><th>Status</th><th>Criado em</th><th className="text-right">Total</th><th className="text-right">Ações</th></tr>
             </thead>
             <tbody>
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="align-top">
                   <td className="px-4 py-4 font-black">#{order.id}</td>
-                  <td className="text-slate-200">{order.customer_name || `Usuario ${order.user_id}`}</td>
+                  <td className="max-w-52 truncate text-slate-200">{order.customer_name || `Usuário ${order.user_id}`}</td>
                   <td><Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge></td>
                   <td className="py-4">
                     <div className="flex max-w-sm flex-wrap gap-1">
                       {order.items.map((item) => (
-                        <span key={item.id} className="inline-flex rounded-gp-pill bg-white/10 px-2 py-1 text-xs font-bold text-slate-200">
+                        <span key={item.id} className="inline-flex max-w-full rounded-gp-pill bg-white/10 px-2 py-1 text-xs font-bold text-slate-200">
                           {item.quantity}x {productMap.get(item.product_id)?.name || `produto #${item.product_id}`}
                         </span>
                       ))}
@@ -487,7 +487,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                   <td className="text-slate-400">{new Date(order.created_at).toLocaleString('pt-BR')}</td>
                   <td className="pr-4 text-right font-black">{formatCurrency(order.total_amount)}</td>
                   <td className="pr-4 text-right">
-                    <div className="inline-flex gap-2">
+                    <div className="inline-flex flex-wrap justify-end gap-2">
                       <Button size="sm" variant="inverse" onClick={() => setSelectedOrderId(order.id)}><Eye size={14} /> Detalhe</Button>
                       <Button size="sm" variant="inverse" onClick={() => copySummary(order)}><Copy size={14} /> Copiar</Button>
                     </div>
@@ -514,10 +514,10 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
 
 function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
       <section className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto gp-panel p-5 text-white shadow-gp-modal">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
             <Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge>
             <h2 className="mt-3 text-2xl font-black">Pedido #{order.id}</h2>
             <p className="mt-1 flex items-center gap-2 text-sm text-slate-400"><Clock size={15} /> {new Date(order.created_at).toLocaleString('pt-BR')}</p>
@@ -526,11 +526,11 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <InfoBlock label="Cliente" value={order.customer_name || `Usuario ${order.user_id}`} />
+          <InfoBlock label="Cliente" value={order.customer_name || `Usuário ${order.user_id}`} />
           <InfoBlock label="Total" value={formatCurrency(order.total_amount)} />
-          <InfoBlock label="Pagamento" value={order.payment_method || 'Nao informado'} />
+          <InfoBlock label="Pagamento" value={order.payment_method || 'Não informado'} />
           <label className="rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
-            <span className="text-xs font-black uppercase text-slate-500">Status</span>
+            <span className="text-xs font-black uppercase text-slate-400">Status</span>
             <AdminSelect className="mt-2 w-full" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
               {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
             </AdminSelect>
@@ -541,12 +541,12 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
           <div className="border-b border-gp-border-inverse p-3 text-sm font-black text-slate-300">Itens</div>
           <div className="divide-y divide-gp-border-inverse">
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-4 p-3 text-sm">
-                <div>
-                  <strong>{productMap.get(item.product_id)?.name || `Produto #${item.product_id}`}</strong>
+              <div key={item.id} className="flex items-start justify-between gap-4 p-3 text-sm">
+                <div className="min-w-0">
+                  <strong className="break-words">{productMap.get(item.product_id)?.name || `Produto #${item.product_id}`}</strong>
                   <p className="mt-1 text-slate-400">{item.quantity} unidade(s) x {formatCurrency(item.unit_price)}</p>
                 </div>
-                <strong>{formatCurrency(item.total_price)}</strong>
+                <strong className="shrink-0">{formatCurrency(item.total_price)}</strong>
               </div>
             ))}
           </div>
@@ -563,9 +563,9 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
 
 function InfoBlock({ label, value }) {
   return (
-    <div className="rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
-      <span className="text-xs font-black uppercase text-slate-500">{label}</span>
-      <strong className="mt-2 block text-sm text-white">{value}</strong>
+    <div className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
+      <span className="text-xs font-black uppercase text-slate-400">{label}</span>
+      <strong className="mt-2 block break-words text-sm text-white">{value}</strong>
     </div>
   );
 }
@@ -611,27 +611,27 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
       <div className="flex flex-wrap items-center justify-between gap-3 gp-card p-4">
         <div>
           <h2 className="text-lg font-black">Produtos</h2>
-          <p className="mt-1 text-sm text-slate-400">Cardapio, variantes, imagem e disponibilidade.</p>
+          <p className="mt-1 text-sm text-slate-400">Cardápio, variantes, imagem e disponibilidade.</p>
         </div>
         <Button onClick={() => setProductModal({ product: null })}><Plus size={16} /> Novo produto</Button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <article key={product.id} className="overflow-hidden gp-card">
-            <div className="grid min-h-44 grid-cols-[150px_1fr]">
+          <article key={product.id} className="min-w-0 overflow-hidden gp-card">
+            <div className="grid min-h-44 sm:grid-cols-[150px_minmax(0,1fr)]">
               {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="h-full min-h-44 w-full object-cover" />
+                <img src={product.image_url} alt={product.name} className="h-44 w-full object-cover sm:h-full sm:min-h-44" />
               ) : (
-                <div className="flex h-full min-h-44 items-center justify-center bg-white/[0.03] text-xs font-black uppercase text-slate-500">Sem imagem</div>
+                <div className="flex h-full min-h-44 items-center justify-center bg-white/[0.03] text-xs font-black uppercase text-slate-400">Sem imagem</div>
               )}
-              <div className="p-4">
+              <div className="min-w-0 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="font-black">{product.name}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-400">{product.description || 'Sem descricao'}</p>
+                  <div className="min-w-0">
+                    <h2 className="line-clamp-2 break-words font-black">{product.name}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-400">{product.description || 'Sem descrição'}</p>
                   </div>
-                  <Badge variant={product.is_active ? 'success' : 'neutral'}>{product.is_active ? 'Ativo' : 'Inativo'}</Badge>
+                  <Badge className="shrink-0" variant={product.is_active ? 'success' : 'neutral'}>{product.is_active ? 'Ativo' : 'Inativo'}</Badge>
                 </div>
                 <strong className="mt-3 block text-xl">{formatCurrency(product.price)}</strong>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -644,11 +644,11 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
               </div>
             </div>
 
-            <div className="border-t border-gp-border-inverse p-4">
+            <div className="min-w-0 border-t border-gp-border-inverse p-4">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <h3 className="text-sm font-black text-slate-300">Variantes</h3>
-                <p className="mt-1 text-xs text-slate-500">{product.variants.length} opcoes cadastradas</p>
+                <p className="mt-1 text-xs text-slate-400">{product.variants.length} opções cadastradas</p>
               </div>
             </div>
 
@@ -661,9 +661,9 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                         <div key={variant.id} className="rounded-gp border border-gp-border-inverse bg-black/20 p-3">
                           <div className="grid gap-2 sm:grid-cols-2">
                             <AdminTextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
-                            <AdminTextInput placeholder="Codigo" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
-                            <AdminTextInput placeholder="Descricao" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
-                            <AdminTextInput placeholder="Preco" type="number" min="0" step="0.01" value={variantForm.price} onChange={(event) => updateVariantForm(variant.id, { price: event.target.value })} />
+                            <AdminTextInput placeholder="Código" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
+                            <AdminTextInput placeholder="Descrição" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
+                            <AdminTextInput placeholder="Preço" type="number" min="0" step="0.01" value={variantForm.price} onChange={(event) => updateVariantForm(variant.id, { price: event.target.value })} />
                           </div>
                           <div className="mt-3"><AdminCheckbox checked={variantForm.is_active} onChange={(event) => updateVariantForm(variant.id, { is_active: event.target.checked })} label="Variante ativa" /></div>
                           <div className="mt-3 flex justify-end gap-2">
@@ -680,12 +680,12 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
                     return (
                       <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-gp bg-black/20 p-3 text-sm">
-                        <div>
-                          <strong>{variant.name}</strong>
-                          <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preco base'}</span>
+                        <div className="min-w-0">
+                          <strong className="break-words">{variant.name}</strong>
+                          <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preço base'}</span>
                           <Badge className="ml-2" variant={variant.is_active ? 'success' : 'neutral'}>{variant.is_active ? 'Ativa' : 'Inativa'}</Badge>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex shrink-0 flex-wrap gap-2">
                           <Button size="sm" variant="inverse" onClick={() => startVariantEdit(product.id, variant)}>Editar</Button>
                           <Button size="sm" variant="danger" onClick={() => onDeleteVariant(product.id, variant.id)}>Desativar</Button>
                         </div>
@@ -701,7 +701,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                   {['name', 'code', 'description', 'price'].map((field) => (
                     <AdminTextInput
                       key={field}
-                      placeholder={{ name: 'Variante', code: 'Codigo', description: 'Descricao', price: 'Preco' }[field]}
+                      placeholder={{ name: 'Variante', code: 'Código', description: 'Descrição', price: 'Preço' }[field]}
                       type={field === 'price' ? 'number' : 'text'}
                       min={field === 'price' ? '0' : undefined}
                       step={field === 'price' ? '0.01' : undefined}
@@ -762,34 +762,34 @@ function ProductFormDialog({ product, onClose, onSave }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto gp-panel p-5 text-white shadow-gp-modal">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4">
+      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain gp-panel p-5 text-white shadow-gp-modal">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
             <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
             <h2 className="mt-3 text-2xl font-black">{product ? 'Editar produto' : 'Novo produto'}</h2>
           </div>
           <Button type="button" variant="inverse" onClick={onClose}>Fechar</Button>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-[220px_1fr]">
+        <div className="mt-5 grid gap-4 sm:grid-cols-[220px_minmax(0,1fr)]">
           <div>
             <div className="flex aspect-square items-center justify-center overflow-hidden rounded-gp border border-gp-border-inverse bg-black/20">
-              {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-500">Preview</span>}
+              {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-400">Preview</span>}
             </div>
             <AdminFileInput onChange={handleImageChange} />
           </div>
 
           <div className="space-y-3">
             <AdminTextInput placeholder="Nome" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
-            <AdminTextInput placeholder="Codigo" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
-            <AdminTextInput placeholder="Descricao" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-            <AdminTextInput placeholder="Preco" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
-            <AdminCheckbox checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} label="Produto ativo no cardapio" />
+            <AdminTextInput placeholder="Código" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
+            <AdminTextInput placeholder="Descrição" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
+            <AdminTextInput placeholder="Preço" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
+            <AdminCheckbox checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} label="Produto ativo no cardápio" />
           </div>
         </div>
 
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="mt-5 flex flex-wrap justify-end gap-3">
           <Button type="button" variant="inverse" onClick={onClose}>Cancelar</Button>
           <Button type="submit">Salvar produto</Button>
         </div>
@@ -811,8 +811,8 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
   });
 
   return (
-    <DataCard title="Estoque" subtitle="Controle por produto, variante, minimo e alerta operacional." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
-      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_190px_140px]">
+    <DataCard title="Estoque" subtitle="Controle por produto, variante, mínimo e alerta operacional." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
+      <div className="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_190px_140px]">
         <AdminTextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
         <AdminCheckbox checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} label="Baixo estoque" />
         <Button variant="inverse" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
@@ -821,7 +821,7 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
       {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
         <DataTable className="min-w-[760px]">
           <thead>
-            <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Minimo</th><th>Severidade</th><th className="text-right">Acao</th></tr>
+            <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Mínimo</th><th>Severidade</th><th className="text-right">Ação</th></tr>
           </thead>
           <tbody>
             {filteredInventory.map((item) => {
@@ -831,11 +831,11 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
               const variant = product?.variants?.find((productVariant) => productVariant.id === item.variant_id);
               return (
                 <tr key={item.id}>
-                  <td className="px-4 py-4 font-black">{product?.name || `Produto #${item.product_id}`}</td>
-                  <td className="text-slate-300">{variant?.name || (item.variant_id ? `Variante #${item.variant_id}` : 'Produto base')}</td>
+                  <td className="max-w-64 truncate px-4 py-4 font-black">{product?.name || `Produto #${item.product_id}`}</td>
+                  <td className="max-w-52 truncate text-slate-300">{variant?.name || (item.variant_id ? `Variante #${item.variant_id}` : 'Produto base')}</td>
                   <td className="py-4"><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
                   <td><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
-                  <td><Badge variant={isLow ? 'danger' : 'success'}>{isCritical ? 'Critico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
+                  <td><Badge variant={isLow ? 'danger' : 'success'}>{isCritical ? 'Crítico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
                   <td className="pr-4 text-right"><Button size="sm" onClick={() => onSaveInventory(item.id)}>Salvar</Button></td>
                 </tr>
               );
@@ -849,11 +849,11 @@ function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveIn
 
 function AuditPanel({ auditLogs }) {
   return (
-    <DataCard title="Auditoria" subtitle="Acoes administrativas e eventos criticos registrados." count={`${auditLogs.length} logs`}>
+    <DataCard title="Auditoria" subtitle="Ações administrativas e eventos críticos registrados." count={`${auditLogs.length} logs`}>
       {auditLogs.length === 0 ? <Feedback>Nenhum log registrado.</Feedback> : (
         <DataTable className="min-w-[720px]">
           <thead>
-            <tr><th className="px-4 py-3">Acao</th><th>Entidade</th><th>Usuario</th><th>Data</th></tr>
+            <tr><th className="px-4 py-3">Ação</th><th>Entidade</th><th>Usuário</th><th>Data</th></tr>
           </thead>
           <tbody>
             {auditLogs.map((log) => (
@@ -881,22 +881,22 @@ function CustomersPanel({ customers }) {
 
   return (
     <>
-      <DataCard title="Clientes" subtitle="Contas cadastradas, historico resumido e dados sensiveis mascarados." count={`${filteredCustomers.length}/${customers.length} clientes`}>
-        <div className="mb-4 grid gap-3 md:grid-cols-[1fr_140px]">
+      <DataCard title="Clientes" subtitle="Contas cadastradas, histórico resumido e dados sensíveis mascarados." count={`${filteredCustomers.length}/${customers.length} clientes`}>
+        <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_140px]">
           <AdminTextInput placeholder="Buscar por nome, email ou CPF mascarado" value={search} onChange={(event) => setSearch(event.target.value)} />
           <Button variant="inverse" onClick={() => setSearch('')}>Limpar</Button>
         </div>
         {filteredCustomers.length === 0 ? <Feedback>Nenhum cliente encontrado.</Feedback> : (
           <DataTable className="min-w-[860px]">
             <thead>
-              <tr><th className="px-4 py-3">Cliente</th><th>Email</th><th>CPF</th><th>Pedidos</th><th>Ultimo pedido</th><th className="text-right">Total gasto</th><th className="text-right">Acao</th></tr>
+              <tr><th className="px-4 py-3">Cliente</th><th>Email</th><th>CPF</th><th>Pedidos</th><th>Último pedido</th><th className="text-right">Total gasto</th><th className="text-right">Ação</th></tr>
             </thead>
             <tbody>
               {filteredCustomers.map((customer) => (
                 <tr key={customer.id}>
-                  <td className="px-4 py-4 font-black">{customer.full_name}</td>
-                  <td className="text-slate-300">{customer.email}</td>
-                  <td><Badge variant="neutral">{customer.cpf_masked || 'Nao informado'}</Badge></td>
+                  <td className="max-w-60 truncate px-4 py-4 font-black">{customer.full_name}</td>
+                  <td className="max-w-64 truncate text-slate-300">{customer.email}</td>
+                  <td><Badge variant="neutral">{customer.cpf_masked || 'Não informado'}</Badge></td>
                   <td>{customer.total_orders}</td>
                   <td className="text-slate-400">{customer.last_order_at ? new Date(customer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'}</td>
                   <td className="pr-4 text-right font-black">{formatCurrency(customer.total_spent)}</td>
@@ -911,21 +911,21 @@ function CustomersPanel({ customers }) {
       </DataCard>
 
       {selectedCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/70 p-4">
-          <section className="w-full max-w-md gp-panel p-5 text-white shadow-gp-modal">
-            <div className="flex items-start justify-between gap-4">
-              <div>
+        <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
+          <section className="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain gp-panel p-5 text-white shadow-gp-modal">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0">
                 <Badge variant="neutral">Cliente</Badge>
-                <h2 className="mt-3 text-2xl font-black">{selectedCustomer.full_name}</h2>
-                <p className="mt-1 text-sm text-slate-400">{selectedCustomer.email}</p>
+                <h2 className="mt-3 break-words text-2xl font-black">{selectedCustomer.full_name}</h2>
+                <p className="mt-1 break-words text-sm text-slate-400">{selectedCustomer.email}</p>
               </div>
               <Button variant="inverse" onClick={() => setSelectedCustomer(null)}>Fechar</Button>
             </div>
             <div className="mt-5 grid gap-3">
-              <InfoBlock label="CPF" value={selectedCustomer.cpf_masked || 'Nao informado'} />
+              <InfoBlock label="CPF" value={selectedCustomer.cpf_masked || 'Não informado'} />
               <InfoBlock label="Pedidos" value={selectedCustomer.total_orders} />
               <InfoBlock label="Total gasto" value={formatCurrency(selectedCustomer.total_spent)} />
-              <InfoBlock label="Ultimo pedido" value={selectedCustomer.last_order_at ? new Date(selectedCustomer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'} />
+              <InfoBlock label="Último pedido" value={selectedCustomer.last_order_at ? new Date(selectedCustomer.last_order_at).toLocaleString('pt-BR') : 'Sem pedidos'} />
             </div>
           </section>
         </div>
@@ -939,7 +939,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
     establishment_name: settings?.establishment_name || 'Gym Prime',
     whatsapp_phone: settings?.whatsapp_phone || '',
     menu_is_open: settings?.menu_is_open ?? true,
-    totem_message: settings?.totem_message || 'Finalize seu pedido e retire no balcao.',
+    totem_message: settings?.totem_message || 'Finalize seu pedido e retire no balcão.',
   });
 
   async function submitSettings(event) {
@@ -955,40 +955,40 @@ function SettingsPanel({ settings, onSaveSettings }) {
   const preview = `Novo pedido\nCliente: Cliente Exemplo\nItens:\n- 1x Coca-Cola: R$ 7.00\nTotal: R$ 7.00`;
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
-      <form onSubmit={submitSettings} className="gp-card p-5">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-black">Configuracoes</h2>
+    <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,360px)]">
+      <form onSubmit={submitSettings} className="min-w-0 gp-card p-5">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-black">Configurações</h2>
             <p className="mt-1 text-sm text-slate-400">Dados operacionais persistidos no backend.</p>
           </div>
-          <Badge variant={form.menu_is_open ? 'success' : 'danger'}>{form.menu_is_open ? 'Cardapio aberto' : 'Cardapio fechado'}</Badge>
+          <Badge variant={form.menu_is_open ? 'success' : 'danger'}>{form.menu_is_open ? 'Cardápio aberto' : 'Cardápio fechado'}</Badge>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <label>
-            <span className="mb-1 block text-xs font-black uppercase text-slate-500">Nome exibido</span>
+            <span className="mb-1 block text-xs font-black uppercase text-slate-400">Nome exibido</span>
             <AdminTextInput value={form.establishment_name} onChange={(event) => setForm({ ...form, establishment_name: event.target.value })} required />
           </label>
           <label>
-            <span className="mb-1 block text-xs font-black uppercase text-slate-500">WhatsApp</span>
+            <span className="mb-1 block text-xs font-black uppercase text-slate-400">WhatsApp</span>
             <AdminTextInput placeholder="5511999999999" value={form.whatsapp_phone} onChange={(event) => setForm({ ...form, whatsapp_phone: event.target.value })} />
           </label>
           <label className="md:col-span-2">
-            <span className="mb-1 block text-xs font-black uppercase text-slate-500">Mensagem do totem</span>
+            <span className="mb-1 block text-xs font-black uppercase text-slate-400">Mensagem do totem</span>
             <AdminTextInput value={form.totem_message} onChange={(event) => setForm({ ...form, totem_message: event.target.value })} required />
           </label>
-          <AdminCheckbox checked={form.menu_is_open} onChange={(event) => setForm({ ...form, menu_is_open: event.target.checked })} label="Cardapio aberto para Cliente e Totem" />
+          <AdminCheckbox checked={form.menu_is_open} onChange={(event) => setForm({ ...form, menu_is_open: event.target.checked })} label="Cardápio aberto para Cliente e Totem" />
         </div>
-        <div className="mt-5 flex justify-end">
-          <Button type="submit">Salvar configuracoes</Button>
+        <div className="mt-5 flex flex-wrap justify-end">
+          <Button type="submit">Salvar configurações</Button>
         </div>
       </form>
 
-      <aside className="gp-card p-5">
+      <aside className="min-w-0 gp-card p-5">
         <Badge variant="neutral">Preview</Badge>
         <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
-        <pre className="mt-4 whitespace-pre-wrap rounded-gp bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
-        <div className="mt-4 rounded-gp bg-black/20 p-4 text-sm text-slate-300">
+        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-gp bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
+        <div className="mt-4 break-words rounded-gp bg-black/20 p-4 text-sm text-slate-300">
           {form.totem_message}
         </div>
       </aside>
@@ -998,7 +998,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
-    <section className="overflow-hidden gp-card">
+    <section className="min-w-0 overflow-hidden gp-card">
       <PanelHeader title={title} subtitle={subtitle} action={<Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>} />
       <div className="overflow-x-auto p-4">{children}</div>
     </section>
@@ -1013,7 +1013,7 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
 
   return (
-    <section className="rounded-gp border border-gp-border-inverse bg-gp-bg-field/90 p-4">
+    <section className="min-w-0 rounded-gp border border-gp-border-inverse bg-gp-bg-field/90 p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-sm font-black">Resumo do dia</h2>
         <ChevronDown size={17} className="text-slate-300" />
@@ -1027,7 +1027,7 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
       ].map(([label, value]) => (
         <div key={label} className="border-t border-gp-border-inverse py-3 first:border-t-0 first:pt-0">
           <span className="block text-xs font-medium text-slate-300">{label}</span>
-          <strong className="mt-1 block text-lg font-black text-gp-lime">{value}</strong>
+          <strong className="mt-1 block break-words text-lg font-black text-gp-lime">{value}</strong>
         </div>
       ))}
     </section>
@@ -1059,7 +1059,7 @@ export function AdminPage() {
       await gymPrimeApi.logout();
       setUser(null);
       setAccessDeniedStatus(null);
-      toast.success('Sessao encerrada');
+      toast.success('Sessão encerrada');
     } catch (error) {
       toast.error(error.message);
     }
@@ -1091,7 +1091,7 @@ export function AdminPage() {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
       setAccessDeniedStatus(error.status);
       if (error.status === 403) {
-        setErrorDialog('Permissao de admin necessaria. Este acesso foi bloqueado.');
+        setErrorDialog('Permissão de admin necessária. Este acesso foi bloqueado.');
       }
       return;
     }
@@ -1123,7 +1123,7 @@ export function AdminPage() {
         }
         setAnalytics(null);
         setSalesSeries(null);
-        toast.error(`Analytics indisponivel: ${error.message}`);
+        toast.error(`Analytics indisponível: ${error.message}`);
       }
       setProducts(productData);
       setOrders(orderData);
@@ -1232,7 +1232,7 @@ export function AdminPage() {
     try {
       const updatedSettings = await gymPrimeApi.updateAdminSettings(payload);
       setSettings(updatedSettings);
-      toast.success('Configuracoes salvas');
+      toast.success('Configurações salvas');
     } catch (error) {
       handleAdminError(error);
     }
@@ -1259,8 +1259,8 @@ export function AdminPage() {
   const activeTabLabel = ADMIN_TABS.find((item) => item.key === tab)?.label || 'Dashboard';
 
   return (
-    <main className="grid min-h-screen grid-cols-[228px_1fr] bg-gp-bg-main text-white">
-      <aside className="flex min-h-0 flex-col border-r border-gp-border-inverse bg-gp-bg-main p-5 text-white">
+    <main className="grid h-screen min-h-0 grid-cols-[210px_minmax(0,1fr)] overflow-hidden bg-gp-bg-main text-white xl:grid-cols-[228px_minmax(0,1fr)]">
+      <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main p-4 text-white xl:p-5">
         <BrandMark label="Gym Prime" tone="dark" />
         <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-300">ADMIN</span>
         <nav className="mt-8 space-y-2">
@@ -1268,11 +1268,11 @@ export function AdminPage() {
             <button
               key={key}
               type="button"
-              className={`flex min-h-12 w-full items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'bg-gp-lime text-gp-text-inverse shadow-gp-glow' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
+              className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'bg-gp-lime text-gp-text-inverse shadow-gp-glow' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
               onClick={() => setTab(key)}
             >
-              {icon}
-              {label}
+              <span className="shrink-0">{icon}</span>
+              <span className="truncate">{label}</span>
             </button>
           ))}
         </nav>
@@ -1281,22 +1281,22 @@ export function AdminPage() {
           <Link to={APP_ROUTES.totem} className="flex min-h-10 items-center justify-center rounded-gp-sm border border-gp-border-inverse text-xs font-black text-slate-300 hover:bg-white/10 hover:text-white">
             Abrir Totem
           </Link>
-          <div className="text-xs font-medium leading-6 text-slate-500">
+          <div className="text-xs font-medium leading-6 text-slate-400">
             <span className="block">(c) 2026 Gym Prime</span>
             <span className="block">v1.0.0</span>
           </div>
         </div>
       </aside>
 
-      <section className="min-w-0 bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.05),transparent_34%)] p-7">
+      <section className="min-h-0 min-w-0 overflow-y-auto bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.05),transparent_34%)] p-4 xl:p-7">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-black leading-none">{activeTabLabel}</h1>
-            {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operacao local da lanchonete Gym Prime.</p>}
+          <div className="min-w-0">
+            <h1 className="truncate text-3xl font-black leading-none xl:text-4xl">{activeTabLabel}</h1>
+            {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operação local da lanchonete Gym Prime.</p>}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
-              <span className="h-3 w-3 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
+              <span className="h-3 w-3 shrink-0 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
               Servidor local online
             </div>
             <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
@@ -1340,7 +1340,7 @@ export function AdminPage() {
         <ConfirmDialog
           danger
           title="Excluir produto?"
-          message={`${productToDelete.name} sera removido do cardapio ativo, mantendo pedidos historicos.`}
+          message={`${productToDelete.name} será removido do cardápio ativo, mantendo pedidos históricos.`}
           confirmLabel="Excluir"
           onCancel={() => setProductToDelete(null)}
           onConfirm={() => deleteProduct(productToDelete)}

@@ -2,10 +2,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const STATUS_FALLBACK_MESSAGES = {
   400: 'Revise os dados enviados',
-  401: 'Sessao expirada. Entre novamente',
-  403: 'Voce nao tem permissao para esta acao',
-  404: 'Registro nao encontrado',
-  409: 'Conflito com dados ja cadastrados',
+  401: 'Sessão expirada. Entre novamente',
+  403: 'Você não tem permissão para esta ação',
+  404: 'Registro não encontrado',
+  409: 'Conflito com dados já cadastrados',
   500: 'Erro interno do servidor',
 };
 

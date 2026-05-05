@@ -18,15 +18,15 @@ const buttonSizes = {
 
 const badgeVariants = {
   neutral: 'bg-slate-100 text-slate-700',
-  success: 'bg-gp-success-soft text-gp-success',
-  warning: 'bg-gp-warning-soft text-gp-warning',
-  danger: 'bg-gp-danger-soft text-gp-danger',
+  success: 'bg-emerald-100 text-emerald-800',
+  warning: 'bg-amber-100 text-amber-800',
+  danger: 'bg-red-100 text-red-700',
 };
 
 const feedbackVariants = {
-  muted: 'border-gp-border bg-white text-slate-500',
-  success: 'border-gp-success/25 bg-gp-success-soft text-gp-text-inverse',
-  danger: 'border-gp-danger/25 bg-gp-danger-soft text-gp-danger',
+  muted: 'border-gp-border bg-white text-slate-700',
+  success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+  danger: 'border-red-200 bg-red-50 text-red-800',
 };
 
 const cardTones = {
@@ -47,7 +47,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-gp font-gp-black transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none',
+        'inline-flex min-w-0 items-center justify-center gap-2 rounded-gp font-gp-black transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700 disabled:shadow-none',
         buttonVariants[variant],
         buttonSizes[size],
         className,
@@ -63,7 +63,7 @@ export function TextInput({ className = '', ...props }) {
   return (
     <input
       className={cn(
-        'gp-field w-full px-3 py-3',
+        'gp-field min-w-0 w-full px-3 py-3',
         className,
       )}
       {...props}
@@ -84,7 +84,7 @@ export function Card({ as = 'div', children, className = '', tone = 'light', ...
 
 export function Badge({ children, className = '', variant = 'neutral' }) {
   return (
-    <span className={cn('inline-flex min-h-7 items-center gap-1.5 rounded-gp-pill px-3 text-gp-xs font-gp-black', badgeVariants[variant], className)}>
+    <span className={cn('inline-flex min-h-7 max-w-full items-center gap-1.5 rounded-gp-pill px-3 text-gp-xs font-gp-black', badgeVariants[variant], className)}>
       {children}
     </span>
   );
@@ -100,8 +100,8 @@ export function Feedback({ children, className = '', variant = 'muted' }) {
 
 export function Dialog({ children, className = '', as = 'section', ...props }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-gp-bg-main/70 p-4 sm:items-center">
-      <Card as={as} className={cn('w-full max-w-md p-5 shadow-gp-modal', className)} {...props}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-main/70 p-4 sm:items-center">
+      <Card as={as} className={cn('max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-gp-modal', className)} {...props}>
         {children}
       </Card>
     </div>
