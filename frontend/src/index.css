@@ -10,16 +10,33 @@
     --gp-bg-panel-rgb: 16 18 20;
     --gp-bg-card: #121415;
     --gp-bg-card-rgb: 18 20 21;
+    --gp-bg-elevated: #171A1C;
+    --gp-bg-elevated-rgb: 23 26 28;
     --gp-bg-field: #0B0D0E;
     --gp-bg-field-rgb: 11 13 14;
     --gp-bg-main-gradient:
-      radial-gradient(circle at 18% -12%, rgb(var(--gp-lime-rgb) / 0.075), transparent 30%),
-      radial-gradient(circle at 84% 8%, rgba(34, 197, 94, 0.055), transparent 28%),
-      linear-gradient(180deg, #070808 0%, var(--gp-bg-main) 44%, #030404 100%);
+      radial-gradient(circle at 16% -14%, rgb(var(--gp-lime-rgb) / 0.09), transparent 31%),
+      radial-gradient(circle at 88% 18%, rgb(var(--gp-purple-rgb) / 0.075), transparent 32%),
+      radial-gradient(circle at 86% 4%, rgba(34, 197, 94, 0.06), transparent 29%),
+      radial-gradient(circle at 50% 108%, rgba(255, 255, 255, 0.035), transparent 34%),
+      linear-gradient(180deg, #070909 0%, var(--gp-bg-main) 46%, #030404 100%);
     --gp-surface-panel:
-      linear-gradient(180deg, rgb(var(--gp-bg-panel-rgb) / 0.98) 0%, rgb(var(--gp-bg-card-rgb) / 0.92) 100%);
+      linear-gradient(180deg, rgb(var(--gp-bg-panel-rgb) / 0.98) 0%, rgb(var(--gp-bg-card-rgb) / 0.93) 100%);
     --gp-surface-card:
-      linear-gradient(180deg, rgba(24, 27, 28, 0.94) 0%, rgb(var(--gp-bg-card-rgb) / 0.88) 100%);
+      linear-gradient(180deg, rgba(24, 27, 28, 0.95) 0%, rgb(var(--gp-bg-card-rgb) / 0.9) 100%);
+    --gp-surface-premium:
+      radial-gradient(circle at 16% 0%, rgb(var(--gp-lime-rgb) / 0.085), transparent 32%),
+      radial-gradient(circle at 92% 12%, rgb(var(--gp-purple-rgb) / 0.075), transparent 34%),
+      linear-gradient(180deg, rgb(var(--gp-bg-elevated-rgb) / 0.98) 0%, rgb(var(--gp-bg-card-rgb) / 0.94) 100%);
+    --gp-surface-active:
+      linear-gradient(135deg, rgb(var(--gp-lime-rgb) / 0.98) 0%, #9BEE25 100%);
+    --gp-surface-bottom-bar:
+      radial-gradient(circle at 50% -22%, rgb(var(--gp-lime-rgb) / 0.12), transparent 42%),
+      linear-gradient(180deg, rgb(var(--gp-bg-elevated-rgb) / 0.96) 0%, rgb(var(--gp-bg-panel-rgb) / 0.98) 100%);
+    --gp-surface-promo:
+      radial-gradient(circle at 18% 18%, rgb(var(--gp-lime-rgb) / 0.18), transparent 38%),
+      radial-gradient(circle at 92% 12%, rgb(var(--gp-purple-rgb) / 0.16), transparent 40%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.035) 100%);
     --gp-surface-field:
       linear-gradient(180deg, rgba(15, 18, 19, 0.96) 0%, var(--gp-bg-field) 100%);
     --gp-surface-light:
@@ -41,6 +58,12 @@
     --gp-lime: #B6FF3B;
     --gp-lime-rgb: 182 255 59;
     --gp-lime-soft: rgba(182, 255, 59, 0.14);
+    --gp-purple: #7C3AED;
+    --gp-purple-rgb: 124 58 237;
+    --gp-purple-deep: #2E1065;
+    --gp-purple-deep-rgb: 46 16 101;
+    --gp-purple-soft: rgba(124, 58, 237, 0.12);
+    --gp-purple-glow: 0 0 34px rgba(124, 58, 237, 0.14);
     --gp-danger: #EF4444;
     --gp-danger-rgb: 239 68 68;
     --gp-danger-soft: rgba(239, 68, 68, 0.12);
@@ -58,11 +81,13 @@
 
     --gp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.12);
     --gp-shadow-card: 0 18px 38px rgba(0, 0, 0, 0.24);
+    --gp-shadow-card-hover: 0 22px 46px rgba(0, 0, 0, 0.26);
     --gp-shadow-panel: 0 22px 54px rgba(0, 0, 0, 0.28);
     --gp-shadow-modal: 0 28px 72px rgba(0, 0, 0, 0.44);
-    --gp-shadow-glow: 0 0 26px rgba(182, 255, 59, 0.22);
-    --gp-shadow-lime-action: 0 10px 24px rgba(182, 255, 59, 0.18);
-    --gp-shadow-focus: 0 0 0 3px rgb(var(--gp-lime-rgb) / 0.20);
+    --gp-shadow-bottom-bar: 0 -22px 48px rgba(0, 0, 0, 0.36);
+    --gp-shadow-glow: 0 0 24px rgba(182, 255, 59, 0.20);
+    --gp-shadow-lime-action: 0 10px 24px rgba(182, 255, 59, 0.16);
+    --gp-shadow-focus: 0 0 0 3px rgb(var(--gp-lime-rgb) / 0.18);
 
     --gp-font-xs: 0.75rem;
     --gp-font-sm: 0.875rem;
@@ -125,11 +150,31 @@
   }
 
   .gp-card-light {
-    border: 1px solid var(--gp-border);
+    border: 1px solid rgba(148, 163, 184, 0.24);
     border-radius: var(--gp-radius-lg);
     background: var(--gp-surface-light);
     color: var(--gp-text-inverse);
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  }
+
+  .gp-product-card-content {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 62%, rgba(241, 245, 249, 0.96) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(15, 23, 42, 0.035);
+  }
+
+  .gp-product-card-title {
+    color: #0f172a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+
+  .gp-product-card-price {
+    color: #101214;
+    text-shadow: 0 0 18px rgb(var(--gp-lime-rgb) / 0.10);
+  }
+
+  .gp-product-card-actions {
+    border-top: 1px solid rgba(15, 23, 42, 0.065);
   }
 
   .gp-field {
@@ -186,6 +231,158 @@
     color: #64748b;
   }
 
+  .gp-surface-premium {
+    border: 1px solid var(--gp-border-inverse);
+    border-radius: var(--gp-radius-lg);
+    background: var(--gp-surface-premium);
+    box-shadow: var(--gp-shadow-panel), var(--gp-purple-glow), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  }
+
+  .gp-card-hover {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .gp-card-hover:hover {
+    border-color: rgba(148, 163, 184, 0.34);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  }
+
+  .gp-active-item {
+    border: 1px solid rgb(var(--gp-lime-rgb) / 0.58);
+    background: var(--gp-surface-active);
+    color: var(--gp-text-inverse);
+    box-shadow: var(--gp-shadow-lime-action);
+  }
+
+  .gp-primary-cta:not(:disabled) {
+    border-color: rgb(var(--gp-lime-rgb) / 0.56);
+    box-shadow:
+      var(--gp-shadow-lime-action),
+      inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  }
+
+  .gp-primary-cta:not(:disabled):hover,
+  .gp-primary-cta:not(:disabled):focus-visible {
+    border-color: rgb(var(--gp-lime-rgb) / 0.72);
+    box-shadow:
+      0 12px 28px rgba(182, 255, 59, 0.20),
+      var(--gp-shadow-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .gp-primary-cta:not(:disabled):active {
+    box-shadow:
+      0 6px 16px rgba(182, 255, 59, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  .gp-bottom-bar {
+    border-top: 1px solid var(--gp-border-inverse);
+    background: var(--gp-surface-bottom-bar);
+    box-shadow: var(--gp-shadow-bottom-bar), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+    backdrop-filter: blur(16px);
+  }
+
+  .gp-promo-card {
+    border: 1px solid rgb(var(--gp-purple-rgb) / 0.24);
+    border-radius: var(--gp-radius-lg);
+    background: var(--gp-surface-promo);
+    box-shadow: var(--gp-shadow-card), 0 0 30px rgb(var(--gp-purple-rgb) / 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.075);
+  }
+
+  .gp-section-header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.875rem;
+    border-bottom: 1px solid var(--gp-border-inverse);
+  }
+
+  .gp-category-pill {
+    border: 1px solid var(--gp-border-inverse);
+    border-radius: var(--gp-radius-pill);
+    background: rgba(255, 255, 255, 0.075);
+    color: var(--gp-text-primary);
+    box-shadow: var(--gp-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .gp-category-pill:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .gp-metric-card {
+    border: 1px solid var(--gp-border-inverse);
+    border-radius: var(--gp-radius-lg);
+    background:
+      radial-gradient(circle at 92% 0%, rgb(var(--gp-lime-rgb) / 0.08), transparent 34%),
+      var(--gp-surface-card);
+    box-shadow: var(--gp-shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  }
+
+  .gp-operational-status {
+    border: 1px solid rgb(var(--gp-lime-rgb) / 0.22);
+    border-radius: var(--gp-radius-pill);
+    background: rgb(var(--gp-lime-rgb) / 0.095);
+    color: var(--gp-lime);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  }
+
+  .gp-product-image {
+    background:
+      radial-gradient(circle at 26% 18%, rgb(var(--gp-lime-rgb) / 0.10), transparent 34%),
+      linear-gradient(145deg, rgb(var(--gp-bg-elevated-rgb) / 0.98), rgb(var(--gp-bg-card-rgb) / 0.98));
+  }
+
+  .gp-price-summary {
+    border: 1px solid var(--gp-border-inverse);
+    background:
+      radial-gradient(circle at 92% 0%, rgb(var(--gp-lime-rgb) / 0.08), transparent 34%),
+      linear-gradient(180deg, rgb(var(--gp-bg-elevated-rgb) / 0.98), rgb(var(--gp-bg-panel-rgb) / 0.98));
+  }
+
+  .gp-totem-total {
+    border-color: rgb(var(--gp-lime-rgb) / 0.30);
+    background:
+      radial-gradient(circle at 92% 0%, rgb(var(--gp-lime-rgb) / 0.18), transparent 34%),
+      linear-gradient(180deg, #ffffff 0%, #eef5e9 100%);
+    color: var(--gp-text-inverse);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  .gp-totem-total strong {
+    color: #050606;
+    text-shadow: 0 0 18px rgb(var(--gp-lime-rgb) / 0.18);
+  }
+
+  .gp-scrollbar-soft {
+    scrollbar-color: rgb(var(--gp-lime-rgb) / 0.38) transparent;
+    scrollbar-width: thin;
+  }
+
+  .gp-scrollbar-soft::-webkit-scrollbar {
+    height: 0.45rem;
+    width: 0.45rem;
+  }
+
+  .gp-scrollbar-soft::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .gp-scrollbar-soft::-webkit-scrollbar-thumb {
+    border-radius: var(--gp-radius-pill);
+    background: rgb(var(--gp-lime-rgb) / 0.32);
+  }
+
+  .gp-scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .gp-scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .gp-table {
     width: 100%;
     border-collapse: collapse;
@@ -194,8 +391,8 @@
   }
 
   .gp-table thead {
-    background: rgba(255, 255, 255, 0.045);
-    color: var(--gp-text-muted);
+    background: rgba(255, 255, 255, 0.055);
+    color: var(--gp-text-secondary);
     font-size: var(--gp-font-xs);
     font-weight: var(--gp-weight-black);
     text-transform: uppercase;
@@ -207,6 +404,11 @@
 
   .gp-table tbody tr {
     border-top: 1px solid var(--gp-border-inverse);
+    transition: background-color 140ms ease;
+  }
+
+  .gp-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.028);
   }
 
   .gp-table th,

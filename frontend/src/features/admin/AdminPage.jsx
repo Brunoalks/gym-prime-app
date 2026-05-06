@@ -36,13 +36,13 @@ const SALES_PERIOD_OPTIONS = [
   { value: 'month', label: 'Por mês' },
 ];
 
-const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 min-w-0 rounded-gp px-3 text-gp-sm font-gp-bold';
+const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 min-w-0 rounded-gp px-3 text-gp-sm font-gp-bold shadow-gp-sm';
 
 const STATUS_STYLES = {
-  pending: 'border-gp-lime/50 bg-gp-lime/10 text-gp-lime',
-  preparing: 'border-sky-400/50 bg-sky-400/10 text-sky-300',
-  ready: 'border-gp-border-inverse bg-white/10 text-gp-text-secondary',
-  completed: 'border-gp-lime/50 bg-gp-lime/10 text-gp-lime',
+  pending: 'border-gp-lime/45 bg-gp-lime/10 text-gp-lime',
+  preparing: 'border-sky-400/45 bg-sky-400/10 text-sky-300',
+  ready: 'border-white/18 bg-white/[0.075] text-gp-text-secondary',
+  completed: 'border-gp-lime/45 bg-gp-lime/10 text-gp-lime',
   canceled: 'border-gp-danger/40 bg-gp-danger-soft text-gp-danger',
 };
 
@@ -74,7 +74,7 @@ function AdminTextInput({ className = '', ...props }) {
 
 function AdminCheckbox({ checked, onChange, label }) {
   return (
-    <label className="flex min-h-11 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-3 text-gp-sm font-gp-bold text-gp-text-secondary">
+    <label className="flex min-h-11 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-3 text-gp-sm font-gp-bold text-gp-text-secondary shadow-gp-sm">
       <span className={`flex h-5 w-5 items-center justify-center rounded-gp-sm border ${checked ? 'border-gp-lime bg-gp-lime text-gp-text-inverse' : 'border-white/20 bg-white/5'}`}>
         {checked && <span className="h-2 w-2 rounded-gp-sm bg-gp-text-inverse" />}
       </span>
@@ -86,7 +86,7 @@ function AdminCheckbox({ checked, onChange, label }) {
 
 function AdminFileInput({ onChange }) {
   return (
-    <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-gp border border-dashed border-white/20 bg-gp-bg-field px-3 text-gp-sm font-gp-black text-gp-text-secondary transition hover:border-gp-lime/60 hover:text-gp-text-primary">
+    <label className="mt-3 flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-gp border border-dashed border-white/20 bg-white/[0.055] px-3 text-gp-sm font-gp-black text-gp-text-secondary shadow-gp-sm transition hover:border-gp-lime/60 hover:text-gp-text-primary">
       <FileImage size={17} />
       Selecionar imagem
       <input type="file" accept="image/*" onChange={onChange} className="sr-only" />
@@ -156,7 +156,7 @@ function AdminLogin({ onLogin }) {
 
   return (
     <main className="gp-app-bg flex min-h-screen items-center justify-center p-5 text-white">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 gp-panel p-6 text-white shadow-gp-modal">
+      <form onSubmit={handleSubmit} className="gp-surface-premium w-full max-w-md space-y-4 p-6 text-white shadow-gp-modal">
         <BrandMark label="Gym Prime" tone="dark" />
         <div>
           <h1 className="text-2xl font-black">Entrar no admin</h1>
@@ -173,7 +173,7 @@ function AdminLogin({ onLogin }) {
 function AccessDenied({ status, onTryLogin }) {
   return (
     <main className="gp-app-bg flex min-h-screen items-center justify-center p-5">
-      <section className="max-w-md gp-panel p-6 text-center text-white shadow-gp-modal">
+      <section className="gp-surface-premium max-w-md p-6 text-center text-white shadow-gp-modal">
         <Badge variant="danger">{status === 403 ? '403' : '401'}</Badge>
         <h1 className="mt-3 text-2xl font-black">Acesso negado</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -234,7 +234,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
       </div>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,430px)]">
-        <section className="min-w-0 overflow-hidden gp-card">
+        <section className="gp-surface-premium min-w-0 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse px-5 py-4">
             <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><ClipboardList className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Pedidos recentes</span></h2>
             <Button size="sm" variant="inverse" onClick={() => setTab('orders')}>Ver todos</Button>
@@ -272,7 +272,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
         </section>
 
         <div className="min-w-0 space-y-4">
-          <section className="min-w-0 gp-card p-4">
+          <section className="gp-surface-premium min-w-0 p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
               <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><AlertTriangle className="shrink-0 text-amber-400" size={20} /> <span className="truncate">Estoque baixo</span></h2>
               <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300" onClick={() => setTab('inventory')}>Ver estoque</button>
@@ -292,7 +292,7 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
             )}
           </section>
 
-          <section className="min-w-0 gp-card p-4">
+          <section className="gp-surface-premium min-w-0 p-4">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
               <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Produtos mais vendidos</span></h2>
               <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatório</button>
@@ -354,7 +354,7 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
   const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="min-w-0 overflow-hidden gp-card p-4">
+    <section className="gp-surface-premium min-w-0 overflow-hidden p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Evolução das vendas</span></h2>
@@ -364,7 +364,7 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
           {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </AdminSelect>
       </div>
-      <div className="relative h-64 rounded-gp bg-black/25 px-4 pb-8 pl-14 pt-5">
+      <div className="relative h-64 rounded-gp border border-gp-border-inverse bg-black/25 px-4 pb-8 pl-14 pt-5 shadow-gp-sm">
         <div className="absolute bottom-8 left-4 top-5 flex flex-col-reverse justify-between text-xs font-bold leading-none text-slate-400">
           {yAxisValues.slice().reverse().map((value) => <span key={value}>{formatAxisValue(value)}</span>)}
         </div>
@@ -400,14 +400,14 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
 
 function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="relative min-w-0 overflow-hidden gp-card p-5">
+    <section className="gp-metric-card relative min-w-0 overflow-hidden p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-gp border bg-black/20 ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-gp border bg-black/20 shadow-gp-sm ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
           {icon}
         </div>
         <Sparkline danger={danger} />
       </div>
-      <p className="mt-4 text-sm font-bold text-slate-300">{title}</p>
+      <p className="mt-4 text-sm font-bold text-gp-text-secondary">{title}</p>
       <strong className="mt-2 block break-words text-2xl font-black text-white 2xl:text-3xl">{value}</strong>
       <div className={`mt-4 flex flex-wrap items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
         {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
@@ -515,7 +515,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
 function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-      <section className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto gp-panel p-5 text-white shadow-gp-modal">
+      <section className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge>
@@ -563,7 +563,7 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
 
 function InfoBlock({ label, value }) {
   return (
-    <div className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
+    <div className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.055] p-3 shadow-gp-sm">
       <span className="text-xs font-black uppercase text-slate-400">{label}</span>
       <strong className="mt-2 block break-words text-sm text-white">{value}</strong>
     </div>
@@ -608,7 +608,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 gp-card p-4">
+      <div className="gp-surface-premium flex flex-wrap items-center justify-between gap-3 p-4">
         <div>
           <h2 className="text-lg font-black">Produtos</h2>
           <p className="mt-1 text-sm text-slate-400">Cardápio, variantes, imagem e disponibilidade.</p>
@@ -618,7 +618,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <article key={product.id} className="min-w-0 overflow-hidden gp-card">
+          <article key={product.id} className="gp-surface-premium min-w-0 overflow-hidden">
             <div className="grid min-h-44 sm:grid-cols-[150px_minmax(0,1fr)]">
               {product.image_url ? (
                 <img src={product.image_url} alt={product.name} className="h-44 w-full object-cover sm:h-full sm:min-h-44" />
@@ -763,7 +763,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4">
-      <form onSubmit={submitProduct} className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain gp-panel p-5 text-white shadow-gp-modal">
+      <form onSubmit={submitProduct} className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
@@ -912,7 +912,7 @@ function CustomersPanel({ customers }) {
 
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-          <section className="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain gp-panel p-5 text-white shadow-gp-modal">
+          <section className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <Badge variant="neutral">Cliente</Badge>
@@ -956,7 +956,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
   return (
     <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,360px)]">
-      <form onSubmit={submitSettings} className="min-w-0 gp-card p-5">
+      <form onSubmit={submitSettings} className="gp-surface-premium min-w-0 p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-lg font-black">Configurações</h2>
@@ -984,7 +984,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
         </div>
       </form>
 
-      <aside className="min-w-0 gp-card p-5">
+      <aside className="gp-surface-premium min-w-0 p-5">
         <Badge variant="neutral">Preview</Badge>
         <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
         <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-gp bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
@@ -998,7 +998,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
-    <section className="min-w-0 overflow-hidden gp-card">
+    <section className="gp-surface-premium min-w-0 overflow-hidden">
       <PanelHeader title={title} subtitle={subtitle} action={<Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>} />
       <div className="overflow-x-auto p-4">{children}</div>
     </section>
@@ -1013,7 +1013,7 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
 
   return (
-    <section className="min-w-0 rounded-gp border border-gp-border-inverse bg-gp-bg-field/90 p-4">
+    <section className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.055] p-4 shadow-gp-sm">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-sm font-black">Resumo do dia</h2>
         <ChevronDown size={17} className="text-slate-300" />
@@ -1260,15 +1260,15 @@ export function AdminPage() {
 
   return (
     <main className="gp-app-bg grid h-screen min-h-0 grid-cols-[210px_minmax(0,1fr)] overflow-hidden text-white xl:grid-cols-[228px_minmax(0,1fr)]">
-      <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main/90 p-4 text-white backdrop-blur xl:p-5">
+      <aside className="gp-scrollbar-soft flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main/90 p-4 text-white backdrop-blur xl:p-5">
         <BrandMark label="Gym Prime" tone="dark" />
-        <span className="mt-1 block pl-14 text-sm font-bold uppercase tracking-normal text-slate-300">ADMIN</span>
+        <span className="mt-3 inline-flex min-h-7 w-fit items-center rounded-gp-pill border border-gp-border-inverse bg-white/[0.07] px-3 text-xs font-black uppercase tracking-normal text-gp-lime">ADMIN</span>
         <nav className="mt-8 space-y-2">
           {ADMIN_TABS.map(({ key, label, icon }) => (
             <button
               key={key}
               type="button"
-              className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'bg-gp-lime text-gp-text-inverse shadow-gp-glow' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
+              className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'gp-active-item' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
               onClick={() => setTab(key)}
             >
               <span className="shrink-0">{icon}</span>
@@ -1288,23 +1288,23 @@ export function AdminPage() {
         </div>
       </aside>
 
-      <section className="min-h-0 min-w-0 overflow-y-auto bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.05),transparent_34%)] p-4 xl:p-7">
+      <section className="gp-scrollbar-soft min-h-0 min-w-0 overflow-y-auto bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.06),transparent_34%)] p-4 xl:p-7">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className="truncate text-3xl font-black leading-none xl:text-4xl">{activeTabLabel}</h1>
             {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operação local da lanchonete Gym Prime.</p>}
           </div>
           <div className="flex flex-wrap items-center justify-end gap-3">
-            <div className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
+            <div className="gp-operational-status flex min-h-11 items-center gap-3 px-4 text-sm font-black">
               <span className="h-3 w-3 shrink-0 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
               Servidor local online
             </div>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-4 text-sm font-black shadow-gp-sm">
               <CalendarDays size={16} />
               Hoje
               <ChevronDown size={15} />
             </button>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-gp-bg-field px-4 text-sm font-black">
+            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-4 text-sm font-black shadow-gp-sm">
               <Shield size={16} />
               Administrador
               <ChevronDown size={15} />

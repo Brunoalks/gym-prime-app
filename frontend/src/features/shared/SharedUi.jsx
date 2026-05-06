@@ -15,7 +15,7 @@ export function BrandMark({ label = 'Gym Prime', tone = 'light' }) {
         <img
           src={gymPrimeLogo}
           alt={label || 'Gym Prime'}
-          className="block h-auto max-h-12 w-auto max-w-[9.5rem] object-contain sm:max-h-14 sm:max-w-[11.5rem]"
+          className="block h-auto max-h-12 w-auto max-w-[9.5rem] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.25)] sm:max-h-14 sm:max-w-[11.5rem]"
           onError={() => setLogoFailed(true)}
         />
       ) : (
@@ -37,14 +37,14 @@ export function ProductImage({ product, className = '' }) {
   const canUseImage = product.image_url && !String(product.image_url).toLowerCase().endsWith('.svg');
 
   return (
-    <div className={`relative flex items-center justify-center overflow-hidden bg-gp-bg-card text-gp-text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${className}`}>
+    <div className={`gp-product-image relative flex items-center justify-center overflow-hidden text-gp-text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] ${className}`}>
       {canUseImage ? (
         <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_24%_18%,rgb(var(--gp-lime-rgb)/0.22),transparent_30%),linear-gradient(135deg,#23272b,#070808)]">
-          <div className="rounded-gp border border-gp-border-inverse bg-white/[0.09] px-4 py-3 text-center text-gp-text-primary shadow-gp-card backdrop-blur">
-            <ShoppingBag className="mx-auto text-gp-lime" size={30} />
-            <strong className="mt-2 block max-w-28 truncate text-gp-sm font-gp-black">{product.name}</strong>
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="rounded-gp border border-gp-border-inverse bg-white/[0.075] px-3 py-2.5 text-center text-gp-text-primary shadow-gp-sm backdrop-blur">
+            <ShoppingBag className="mx-auto text-gp-lime" size={26} />
+            <strong className="mt-2 block max-w-24 truncate text-gp-xs font-gp-black">{product.name}</strong>
           </div>
         </div>
       )}
@@ -54,7 +54,7 @@ export function ProductImage({ product, className = '' }) {
 
 export function ProductPromoBadge({ children = 'Popular', showIcon = false, className = '' }) {
   return (
-    <Badge className={className} variant="warning">
+    <Badge className={cn('border border-amber-300/60 shadow-gp-sm', className)} variant="warning">
       {showIcon && <Flame size={13} />}
       {children}
     </Badge>
@@ -63,7 +63,7 @@ export function ProductPromoBadge({ children = 'Popular', showIcon = false, clas
 
 export function ProductStockBadge({ showIcon = false, className = '' }) {
   return (
-    <Badge className={className} variant="success">
+    <Badge className={cn('border border-emerald-300/70 shadow-gp-sm', className)} variant="success">
       {showIcon && <CheckCircle2 size={13} />}
       Em estoque
     </Badge>
@@ -81,7 +81,7 @@ export function PriceSummary({
   const formattedValue = typeof value === 'string' ? value : formatCurrency(value);
 
   return (
-    <div className={cn('min-w-0 rounded-gp bg-gp-bg-panel p-4 text-gp-text-primary shadow-gp-sm ring-1 ring-white/5', className)}>
+    <div className={cn('gp-price-summary min-w-0 rounded-gp p-4 text-gp-text-primary shadow-gp-sm ring-1 ring-white/5', className)}>
       <div className={stacked ? 'min-w-0' : 'flex min-w-0 items-center justify-between gap-3'}>
         <span className={cn('text-gp-sm font-gp-bold', labelClassName)}>{label}</span>
         <strong className={cn(stacked ? 'mt-1 block' : 'shrink-0', 'font-gp-black', valueClassName)}>{formattedValue}</strong>
@@ -123,11 +123,11 @@ export function VariantPickerModal({ product, selectedVariantId, setSelectedVari
   const price = selectedVariant?.price || product.price;
 
   return (
-    <Dialog className={large ? 'max-w-2xl p-5 sm:p-7' : ''}>
+    <Dialog className={large ? 'max-w-2xl p-5 sm:p-7' : 'max-h-[calc(100dvh-1rem)] rounded-t-gp p-5 sm:rounded-gp'}>
       <Badge variant="success">Variante</Badge>
       <h2 className="mt-3 break-words text-xl font-gp-black text-gp-text-inverse">{product.name}</h2>
       <p className="mt-1 text-gp-sm text-slate-700">Escolha uma opção antes de adicionar ao carrinho.</p>
-      <div className={`mt-4 grid gap-2 ${large ? 'sm:grid-cols-2' : ''}`}>
+      <div className={`gp-scrollbar-soft mt-4 grid max-h-[42dvh] gap-2 overflow-y-auto pr-1 ${large ? 'sm:max-h-[48dvh] sm:grid-cols-2' : ''}`}>
         {product.variants.map((variant) => (
           <Button
             key={variant.id}
@@ -143,7 +143,7 @@ export function VariantPickerModal({ product, selectedVariantId, setSelectedVari
       <PriceSummary className="mt-4" value={price} />
       <ModalActions>
         <Button variant="secondary" onClick={onCancel}>Voltar</Button>
-        <Button onClick={onConfirm}>Adicionar</Button>
+        <Button className="gp-primary-cta" onClick={onConfirm}>Adicionar</Button>
       </ModalActions>
     </Dialog>
   );
@@ -197,7 +197,7 @@ export function ConfirmDialog({ title, message, confirmLabel = 'Confirmar', onCa
       <p className="mt-2 text-gp-sm leading-6 text-slate-700">{message}</p>
       <ModalActions>
         <Button variant="secondary" onClick={onCancel}>Voltar</Button>
-        <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel}</Button>
+        <Button className={danger ? '' : 'gp-primary-cta'} variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel}</Button>
       </ModalActions>
     </Dialog>
   );

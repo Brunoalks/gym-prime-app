@@ -1,11 +1,12 @@
 import { createElement } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from './classNames.js';
 
 const buttonVariants = {
-  primary: 'bg-gp-lime text-gp-text-inverse shadow-gp-lime-action hover:bg-gp-lime/95 hover:shadow-gp-glow',
-  dark: 'border border-gp-border-inverse bg-gp-bg-panel text-gp-text-primary shadow-gp-sm hover:bg-gp-bg-card',
+  primary: 'gp-active-item hover:brightness-[1.02] hover:shadow-gp-glow',
+  dark: 'border border-gp-border-inverse bg-gp-bg-elevated text-gp-text-primary shadow-gp-sm hover:border-white/20 hover:bg-gp-bg-card',
   secondary: 'border border-gp-border bg-white text-gp-text-inverse shadow-gp-sm hover:border-slate-300 hover:bg-slate-50',
-  inverse: 'border border-gp-border-inverse bg-white/[0.08] text-gp-text-primary shadow-gp-sm hover:border-white/20 hover:bg-white/[0.14]',
+  inverse: 'border border-gp-border-inverse bg-white/[0.075] text-gp-text-primary shadow-gp-sm hover:border-white/20 hover:bg-white/[0.13]',
   danger: 'border border-gp-danger/20 bg-gp-danger-soft text-gp-danger hover:bg-gp-danger/20',
   ghost: 'text-gp-text-muted hover:bg-slate-100 hover:text-gp-text-inverse',
 };
@@ -21,6 +22,10 @@ const badgeVariants = {
   success: 'bg-emerald-100 text-emerald-800',
   warning: 'bg-amber-100 text-amber-800',
   danger: 'bg-red-100 text-red-700',
+  inverse: 'border border-gp-border-inverse bg-white/[0.08] text-gp-text-secondary',
+  lime: 'border border-gp-lime/30 bg-gp-lime/10 text-gp-lime',
+  info: 'border border-sky-400/35 bg-sky-400/10 text-sky-300',
+  operational: 'gp-operational-status',
 };
 
 const feedbackVariants = {
@@ -99,13 +104,16 @@ export function Feedback({ children, className = '', variant = 'muted' }) {
 }
 
 export function Dialog({ children, className = '', as = 'section', ...props }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-main/75 p-4 backdrop-blur-sm sm:items-center">
+  const dialog = (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-gp-bg-main/75 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:p-4">
       <Card as={as} className={cn('max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-gp-modal', className)} {...props}>
         {children}
       </Card>
     </div>
   );
+
+  if (typeof document === 'undefined') return dialog;
+  return createPortal(dialog, document.body);
 }
 
 export function EmptyState({ icon = null, title, children, className = '', iconClassName = '', ...props }) {
@@ -143,7 +151,7 @@ export function ModalActions({ children, className = '', ...props }) {
 
 export function PanelHeader({ title, subtitle, action = null, children = null, className = '', ...props }) {
   return (
-    <div className={cn('flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse p-4', className)} {...props}>
+    <div className={cn('gp-section-header flex-wrap p-4', className)} {...props}>
       <div>
         {title && <h2 className="text-lg font-black">{title}</h2>}
         {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}

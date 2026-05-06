@@ -17,6 +17,7 @@ export default {
             main: tokenColor('--gp-bg-main-rgb'),
             panel: tokenColor('--gp-bg-panel-rgb'),
             card: tokenColor('--gp-bg-card-rgb'),
+            elevated: tokenColor('--gp-bg-elevated-rgb'),
             field: tokenColor('--gp-bg-field-rgb'),
           },
           border: {
@@ -31,6 +32,8 @@ export default {
           },
           lime: tokenColor('--gp-lime-rgb'),
           'lime-soft': 'var(--gp-lime-soft)',
+          purple: tokenColor('--gp-purple-rgb'),
+          'purple-soft': 'var(--gp-purple-soft)',
           danger: tokenColor('--gp-danger-rgb'),
           'danger-soft': 'var(--gp-danger-soft)',
           warning: tokenColor('--gp-warning-rgb'),
@@ -51,8 +54,10 @@ export default {
       boxShadow: {
         'gp-sm': 'var(--gp-shadow-sm)',
         'gp-card': 'var(--gp-shadow-card)',
+        'gp-card-hover': 'var(--gp-shadow-card-hover)',
         'gp-panel': 'var(--gp-shadow-panel)',
         'gp-modal': 'var(--gp-shadow-modal)',
+        'gp-bottom-bar': 'var(--gp-shadow-bottom-bar)',
         'gp-glow': 'var(--gp-shadow-glow)',
         'gp-lime-action': 'var(--gp-shadow-lime-action)',
         'gp-focus': 'var(--gp-shadow-focus)',

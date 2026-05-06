@@ -79,7 +79,7 @@ function LoginPage({ onLogin }) {
           )}
           <AuthField label="Email" type="email" placeholder="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
           <AuthField label="Senha" type="password" placeholder="Senha" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} minLength={isRegister ? 8 : 1} hint={isRegister ? 'Use pelo menos 8 caracteres.' : null} required />
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="gp-primary-cta w-full">
             {isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
             {isRegister ? 'Cadastrar e entrar' : 'Entrar'}
           </Button>
@@ -104,23 +104,23 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
   }
 
   return (
-    <article className="gp-card-light grid grid-cols-[clamp(6rem,30vw,7rem)_minmax(0,1fr)] gap-3 overflow-hidden p-2">
+    <article className="gp-card-light gp-card-hover grid grid-cols-[clamp(6.25rem,30vw,7.25rem)_minmax(0,1fr)] gap-3 overflow-hidden p-2.5">
       <ProductImage product={product} className="aspect-square rounded-gp" />
-      <div className="min-w-0">
+      <div className="gp-product-card-content flex min-w-0 flex-col rounded-gp px-2 py-2">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="min-w-0 truncate text-xl font-gp-black text-gp-text-inverse">{product.name}</h2>
-          <ProductPromoBadge className="shrink-0" showIcon />
+          <h2 className="gp-product-card-title line-clamp-2 min-w-0 text-lg font-gp-black leading-tight sm:text-xl">{product.name}</h2>
+          <ProductPromoBadge className="min-h-6 shrink-0 px-2 text-[0.68rem]" showIcon />
         </div>
-        <p className="mt-2 line-clamp-2 min-h-10 text-gp-base leading-5 text-slate-700">{product.description || 'Produto disponível para pedido.'}</p>
-        <ProductStockBadge className="mt-3 w-fit" showIcon />
-        <div className="mt-4">
-          <strong className="text-xl font-gp-black text-gp-text-inverse">{formatCurrency(price)}</strong>
-          <div className="mt-3 grid grid-cols-[1fr_44px] gap-2">
+        <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-700 sm:text-gp-base">{product.description || 'Produto disponível para pedido.'}</p>
+        <ProductStockBadge className="mt-3 min-h-6 w-fit px-2 text-[0.68rem]" showIcon />
+        <div className="mt-auto pt-3">
+          <strong className="gp-product-card-price text-xl font-gp-black leading-none">{formatCurrency(price)}</strong>
+          <div className="gp-product-card-actions mt-3 grid grid-cols-[1fr_44px] gap-2 pt-3">
             <Button size="sm" variant="secondary" className="min-h-11 min-w-0 px-2" onClick={() => onDetails(product)}>
               <span className="truncate">Detalhes</span>
               <ChevronRight size={16} />
             </Button>
-            <Button size="icon" className="h-11 w-11" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
+            <Button size="icon" className="gp-primary-cta h-11 w-11" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
               <Plus size={23} />
             </Button>
           </div>
@@ -145,10 +145,10 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
 function CustomerCartBar({ cart, onCheckout }) {
   const hasItems = cart.items.length > 0;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gp-border-inverse bg-gp-bg-panel/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 text-gp-text-primary shadow-gp-modal backdrop-blur">
+    <div className="gp-bottom-bar fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 text-gp-text-primary">
       <div className="mx-auto flex max-w-xl min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-gp-pill bg-white/10">
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-gp-pill border border-gp-border-inverse bg-white/10 shadow-gp-sm">
             <ShoppingBag size={26} />
             {cart.items.length > 0 && <span className="absolute -right-1 -top-1 rounded-gp-pill bg-gp-lime px-2 py-0.5 text-gp-xs font-gp-black text-gp-text-inverse">{cart.items.length}</span>}
           </div>
@@ -157,7 +157,7 @@ function CustomerCartBar({ cart, onCheckout }) {
             <strong className="block truncate text-xl font-gp-black text-gp-lime sm:text-2xl">{formatCurrency(cart.total_amount)}</strong>
           </div>
         </div>
-        <Button className="min-h-12 shrink-0 px-4 text-gp-sm sm:min-h-14 sm:px-6 sm:text-gp-base" disabled={!hasItems} onClick={onCheckout}>
+        <Button className={`gp-primary-cta min-h-12 shrink-0 px-4 text-gp-sm sm:min-h-14 sm:px-6 sm:text-gp-base ${hasItems ? 'shadow-gp-glow' : ''}`} disabled={!hasItems} onClick={onCheckout}>
           Ver carrinho
           <ChevronRight size={20} />
         </Button>
@@ -184,7 +184,7 @@ function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
         <PriceSummary className="mt-4" value={cart.total_amount} />
         <ModalActions>
           <Button variant="secondary" onClick={onCancel}>Voltar</Button>
-          <Button onClick={onConfirm}><Check size={18} /> Confirmar</Button>
+          <Button className="gp-primary-cta" onClick={onConfirm}><Check size={18} /> Confirmar</Button>
         </ModalActions>
       </section>
     </div>
@@ -301,33 +301,45 @@ function CustomerMenuPage({ user, onLogout }) {
   }
 
   return (
-    <main className="gp-app-bg min-h-screen overflow-x-hidden pb-[calc(10rem+env(safe-area-inset-bottom))] text-gp-text-primary">
-      <header className="px-4 py-6">
+    <main className="gp-app-bg min-h-screen overflow-x-hidden pb-[calc(10.5rem+env(safe-area-inset-bottom))] text-gp-text-primary">
+      <header className="px-4 pb-3 pt-5">
         <div className="mx-auto flex max-w-xl min-w-0 items-center justify-between gap-4">
           <BrandMark tone="dark" />
           <div className="flex min-w-0 items-center gap-3 text-right">
             <button type="button" onClick={onLogout} className="text-gp-xs font-gp-black text-gp-text-muted underline-offset-4 hover:text-gp-text-primary hover:underline">
               Sair
             </button>
-            <div className="max-w-[45vw] truncate rounded-gp-pill bg-white/10 px-3 py-2 text-gp-sm font-gp-bold">
+            <div className="max-w-[45vw] truncate rounded-gp-pill border border-gp-border-inverse bg-white/10 px-3 py-2 text-gp-sm font-gp-bold shadow-gp-sm">
               Oi, <span className="text-gp-lime">{user.full_name?.split(' ')[0]}</span>
             </div>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-xl px-4 py-5">
-        <div className="flex min-h-16 min-w-0 items-center gap-4 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-5 text-gp-text-secondary shadow-gp-sm backdrop-blur">
-          <Search className="shrink-0" size={27} />
-          <span className="truncate text-lg font-medium">Buscar no cardápio</span>
+      <section className="mx-auto max-w-xl px-4 py-4">
+        <div className="gp-promo-card p-4 text-gp-text-primary">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0">
+              <span className={`gp-operational-status inline-flex min-h-7 items-center gap-2 px-3 text-gp-xs font-gp-black uppercase ${publicSettings.menu_is_open ? '' : 'border-gp-danger/30 bg-gp-danger-soft text-gp-danger'}`}>
+                <span className={`h-2 w-2 rounded-gp-pill shadow-gp-glow ${publicSettings.menu_is_open ? 'bg-gp-lime' : 'bg-gp-danger'}`} />
+                {publicSettings.menu_is_open ? 'Aberto' : 'Fechado'} • Retirada
+              </span>
+              <h1 className="mt-3 text-xl font-gp-black leading-tight">Peça rápido e retire no balcão</h1>
+            </div>
+            <ShoppingBag className="shrink-0 text-gp-lime" size={32} />
+          </div>
         </div>
-        <div className="-mx-4 mt-5 flex gap-3 overflow-x-auto overscroll-x-contain px-4 pb-2">
+        <div className="mt-4 flex min-h-14 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur">
+          <Search className="shrink-0 text-gp-lime" size={22} />
+          <span className="truncate text-gp-base font-gp-bold">Buscar no cardápio</span>
+        </div>
+        <div className="gp-scrollbar-none -mx-4 mt-4 flex gap-3 overflow-x-auto overscroll-x-contain px-4 pb-2">
           {PRODUCT_CATEGORIES.slice(0, 5).map((item) => (
             <Button
               key={item.key}
               size="sm"
-              variant={category === item.key ? 'primary' : 'secondary'}
-              className={`min-h-14 max-w-[70vw] shrink-0 rounded-gp px-5 text-gp-base ${category === item.key ? 'border border-gp-lime shadow-gp-lime-action' : 'border-gp-border-inverse bg-white/10 text-gp-text-primary hover:bg-white/20'}`}
+              variant={category === item.key ? 'primary' : 'inverse'}
+              className={`min-h-12 max-w-[72vw] shrink-0 rounded-gp-pill px-4 text-gp-sm sm:px-5 sm:text-gp-base ${category === item.key ? '' : 'gp-category-pill'}`}
               onClick={() => setCategory(item.key)}
             >
               {CATEGORY_ICONS[item.key]}
@@ -336,7 +348,7 @@ function CustomerMenuPage({ user, onLogout }) {
           ))}
         </div>
         <div className="mt-5">
-          <div className="grid grid-cols-2 gap-2 rounded-gp bg-white/10 p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-gp border border-gp-border-inverse bg-white/[0.075] p-1 shadow-gp-sm">
             <Button variant={view === 'menu' ? 'primary' : 'inverse'} className={view === 'menu' ? '' : 'bg-transparent'} onClick={() => setView('menu')}>Cardápio</Button>
             <Button variant={view === 'orders' ? 'primary' : 'inverse'} className={view === 'orders' ? '' : 'bg-transparent'} onClick={() => setView('orders')}>Meus pedidos</Button>
           </div>
