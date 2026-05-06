@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, ChevronRight, Dumbbell, Grid2X2, Leaf, LogIn, Plus, Search, ShoppingBag, UserPlus, Zap } from 'lucide-react';
-import { Badge, Button, Card, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
+import { Badge, Button, Card, EmptyState, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
-import { buildProductMap, filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
+import { buildProductMap, filterProductsByCategory, formatCurrency, getProductCategory, PRODUCT_CATEGORIES } from '../shared/catalog.js';
 import { BrandMark, ErrorDialog, OrderSuccessModal, PriceSummary, ProductDetailsModal, ProductImage, ProductPromoBadge, ProductStockBadge, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
@@ -15,6 +15,14 @@ const CATEGORY_ICONS = {
   snacks: <Leaf size={19} />,
   preworkout: <Zap size={19} />,
 };
+
+function matchesProductSearch(product, searchTerm) {
+  const query = searchTerm.trim().toLowerCase();
+  if (!query) return true;
+  const categoryKey = getProductCategory(product);
+  const categoryLabel = PRODUCT_CATEGORIES.find((item) => item.key === categoryKey)?.label || categoryKey;
+  return [product.name, product.description, categoryKey, categoryLabel].some((value) => String(value || '').toLowerCase().includes(query));
+}
 
 function AuthField({ label, hint, ...props }) {
   return (
@@ -231,6 +239,7 @@ function CustomerMenuPage({ user, onLogout }) {
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [category, setCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState({ items: [], total_amount: 0 });
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
   const [view, setView] = useState('menu');
@@ -240,7 +249,8 @@ function CustomerMenuPage({ user, onLogout }) {
   const [errorDialog, setErrorDialog] = useState('');
 
   const activeProducts = useMemo(() => products.filter((product) => product.is_active), [products]);
-  const visibleProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
+  const categoryProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
+  const visibleProducts = useMemo(() => categoryProducts.filter((product) => matchesProductSearch(product, searchTerm)), [categoryProducts, searchTerm]);
   const productMap = useMemo(() => buildProductMap(products), [products]);
 
   useEffect(() => {
@@ -329,10 +339,15 @@ function CustomerMenuPage({ user, onLogout }) {
             <ShoppingBag className="shrink-0 text-gp-lime" size={32} />
           </div>
         </div>
-        <div className="mt-4 flex min-h-14 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur">
+        <label className="mt-4 flex min-h-14 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur">
           <Search className="shrink-0 text-gp-lime" size={22} />
-          <span className="truncate text-gp-base font-gp-bold">Buscar no cardápio</span>
-        </div>
+          <input
+            className="min-w-0 flex-1 bg-transparent text-gp-base font-gp-bold text-gp-text-primary outline-none placeholder:text-gp-text-secondary"
+            placeholder="Buscar no cardapio"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </label>
         <div className="gp-scrollbar-none -mx-4 mt-4 flex gap-3 overflow-x-auto overscroll-x-contain px-4 pb-2">
           {PRODUCT_CATEGORIES.slice(0, 5).map((item) => (
             <Button
@@ -364,7 +379,9 @@ function CustomerMenuPage({ user, onLogout }) {
           ) : productsLoading ? (
             <Feedback>Carregando produtos...</Feedback>
           ) : visibleProducts.length === 0 ? (
-            <Feedback>Nenhum produto disponível nesta categoria.</Feedback>
+            <EmptyState icon={<ShoppingBag size={34} />} title="Nenhum produto encontrado">
+              Ajuste a busca ou escolha outra categoria.
+            </EmptyState>
           ) : (
             visibleProducts.map((product) => (
               <CustomerProductCard key={product.id} product={product} onAdd={handleAdd} onDetails={setDetailsProduct} />

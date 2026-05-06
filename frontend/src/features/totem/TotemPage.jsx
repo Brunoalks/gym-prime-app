@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Dumbbell, Gift, Grid2X2, Info, Leaf, Plus, RotateCcw, Search, ShoppingBag, Trash2, Zap } from 'lucide-react';
 import { Button, Badge, EmptyState, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
-import { buildLocalCart, filterProductsByCategory, formatCurrency, PRODUCT_CATEGORIES } from '../shared/catalog.js';
+import { buildLocalCart, filterProductsByCategory, formatCurrency, getProductCategory, PRODUCT_CATEGORIES } from '../shared/catalog.js';
 import { BrandMark, ErrorDialog, OrderSuccessModal, PriceSummary, ProductDetailsModal, ProductImage, ProductPromoBadge, ProductStockBadge, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
@@ -14,6 +14,14 @@ const CATEGORY_ICONS = {
   preworkout: <Zap size={27} />,
   combos: <Gift size={26} />,
 };
+
+function matchesProductSearch(product, searchTerm) {
+  const query = searchTerm.trim().toLowerCase();
+  if (!query) return true;
+  const categoryKey = getProductCategory(product);
+  const categoryLabel = PRODUCT_CATEGORIES.find((item) => item.key === categoryKey)?.label || categoryKey;
+  return [product.name, product.description, categoryKey, categoryLabel].some((value) => String(value || '').toLowerCase().includes(query));
+}
 
 function TotemProductCard({ product, onAdd, onDetails }) {
   const [variantId, setVariantId] = useState(product.variants[0]?.id || null);
@@ -72,11 +80,11 @@ function TotemProductCard({ product, onAdd, onDetails }) {
   );
 }
 
-function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemove }) {
+function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemove, cartRef }) {
   const hasItems = cart.items.length > 0;
 
   return (
-    <aside className="gp-surface-premium flex max-h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden p-3 text-gp-text-primary min-[1200px]:min-h-0 min-[1200px]:max-h-none min-[1200px]:p-4 xl:p-5">
+    <aside ref={cartRef} className="gp-surface-premium flex max-h-[calc(100vh-2rem)] min-w-0 flex-col overflow-hidden p-3 text-gp-text-primary min-[1200px]:min-h-0 min-[1200px]:max-h-none min-[1200px]:p-4 xl:p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
@@ -175,15 +183,18 @@ export function TotemPage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [category, setCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [cartLines, setCartLines] = useState([]);
   const [showNameModal, setShowNameModal] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [detailsProduct, setDetailsProduct] = useState(null);
   const [successResult, setSuccessResult] = useState(null);
   const [errorDialog, setErrorDialog] = useState('');
+  const cartPanelRef = useRef(null);
 
   const activeProducts = useMemo(() => products.filter((product) => product.is_active), [products]);
-  const visibleProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
+  const categoryProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
+  const visibleProducts = useMemo(() => categoryProducts.filter((product) => matchesProductSearch(product, searchTerm)), [categoryProducts, searchTerm]);
   const cart = useMemo(() => buildLocalCart(cartLines, products), [cartLines, products]);
 
   useEffect(() => {
@@ -289,16 +300,33 @@ export function TotemPage() {
         </div>
       </nav>
 
+      {cart.items.length > 0 && (
+        <section className="gp-surface-premium flex min-w-0 items-center justify-between gap-3 p-3 min-[1200px]:hidden">
+          <div className="min-w-0">
+            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">{cart.items.length} itens</span>
+            <strong className="block truncate text-2xl font-gp-black text-gp-lime">{formatCurrency(cart.total_amount)}</strong>
+          </div>
+          <Button className="gp-primary-cta min-h-12 shrink-0 px-4" onClick={() => cartPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            Ver pedido
+          </Button>
+        </section>
+      )}
+
       <section className="gp-surface-premium flex min-w-0 flex-col overflow-visible p-3 min-[1200px]:min-h-0 min-[1200px]:overflow-hidden min-[1200px]:p-4">
         <header className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-3xl font-gp-black tracking-normal xl:text-4xl">Cardápio</h1>
             <p className="mt-1 text-gp-base font-gp-medium text-gp-text-secondary">Toque para adicionar ao pedido.</p>
           </div>
-          <div className="flex min-h-12 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
+          <label className="flex min-h-12 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-4 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
             <Search className="shrink-0 text-gp-lime" size={20} />
-            <span className="truncate font-gp-bold">Escolha seus itens</span>
-          </div>
+            <input
+              className="min-w-0 flex-1 bg-transparent font-gp-bold text-gp-text-primary outline-none placeholder:text-gp-text-secondary"
+              placeholder="Buscar produtos"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </label>
           <Badge className="shrink-0" variant="operational">Atendimento público</Badge>
         </header>
 
@@ -309,7 +337,9 @@ export function TotemPage() {
         ) : productsLoading ? (
           <Feedback>Carregando produtos...</Feedback>
         ) : visibleProducts.length === 0 ? (
-          <Feedback>Nenhum produto disponível nesta categoria.</Feedback>
+          <EmptyState icon={<ShoppingBag size={34} />} title="Nenhum produto encontrado">
+            Ajuste a busca ou escolha outra categoria.
+          </EmptyState>
         ) : (
           <div className="gp-scrollbar-soft grid grid-cols-[repeat(auto-fit,minmax(min(18rem,100%),1fr))] gap-3 min-[1200px]:min-h-0 min-[1200px]:grid-cols-[repeat(auto-fit,minmax(min(14rem,100%),1fr))] min-[1200px]:overflow-y-auto min-[1200px]:pr-1">
             {visibleProducts.map((product) => (
@@ -326,6 +356,7 @@ export function TotemPage() {
         onIncrement={incrementCartItem}
         onDecrement={decrementCartItem}
         onRemove={removeCartItem}
+        cartRef={cartPanelRef}
       />
 
       {showNameModal && (
