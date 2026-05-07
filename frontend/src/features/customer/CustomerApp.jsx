@@ -117,7 +117,7 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
       <div className="gp-product-card-content flex min-w-0 flex-col rounded-gp px-2 py-2">
         <div className="flex items-start justify-between gap-2">
           <h2 className="gp-product-card-title line-clamp-2 min-w-0 text-lg font-gp-black leading-tight sm:text-xl">{product.name}</h2>
-          <ProductPromoBadge className="min-h-6 shrink-0 px-2 text-[0.68rem]" showIcon />
+          {product.variants.length > 0 && <ProductPromoBadge className="min-h-6 shrink-0 px-2 text-[0.68rem]">Variante</ProductPromoBadge>}
         </div>
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-700 sm:text-gp-base">{product.description || 'Produto disponível para pedido.'}</p>
         <ProductStockBadge className="mt-3 min-h-6 w-fit px-2 text-[0.68rem]" showIcon />

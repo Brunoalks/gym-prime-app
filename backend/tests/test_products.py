@@ -1,4 +1,7 @@
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.models.inventory import Inventory
 
 
 def test_admin_product_crud(admin_client: TestClient):
@@ -13,6 +16,7 @@ def test_admin_product_crud(admin_client: TestClient):
     )
     assert create_response.status_code == 201
     product = create_response.json()
+    assert product["category"] == "snacks"
 
     list_response = admin_client.get("/products")
     assert list_response.status_code == 200
@@ -57,6 +61,44 @@ def test_admin_variant_creation_belongs_to_product(admin_client: TestClient):
     variant = variant_response.json()
     assert variant["product_id"] == product["id"]
     assert variant["name"] == "Zero"
+
+
+def test_admin_can_create_inventory_records(admin_client: TestClient, db_session: Session):
+    product_response = admin_client.post(
+        "/products",
+        json={
+            "name": "Estoque QA",
+            "code": "estoque-qa",
+            "price": "9.00",
+            "category": "drinks",
+        },
+    )
+    product = product_response.json()
+    base_response = admin_client.post(
+        "/inventory",
+        json={"product_id": product["id"], "variant_id": None, "quantity": 3, "min_quantity": 1},
+    )
+    assert base_response.status_code == 201
+    base_inventory = db_session.query(Inventory).filter_by(product_id=product["id"], variant_id=None).one()
+    assert base_inventory.quantity == 3
+
+    variant_response = admin_client.post(
+        f"/products/{product['id']}/variants",
+        json={
+            "name": "Lata",
+            "code": "lata",
+            "price": "9.50",
+        },
+    )
+    variant = variant_response.json()
+
+    variant_inventory_response = admin_client.post(
+        "/inventory",
+        json={"product_id": product["id"], "variant_id": variant["id"], "quantity": 7, "min_quantity": 2},
+    )
+    assert variant_inventory_response.status_code == 201
+    variant_inventory = db_session.query(Inventory).filter_by(product_id=product["id"], variant_id=variant["id"]).one()
+    assert variant_inventory.min_quantity == 2
 
 
 def test_duplicate_product_code_returns_conflict(admin_client: TestClient):

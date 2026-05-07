@@ -8,6 +8,13 @@ class InventoryUpdate(BaseModel):
     min_quantity: int | None = Field(default=None, ge=0)
 
 
+class InventoryCreate(BaseModel):
+    product_id: int
+    variant_id: int | None = None
+    quantity: int = Field(default=0, ge=0)
+    min_quantity: int = Field(default=0, ge=0)
+
+
 class InventoryRead(BaseModel):
     id: int
     product_id: int

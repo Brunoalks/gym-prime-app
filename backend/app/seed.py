@@ -13,18 +13,21 @@ DEMO_PRODUCTS = [
         "code": "coca-cola",
         "description": "Refrigerante lata gelado.",
         "price": "7.00",
+        "category": "drinks",
     },
     {
         "name": "Shake Proteico",
         "code": "shake-proteico",
         "description": "Shake de whey protein para pre ou pos treino.",
         "price": "16.00",
+        "category": "protein",
     },
     {
         "name": "Sanduiche Natural",
         "code": "sanduiche-natural",
         "description": "Sanduiche leve com frango, salada e molho da casa.",
         "price": "18.50",
+        "category": "snacks",
     },
 ]
 

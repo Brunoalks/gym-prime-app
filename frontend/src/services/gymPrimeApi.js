@@ -68,6 +68,13 @@ export const gymPrimeApi = {
     return api('/inventory');
   },
 
+  createInventory(payload) {
+    return api('/inventory', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
   listAuditLogs() {
     return api('/audit-logs');
   },

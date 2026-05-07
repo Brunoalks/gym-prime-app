@@ -21,6 +21,7 @@ class Product(Base):
     description: Mapped[str | None] = mapped_column(Text)
     image_url: Mapped[str | None] = mapped_column(String(500))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    category: Mapped[str] = mapped_column(String(40), default="snacks")
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     variants: Mapped[list["ProductVariant"]] = relationship(back_populates="product", cascade="all, delete-orphan")

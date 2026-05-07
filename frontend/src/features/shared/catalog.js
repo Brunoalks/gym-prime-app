@@ -7,6 +7,12 @@ export const PRODUCT_CATEGORIES = [
   { key: 'combos', label: 'Combos' },
 ];
 
+export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.filter((category) => category.key !== 'all');
+
+export function getProductCategoryLabel(categoryKey) {
+  return PRODUCT_CATEGORIES.find((category) => category.key === categoryKey)?.label || categoryKey || 'Snacks';
+}
+
 export function formatCurrency(value) {
   return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -17,6 +23,8 @@ export function getProductPrice(product, variantId = null) {
 }
 
 export function getProductCategory(product) {
+  if (PRODUCT_CATEGORY_OPTIONS.some((category) => category.key === product.category)) return product.category;
+
   const text = `${product.name} ${product.description || ''}`.toLowerCase();
   if (text.includes('combo')) return 'combos';
   if (text.includes('pre') || text.includes('cafeina')) return 'preworkout';

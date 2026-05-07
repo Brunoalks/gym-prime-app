@@ -1,6 +1,9 @@
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, Field
+
+ProductCategory = Literal["drinks", "protein", "snacks", "preworkout", "combos"]
 
 
 class ProductVariantBase(BaseModel):
@@ -38,6 +41,7 @@ class ProductBase(BaseModel):
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal = Field(ge=0)
+    category: ProductCategory = "snacks"
     is_active: bool = True
 
 
@@ -51,6 +55,7 @@ class ProductUpdate(BaseModel):
     description: str | None = None
     image_url: str | None = Field(default=None, max_length=500)
     price: Decimal | None = Field(default=None, ge=0)
+    category: ProductCategory | None = None
     is_active: bool | None = None
 
 

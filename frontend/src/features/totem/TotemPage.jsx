@@ -43,7 +43,7 @@ function TotemProductCard({ product, onAdd, onDetails }) {
       <div className="gp-product-card-content flex min-h-0 min-w-0 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <h3 className="gp-product-card-title line-clamp-2 min-w-0 text-lg font-gp-black leading-tight">{product.name}</h3>
-          <ProductPromoBadge className="max-w-[7rem] shrink-0 truncate px-2 text-[0.68rem]">{product.variants.length > 0 ? 'Variante' : 'Popular'}</ProductPromoBadge>
+          {product.variants.length > 0 && <ProductPromoBadge className="max-w-[7rem] shrink-0 truncate px-2 text-[0.68rem]">Variante</ProductPromoBadge>}
         </div>
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-700">
           {product.description || 'Produto disponível no cardápio.'}

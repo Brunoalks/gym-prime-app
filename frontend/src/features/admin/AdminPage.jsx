@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, BarChart3, CalendarDays, ChevronDown, ClipboardList, Clock, Copy, DollarSign, Eye, FileImage, LayoutDashboard, Package, Plus, Settings, Shield, ShoppingBag, Trash2, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, BarChart3, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Clock, Copy, DollarSign, Eye, FileImage, LayoutDashboard, Package, Plus, Settings, Shield, ShoppingBag, Trash2, TrendingUp, Users } from 'lucide-react';
 import { Badge, Button, DataTable, Feedback, PanelHeader, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { ApiError } from '../../services/api.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
-import { buildProductMap, formatCurrency } from '../shared/catalog.js';
+import { buildProductMap, formatCurrency, getProductCategory, getProductCategoryLabel, PRODUCT_CATEGORY_OPTIONS } from '../shared/catalog.js';
 import { BrandMark, ConfirmDialog, ErrorDialog } from '../shared/SharedUi.jsx';
 
 const ADMIN_TABS = [
@@ -36,14 +36,21 @@ const SALES_PERIOD_OPTIONS = [
   { value: 'month', label: 'Por mês' },
 ];
 
+const DASHBOARD_ORDER_PERIOD_OPTIONS = [
+  { value: 'today', label: 'Hoje', summary: 'pedidos de hoje' },
+  { value: 'yesterday', label: 'Ontem', summary: 'pedidos de ontem' },
+  { value: 'week', label: 'Últimos 7 dias', summary: 'pedidos dos últimos 7 dias' },
+  { value: 'all', label: 'Todos', summary: 'pedidos' },
+];
+
 const ADMIN_FIELD_CLASS = 'gp-field gp-field-dark min-h-11 min-w-0 rounded-gp px-3 text-gp-sm font-gp-bold shadow-gp-sm';
 
 const STATUS_STYLES = {
-  pending: 'border-gp-lime/45 bg-gp-lime/10 text-gp-lime',
-  preparing: 'border-sky-400/45 bg-sky-400/10 text-sky-300',
-  ready: 'border-white/18 bg-white/[0.075] text-gp-text-secondary',
-  completed: 'border-gp-lime/45 bg-gp-lime/10 text-gp-lime',
-  canceled: 'border-gp-danger/40 bg-gp-danger-soft text-gp-danger',
+  pending: 'border-gp-lime/[0.35] bg-gp-lime/10 text-gp-lime',
+  preparing: 'border-sky-400/[0.35] bg-sky-400/10 text-sky-300',
+  ready: 'border-white/[0.14] bg-white/[0.055] text-gp-text-secondary',
+  completed: 'border-gp-lime/[0.35] bg-gp-lime/10 text-gp-lime',
+  canceled: 'border-gp-danger/[0.35] bg-gp-danger-soft text-red-300',
 };
 
 function getOrderOrigin(order) {
@@ -60,6 +67,43 @@ function formatAxisValue(value) {
   return Math.round(value).toLocaleString('pt-BR');
 }
 
+function getValidDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getLocalDayBoundary(offsetDays = 0, endOfDay = false) {
+  const date = new Date();
+  date.setHours(endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  date.setDate(date.getDate() + offsetDays);
+  return date;
+}
+
+function isSameLocalDay(date, targetDate) {
+  return date.getFullYear() === targetDate.getFullYear()
+    && date.getMonth() === targetDate.getMonth()
+    && date.getDate() === targetDate.getDate();
+}
+
+function isOrderInDashboardPeriod(order, period) {
+  const orderDate = getValidDate(order.created_at);
+  if (!orderDate) return period === 'all';
+  if (period === 'all') return true;
+  if (period === 'today') return isSameLocalDay(orderDate, getLocalDayBoundary());
+  if (period === 'yesterday') return isSameLocalDay(orderDate, getLocalDayBoundary(-1));
+  if (period === 'week') return orderDate >= getLocalDayBoundary(-6) && orderDate <= getLocalDayBoundary(0, true);
+  return true;
+}
+
+function buildRecentOrdersSummary(period, visibleCount, filteredCount, totalCount) {
+  if (period === 'all') return `Mostrando ${visibleCount} de ${totalCount} pedidos`;
+  const periodSummary = DASHBOARD_ORDER_PERIOD_OPTIONS.find((option) => option.value === period)?.summary || 'pedidos';
+  return filteredCount > visibleCount
+    ? `Mostrando ${visibleCount} de ${filteredCount} ${periodSummary}`
+    : `Mostrando ${visibleCount} ${periodSummary}`;
+}
+
 function AdminSelect({ className = '', children, ...props }) {
   return (
     <select className={`${ADMIN_FIELD_CLASS} gp-select ${className}`} {...props}>
@@ -74,7 +118,7 @@ function AdminTextInput({ className = '', ...props }) {
 
 function AdminCheckbox({ checked, onChange, label }) {
   return (
-    <label className="flex min-h-11 min-w-0 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-3 text-gp-sm font-gp-bold text-gp-text-secondary shadow-gp-sm">
+    <label className="flex min-h-11 min-w-0 items-center gap-3 rounded-gp border border-white/10 bg-white/[0.045] px-3 text-gp-sm font-gp-bold text-gp-text-secondary shadow-gp-sm transition hover:border-white/[0.15] hover:bg-white/[0.065]">
       <span className={`flex h-5 w-5 items-center justify-center rounded-gp-sm border ${checked ? 'border-gp-lime bg-gp-lime text-gp-text-inverse' : 'border-white/20 bg-white/5'}`}>
         {checked && <span className="h-2 w-2 rounded-gp-sm bg-gp-text-inverse" />}
       </span>
@@ -96,7 +140,7 @@ function AdminFileInput({ onChange }) {
 
 function StatusPill({ status }) {
   return (
-    <span className={`inline-flex min-h-7 max-w-full items-center gap-2 rounded-gp-pill border px-3 text-gp-xs font-gp-black ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
+    <span className={`inline-flex min-h-7 max-w-full items-center gap-2 rounded-gp-pill border px-3 text-gp-xs font-gp-black shadow-gp-sm ${STATUS_STYLES[status] || STATUS_STYLES.ready}`}>
       <span className="h-1.5 w-1.5 rounded-gp-pill bg-current" />
       {ORDER_STATUS_LABELS[status] || status}
     </span>
@@ -108,14 +152,14 @@ function Sparkline({ danger = false }) {
   const bars = [18, 30, 22, 42, 28, 52];
   if (danger) {
     return (
-      <div className="flex h-10 items-end gap-1">
-        {bars.map((height, index) => <span key={index} className="w-1.5 rounded-gp-sm bg-amber-500/80" style={{ height }} />)}
+      <div className="flex h-10 items-end gap-1 opacity-80">
+        {bars.map((height, index) => <span key={index} className="w-1.5 rounded-gp-sm bg-amber-400/70" style={{ height }} />)}
       </div>
     );
   }
   return (
-    <svg viewBox="0 0 92 42" className="h-11 w-24" aria-hidden="true">
-      <polyline points="0,34 12,35 22,30 34,31 46,22 57,14 68,24 80,15 92,10" fill="none" stroke={stroke} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 92 42" className="h-10 w-24 opacity-90" aria-hidden="true">
+      <polyline points="0,34 12,35 22,30 34,31 46,22 57,14 68,24 80,15 92,10" fill="none" stroke={stroke} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -188,9 +232,15 @@ function AccessDenied({ status, onTryLogin }) {
 }
 
 function Dashboard({ orders, inventory, productMap, analytics, salesSeries, salesPeriod, onSalesPeriodChange, setTab }) {
+  const [recentOrdersPeriod, setRecentOrdersPeriod] = useState('today');
   const revenue = orders.reduce((total, order) => total + Number(order.total_amount), 0);
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity);
-  const recentOrders = analytics?.recent_orders || orders.slice(0, 5);
+  const filteredRecentOrders = useMemo(
+    () => orders.filter((order) => isOrderInDashboardPeriod(order, recentOrdersPeriod)),
+    [orders, recentOrdersPeriod],
+  );
+  const recentOrders = filteredRecentOrders.slice(0, 8);
+  const recentOrdersSummary = buildRecentOrdersSummary(recentOrdersPeriod, recentOrders.length, filteredRecentOrders.length, orders.length);
   const topProducts = useMemo(() => {
     if (analytics?.top_products) return analytics.top_products;
     const totals = new Map();
@@ -226,24 +276,29 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
 
   return (
     <section className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
         <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" helper="vs ontem" icon={<DollarSign size={24} />} />
         <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" helper="vs ontem" icon={<ShoppingBag size={24} />} />
         <KpiCard title="Ticket médio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
         <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atenção' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
       </div>
 
-      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,430px)]">
-        <section className="gp-surface-premium min-w-0 overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse px-5 py-4">
-            <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><ClipboardList className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Pedidos recentes</span></h2>
-            <Button size="sm" variant="inverse" onClick={() => setTab('orders')}>Ver todos</Button>
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(18rem,380px)]">
+        <section className="gp-admin-panel min-w-0 overflow-hidden">
+          <div className="gp-admin-panel-header flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><ClipboardList className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Pedidos recentes</span></h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <AdminSelect className="min-h-9 w-40 px-2 text-xs" value={recentOrdersPeriod} onChange={(event) => setRecentOrdersPeriod(event.target.value)}>
+                {DASHBOARD_ORDER_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </AdminSelect>
+              <Button size="sm" variant="inverse" onClick={() => setTab('orders')}>Ver todos</Button>
+            </div>
           </div>
           {recentOrders.length === 0 ? (
-            <div className="p-4"><Feedback>Nenhum pedido registrado ainda.</Feedback></div>
+            <div className="p-4"><Feedback>Nenhum pedido encontrado para o período selecionado.</Feedback></div>
           ) : (
-            <div className="overflow-x-auto">
-              <DataTable className="min-w-[820px]">
+            <div className="gp-scrollbar-soft overflow-x-auto">
+              <DataTable className="min-w-[760px]">
                 <thead>
                   <tr><th className="px-5 py-3"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-6 text-right">Total</th><th className="pl-3">Status</th></tr>
                 </thead>
@@ -265,37 +320,37 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
               </DataTable>
             </div>
           )}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gp-border-inverse px-5 py-3 text-sm text-slate-400">
-            <span>Mostrando {Math.min(recentOrders.length, 8)} de {orders.length} pedidos</span>
-            <button type="button" className="font-black text-white hover:text-gp-lime" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 text-sm text-slate-400">
+            <span>{recentOrdersSummary}</span>
+            <button type="button" className="gp-admin-link font-black" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
           </div>
         </section>
 
-        <div className="min-w-0 space-y-4">
-          <section className="gp-surface-premium min-w-0 p-4">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-2 2xl:block 2xl:space-y-4">
+          <section className="gp-admin-panel min-w-0 p-4">
+            <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
               <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><AlertTriangle className="shrink-0 text-amber-400" size={20} /> <span className="truncate">Estoque baixo</span></h2>
-              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300" onClick={() => setTab('inventory')}>Ver estoque</button>
+              <button type="button" className="gp-admin-link text-sm font-black" onClick={() => setTab('inventory')}>Ver estoque</button>
             </div>
             {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do mínimo.</Feedback> : (
-              <div className="divide-y divide-gp-border-inverse">
+              <div className="space-y-2">
                 {lowInventoryItems.slice(0, 4).map((item) => (
-                  <div key={item.inventory_id} className="grid grid-cols-[48px_minmax(0,1fr)_auto_auto_auto] items-center gap-2 py-3 text-sm">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-gp-sm border border-gp-border-inverse bg-black/30 text-gp-lime"><Package size={22} /></div>
+                  <div key={item.inventory_id} className="grid grid-cols-[40px_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-gp border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm sm:grid-cols-[44px_minmax(0,1fr)_auto_auto_auto]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-gp-sm border border-white/10 bg-black/20 text-gp-lime"><Package size={19} /></div>
                     <strong className="min-w-0 truncate">{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
                     <span className="whitespace-nowrap font-black">{item.quantity}</span>
-                    <span className="whitespace-nowrap text-slate-400">{item.min_quantity}</span>
-                    <Badge variant={item.severity === 'critical' ? 'danger' : 'neutral'} className={item.severity === 'critical' ? 'border border-red-500/40 bg-red-100 text-red-700' : 'border border-amber-500/40 bg-amber-100 text-amber-800'}>{item.severity === 'critical' ? 'Crítico' : 'Baixo'}</Badge>
+                    <span className="hidden whitespace-nowrap text-slate-400 sm:inline">{item.min_quantity}</span>
+                    <Badge variant="inverse" className={item.severity === 'critical' ? 'border border-red-400/[0.35] bg-red-500/10 text-red-300' : 'border border-amber-400/[0.35] bg-amber-500/10 text-amber-300'}>{item.severity === 'critical' ? 'Crítico' : 'Baixo'}</Badge>
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          <section className="gp-surface-premium min-w-0 p-4">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gp-border-inverse pb-4">
-              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Produtos mais vendidos</span></h2>
-              <button type="button" className="text-sm font-black text-sky-400 hover:text-sky-300">Ver relatório</button>
+          <section className="gp-admin-panel min-w-0 p-4">
+            <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
+              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Produtos mais vendidos</span></h2>
+              <button type="button" className="gp-admin-link text-sm font-black">Ver relatório</button>
             </div>
             {topProducts.length === 0 ? <Feedback>Nenhum ranking disponível.</Feedback> : (
               <div className="space-y-3">
@@ -310,8 +365,8 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
                       <span className="whitespace-nowrap font-black text-slate-300">{item.quantity} un.</span>
                       <span className="whitespace-nowrap text-right font-black">{formatCurrency(item.revenue)}</span>
                     </div>
-                    <div className="ml-8 mt-2 h-2 rounded-gp-pill bg-white/10">
-                      <div className="h-2 rounded-gp-pill bg-gp-lime" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
+                    <div className="gp-admin-progress ml-8 mt-2 h-2">
+                      <div className="gp-admin-progress-bar h-2" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
                     </div>
                   </div>
                 ))}
@@ -354,17 +409,17 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
   const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="gp-surface-premium min-w-0 overflow-hidden p-4">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <section className="gp-admin-panel min-w-0 overflow-hidden p-4">
+      <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
         <div className="min-w-0">
-          <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-slate-300" size={20} /> <span className="truncate">Evolução das vendas</span></h2>
+          <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Evolução das vendas</span></h2>
           <p className="mt-1 text-sm text-slate-400">Série real de pedidos agregada {activePeriodLabel.toLowerCase()}.</p>
         </div>
         <AdminSelect value={period} onChange={(event) => onPeriodChange(event.target.value)} className="w-36">
           {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </AdminSelect>
       </div>
-      <div className="relative h-64 rounded-gp border border-gp-border-inverse bg-black/25 px-4 pb-8 pl-14 pt-5 shadow-gp-sm">
+      <div className="gp-admin-chart relative h-56 px-4 pb-8 pl-14 pt-5 xl:h-64">
         <div className="absolute bottom-8 left-4 top-5 flex flex-col-reverse justify-between text-xs font-bold leading-none text-slate-400">
           {yAxisValues.slice().reverse().map((value) => <span key={value}>{formatAxisValue(value)}</span>)}
         </div>
@@ -376,16 +431,17 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
         <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" preserveAspectRatio="none" role="img" aria-label="Gráfico de vendas por hora">
           <defs>
             <linearGradient id="salesArea" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--gp-lime)" stopOpacity="0.46" />
+              <stop offset="0%" stopColor="var(--gp-lime)" stopOpacity="0.28" />
               <stop offset="100%" stopColor="var(--gp-lime)" stopOpacity="0.03" />
             </linearGradient>
           </defs>
           {yAxisValues.map((value) => {
             const y = 94 - (value / maxValue) * 78;
-            return <line key={value} x1="7" x2="95" y1={y} y2={y} stroke="rgba(255,255,255,0.10)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />;
+            return <line key={value} x1="7" x2="95" y1={y} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />;
           })}
           <polyline points={areaPoints} fill="url(#salesArea)" stroke="none" />
-          <polyline points={chartPoints} fill="none" stroke="var(--gp-lime)" strokeWidth="2.6" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          <polyline points={chartPoints} fill="none" stroke="var(--gp-lime)" strokeWidth="5.4" opacity="0.10" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+          <polyline points={chartPoints} fill="none" stroke="var(--gp-lime)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
           {points.map((point, index) => {
             if (index % 2 !== 0) return null;
             const x = 7 + (index / Math.max(points.length - 1, 1)) * 88;
@@ -400,19 +456,19 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
 
 function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="gp-metric-card relative min-w-0 overflow-hidden p-5">
+    <section className="gp-admin-kpi min-w-0 overflow-hidden p-4 xl:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-gp border bg-black/20 shadow-gp-sm ${danger ? 'border-amber-500/70 text-amber-400' : 'border-gp-lime/50 text-gp-lime'}`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center ${danger ? 'gp-admin-kpi-icon gp-admin-kpi-icon-danger' : 'gp-admin-kpi-icon'}`}>
           {icon}
         </div>
         <Sparkline danger={danger} />
       </div>
       <p className="mt-4 text-sm font-bold text-gp-text-secondary">{title}</p>
-      <strong className="mt-2 block break-words text-2xl font-black text-white 2xl:text-3xl">{value}</strong>
+      <strong className="mt-2 block break-words text-2xl font-black text-white 2xl:text-[1.7rem]">{value}</strong>
       <div className={`mt-4 flex flex-wrap items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
         {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
         <span>{badge}</span>
-        {helper && <span className="font-medium text-white">{helper}</span>}
+        {helper && <span className="font-medium text-gp-text-muted">{helper}</span>}
       </div>
     </section>
   );
@@ -443,7 +499,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
   return (
     <>
       <DataCard title="Pedidos" subtitle="Pedidos salvos pelo cliente mobile e pelo totem." count={`${filteredOrders.length}/${orders.length} pedidos`}>
-        <div className="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[180px_180px_220px_minmax(0,1fr)]">
+        <div className="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[170px_170px_210px_minmax(0,1fr)]">
           <AdminTextInput type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
           <AdminSelect value={filters.origin} onChange={(event) => setFilters({ ...filters, origin: event.target.value })}>
             <option value="all">Todas as origens</option>
@@ -460,7 +516,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
         </div>
 
         {filteredOrders.length === 0 ? <Feedback>Nenhum pedido encontrado para os filtros.</Feedback> : (
-          <DataTable className="min-w-[960px]">
+          <DataTable className="min-w-[900px]">
             <thead>
               <tr><th className="px-4 py-3">Pedido</th><th>Cliente</th><th>Origem</th><th>Itens</th><th>Status</th><th>Criado em</th><th className="text-right">Total</th><th className="text-right">Ações</th></tr>
             </thead>
@@ -469,7 +525,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                 <tr key={order.id} className="align-top">
                   <td className="px-4 py-4 font-black">#{order.id}</td>
                   <td className="max-w-52 truncate text-slate-200">{order.customer_name || `Usuário ${order.user_id}`}</td>
-                  <td><Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge></td>
+                  <td><Badge variant="info">{getOrderOrigin(order)}</Badge></td>
                   <td className="py-4">
                     <div className="flex max-w-sm flex-wrap gap-1">
                       {order.items.map((item) => (
@@ -486,7 +542,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
                   </td>
                   <td className="text-slate-400">{new Date(order.created_at).toLocaleString('pt-BR')}</td>
                   <td className="pr-4 text-right font-black">{formatCurrency(order.total_amount)}</td>
-                  <td className="pr-4 text-right">
+                  <td className="min-w-[150px] pr-4 text-right">
                     <div className="inline-flex flex-wrap justify-end gap-2">
                       <Button size="sm" variant="inverse" onClick={() => setSelectedOrderId(order.id)}><Eye size={14} /> Detalhe</Button>
                       <Button size="sm" variant="inverse" onClick={() => copySummary(order)}><Copy size={14} /> Copiar</Button>
@@ -515,10 +571,10 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
 function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-      <section className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto p-5 text-white shadow-gp-modal">
+      <section className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <Badge className="bg-blue-500/20 text-blue-300">{getOrderOrigin(order)}</Badge>
+            <Badge variant="info">{getOrderOrigin(order)}</Badge>
             <h2 className="mt-3 text-2xl font-black">Pedido #{order.id}</h2>
             <p className="mt-1 flex items-center gap-2 text-sm text-slate-400"><Clock size={15} /> {new Date(order.created_at).toLocaleString('pt-BR')}</p>
           </div>
@@ -529,7 +585,7 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
           <InfoBlock label="Cliente" value={order.customer_name || `Usuário ${order.user_id}`} />
           <InfoBlock label="Total" value={formatCurrency(order.total_amount)} />
           <InfoBlock label="Pagamento" value={order.payment_method || 'Não informado'} />
-          <label className="rounded-gp border border-gp-border-inverse bg-white/[0.04] p-3">
+          <label className="gp-admin-panel-flat p-3">
             <span className="text-xs font-black uppercase text-slate-400">Status</span>
             <AdminSelect className="mt-2 w-full" value={order.status} onChange={(event) => onUpdateStatus(order.id, event.target.value)}>
               {ORDER_STATUS_OPTIONS.map((statusOption) => <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>)}
@@ -537,9 +593,9 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
           </label>
         </div>
 
-        <div className="mt-5 rounded-gp border border-gp-border-inverse">
-          <div className="border-b border-gp-border-inverse p-3 text-sm font-black text-slate-300">Itens</div>
-          <div className="divide-y divide-gp-border-inverse">
+        <div className="gp-admin-panel-flat mt-5">
+          <div className="gp-admin-panel-header p-3 text-sm font-black text-slate-300">Itens</div>
+          <div className="divide-y divide-white/10">
             {order.items.map((item) => (
               <div key={item.id} className="flex items-start justify-between gap-4 p-3 text-sm">
                 <div className="min-w-0">
@@ -563,7 +619,7 @@ function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus 
 
 function InfoBlock({ label, value }) {
   return (
-    <div className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.055] p-3 shadow-gp-sm">
+    <div className="gp-admin-panel-flat min-w-0 p-3">
       <span className="text-xs font-black uppercase text-slate-400">{label}</span>
       <strong className="mt-2 block break-words text-sm text-white">{value}</strong>
     </div>
@@ -573,6 +629,14 @@ function InfoBlock({ label, value }) {
 function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVariant, onDeleteVariant, onDeleteProduct }) {
   const [productModal, setProductModal] = useState(null);
   const [variantForms, setVariantForms] = useState({});
+  const [expandedProductId, setExpandedProductId] = useState(null);
+  const [newVariantProductId, setNewVariantProductId] = useState(null);
+
+  function toggleProduct(productId) {
+    const nextProductId = expandedProductId === productId ? null : productId;
+    setExpandedProductId(nextProductId);
+    setNewVariantProductId(null);
+  }
 
   function startVariantEdit(productId, variant) {
     setVariantForms({
@@ -608,7 +672,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
   return (
     <section className="space-y-4">
-      <div className="gp-surface-premium flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="gp-admin-panel flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4">
         <div>
           <h2 className="text-lg font-black">Produtos</h2>
           <p className="mt-1 text-sm text-slate-400">Cardápio, variantes, imagem e disponibilidade.</p>
@@ -616,50 +680,65 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
         <Button onClick={() => setProductModal({ product: null })}><Plus size={16} /> Novo produto</Button>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-        {products.map((product) => (
-          <article key={product.id} className="gp-surface-premium min-w-0 overflow-hidden">
-            <div className="grid min-h-44 sm:grid-cols-[150px_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-3 2xl:grid-cols-2">
+        {products.map((product) => {
+          const isExpanded = expandedProductId === product.id;
+          const showNewVariantForm = newVariantProductId === product.id;
+
+          return (
+          <article key={product.id} className="gp-admin-panel min-w-0 overflow-hidden">
+            <div className="grid min-h-28 sm:grid-cols-[112px_minmax(0,1fr)] xl:grid-cols-[120px_minmax(0,1fr)]">
               {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="h-44 w-full object-cover sm:h-full sm:min-h-44" />
+                <img src={product.image_url} alt={product.name} className="h-28 w-full object-cover sm:h-full sm:min-h-28" />
               ) : (
-                <div className="flex h-full min-h-44 items-center justify-center bg-white/[0.03] text-xs font-black uppercase text-slate-400">Sem imagem</div>
+                <div className="flex h-full min-h-28 items-center justify-center bg-white/[0.03] text-xs font-black uppercase text-slate-400">Sem imagem</div>
               )}
-              <div className="min-w-0 p-4">
-                <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 p-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="line-clamp-2 break-words font-black">{product.name}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-400">{product.description || 'Sem descrição'}</p>
+                    <h2 className="line-clamp-1 break-words font-black">{product.name}</h2>
+                    <p className="mt-1 line-clamp-1 text-sm text-slate-400">{product.description || 'Sem descrição'}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <strong className="text-lg leading-none">{formatCurrency(product.price)}</strong>
+                      <Badge variant="inverse">{getProductCategoryLabel(getProductCategory(product))}</Badge>
+                      <Badge variant="inverse">{product.variants.length} variantes</Badge>
+                    </div>
                   </div>
                   <Badge className="shrink-0" variant={product.is_active ? 'success' : 'neutral'}>{product.is_active ? 'Ativo' : 'Inativo'}</Badge>
                 </div>
-                <strong className="mt-3 block text-xl">{formatCurrency(product.price)}</strong>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <Button variant="inverse" size="sm" onClick={() => setProductModal({ product })}>Editar</Button>
                   <Button variant="inverse" size="sm" onClick={() => onSaveProduct(product, { ...product, is_active: !product.is_active }, null)}>
                     {product.is_active ? 'Desativar' : 'Ativar'}
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => onDeleteProduct(product)}><Trash2 size={14} /> Remover</Button>
+                  <Button size="sm" onClick={() => toggleProduct(product.id)}>
+                    {isExpanded ? 'Recolher' : 'Gerenciar'}
+                  </Button>
                 </div>
               </div>
             </div>
 
-            <div className="min-w-0 border-t border-gp-border-inverse p-4">
-            <div className="flex items-start justify-between gap-3">
+            {isExpanded && (
+            <div className="min-w-0 border-t border-white/10 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="text-sm font-black text-slate-300">Variantes</h3>
                 <p className="mt-1 text-xs text-slate-400">{product.variants.length} opções cadastradas</p>
               </div>
+              <Button size="sm" variant={showNewVariantForm ? 'inverse' : 'primary'} onClick={() => setNewVariantProductId(showNewVariantForm ? null : product.id)}>
+                <Plus size={16} /> Nova variante
+              </Button>
             </div>
 
-              {product.variants.length > 0 && (
+              {product.variants.length > 0 ? (
                 <div className="mt-3 space-y-2">
                   {product.variants.map((variant) => {
                     const variantForm = variantForms[variant.id];
                     if (variantForm) {
                       return (
-                        <div key={variant.id} className="rounded-gp border border-gp-border-inverse bg-black/20 p-3">
-                          <div className="grid gap-2 sm:grid-cols-2">
+                        <div key={variant.id} className="gp-admin-panel-flat p-3">
+                          <div className="grid gap-2 md:grid-cols-2">
                             <AdminTextInput placeholder="Variante" value={variantForm.name} onChange={(event) => updateVariantForm(variant.id, { name: event.target.value })} />
                             <AdminTextInput placeholder="Código" value={variantForm.code} onChange={(event) => updateVariantForm(variant.id, { code: event.target.value })} />
                             <AdminTextInput placeholder="Descrição" value={variantForm.description} onChange={(event) => updateVariantForm(variant.id, { description: event.target.value })} />
@@ -679,7 +758,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                     }
 
                     return (
-                      <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-gp bg-black/20 p-3 text-sm">
+                      <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-gp border border-white/10 bg-white/[0.035] p-3 text-sm">
                         <div className="min-w-0">
                           <strong className="break-words">{variant.name}</strong>
                           <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preço base'}</span>
@@ -693,11 +772,16 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                     );
                   })}
                 </div>
+              ) : (
+                <div className="mt-3 rounded-gp border border-dashed border-white/10 bg-white/[0.035] p-3 text-sm font-bold text-slate-400">
+                  Nenhuma variante cadastrada para este produto.
+                </div>
               )}
 
-              <div className="mt-4 rounded-gp border border-gp-border-inverse bg-black/20 p-3">
+              {showNewVariantForm && (
+              <div className="gp-admin-panel-flat mt-4 p-3">
                 <h3 className="text-sm font-black text-slate-300">Nova variante</h3>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
                   {['name', 'code', 'description', 'price'].map((field) => (
                     <AdminTextInput
                       key={field}
@@ -713,16 +797,23 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
                     />
                   ))}
                 </div>
-                <Button className="mt-3 w-full" size="sm" onClick={async () => {
-                  await onCreateVariant(product.id, variantForms[`new-${product.id}`] || {});
-                  setVariantForms({ ...variantForms, [`new-${product.id}`]: { name: '', code: '', description: '', price: '' } });
-                }}>
-                  <Plus size={16} /> Criar variante
-                </Button>
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  <Button size="sm" variant="inverse" onClick={() => setNewVariantProductId(null)}>Cancelar</Button>
+                  <Button size="sm" onClick={async () => {
+                    await onCreateVariant(product.id, variantForms[`new-${product.id}`] || {});
+                    setVariantForms({ ...variantForms, [`new-${product.id}`]: { name: '', code: '', description: '', price: '' } });
+                    setNewVariantProductId(null);
+                  }}>
+                    <Plus size={16} /> Criar variante
+                  </Button>
+                </div>
               </div>
+              )}
             </div>
+            )}
           </article>
-        ))}
+          );
+        })}
       </div>
 
       {productModal && (
@@ -745,6 +836,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
     code: product?.code || '',
     description: product?.description || '',
     price: product?.price || '',
+    category: product?.category || getProductCategory(product || {}),
     is_active: product?.is_active ?? true,
   });
   const [image, setImage] = useState(null);
@@ -763,7 +855,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4">
-      <form onSubmit={submitProduct} className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
+      <form onSubmit={submitProduct} className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
@@ -774,7 +866,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-[220px_minmax(0,1fr)]">
           <div>
-            <div className="flex aspect-square items-center justify-center overflow-hidden rounded-gp border border-gp-border-inverse bg-black/20">
+            <div className="flex aspect-square items-center justify-center overflow-hidden rounded-gp border border-white/10 bg-black/20">
               {imagePreview ? <img src={imagePreview} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black uppercase text-slate-400">Preview</span>}
             </div>
             <AdminFileInput onChange={handleImageChange} />
@@ -785,6 +877,9 @@ function ProductFormDialog({ product, onClose, onSave }) {
             <AdminTextInput placeholder="Código" value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} required />
             <AdminTextInput placeholder="Descrição" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
             <AdminTextInput placeholder="Preço" type="number" min="0" step="0.01" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
+            <AdminSelect value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })}>
+              {PRODUCT_CATEGORY_OPTIONS.map((category) => <option key={category.key} value={category.key}>{category.label}</option>)}
+            </AdminSelect>
             <AdminCheckbox checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} label="Produto ativo no cardápio" />
           </div>
         </div>
@@ -798,45 +893,72 @@ function ProductFormDialog({ product, onClose, onSave }) {
   );
 }
 
-function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveInventory, productMap }) {
+function InventoryPanel({ inventory, inventoryForms, setInventoryForms, onSaveInventory, onCreateInventory, productMap }) {
   const [filters, setFilters] = useState({ search: '', onlyLow: false });
+  const inventoryKeys = new Set(inventory.map((item) => `${item.product_id}:${item.variant_id || 'base'}`));
+  const missingInventory = [...productMap.values()].flatMap((product) => {
+    const variants = product.variants || [];
+    if (variants.length > 0) {
+      return variants
+        .filter((variant) => !inventoryKeys.has(`${product.id}:${variant.id}`))
+        .map((variant) => ({
+          id: `missing-${product.id}-${variant.id}`,
+          product_id: product.id,
+          variant_id: variant.id,
+          quantity: 0,
+          min_quantity: 0,
+          missing: true,
+        }));
+    }
+    return inventoryKeys.has(`${product.id}:base`)
+      ? []
+      : [{
+          id: `missing-${product.id}-base`,
+          product_id: product.id,
+          variant_id: null,
+          quantity: 0,
+          min_quantity: 0,
+          missing: true,
+        }];
+  });
+  const inventoryRows = [...inventory, ...missingInventory];
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity);
-  const filteredInventory = inventory.filter((item) => {
+  const filteredInventory = inventoryRows.filter((item) => {
     const product = productMap.get(item.product_id);
     const variant = product?.variants?.find((productVariant) => productVariant.id === item.variant_id);
     const searchableText = `${product?.name || ''} ${variant?.name || ''} ${item.product_id} ${item.variant_id || ''}`.toLowerCase();
     const matchesSearch = searchableText.includes(filters.search.toLowerCase());
-    const matchesLow = !filters.onlyLow || item.quantity <= item.min_quantity;
+    const matchesLow = !filters.onlyLow || item.missing || item.quantity <= item.min_quantity;
     return matchesSearch && matchesLow;
   });
 
   return (
-    <DataCard title="Estoque" subtitle="Controle por produto, variante, mínimo e alerta operacional." count={lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0}>
+    <DataCard title="Estoque" subtitle="Controle por produto, variante, mínimo e alerta operacional." count={missingInventory.length > 0 ? `${missingInventory.length} sem registro` : lowInventory.length > 0 ? `${lowInventory.length} alerta` : 'Sem alertas'} danger={lowInventory.length > 0 || missingInventory.length > 0}>
       <div className="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_190px_140px]">
         <AdminTextInput placeholder="Buscar produto ou variante" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} />
         <AdminCheckbox checked={filters.onlyLow} onChange={(event) => setFilters({ ...filters, onlyLow: event.target.checked })} label="Baixo estoque" />
         <Button variant="inverse" onClick={() => setFilters({ search: '', onlyLow: false })}>Limpar</Button>
       </div>
 
-      {inventory.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
+      {inventoryRows.length === 0 ? <Feedback>Nenhum estoque cadastrado.</Feedback> : filteredInventory.length === 0 ? <Feedback>Nenhum item encontrado para os filtros.</Feedback> : (
         <DataTable className="min-w-[760px]">
           <thead>
             <tr><th className="px-4 py-3">Produto</th><th>Variante</th><th>Quantidade</th><th>Mínimo</th><th>Severidade</th><th className="text-right">Ação</th></tr>
           </thead>
           <tbody>
             {filteredInventory.map((item) => {
-              const isLow = item.quantity <= item.min_quantity;
-              const isCritical = item.quantity === 0;
+              const isLow = !item.missing && item.quantity <= item.min_quantity;
+              const isCritical = !item.missing && item.quantity === 0;
               const product = productMap.get(item.product_id);
               const variant = product?.variants?.find((productVariant) => productVariant.id === item.variant_id);
               return (
                 <tr key={item.id}>
                   <td className="max-w-64 truncate px-4 py-4 font-black">{product?.name || `Produto #${item.product_id}`}</td>
                   <td className="max-w-52 truncate text-slate-300">{variant?.name || (item.variant_id ? `Variante #${item.variant_id}` : 'Produto base')}</td>
-                  <td className="py-4"><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
-                  <td><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? ''} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
-                  <td><Badge variant={isLow ? 'danger' : 'success'}>{isCritical ? 'Crítico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
-                  <td className="pr-4 text-right"><Button size="sm" onClick={() => onSaveInventory(item.id)}>Salvar</Button></td>
+                  <td className="py-4"><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.quantity ?? String(item.quantity)} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), quantity: event.target.value } })} /></td>
+                  <td><AdminTextInput className="max-w-28" type="number" min="0" value={inventoryForms[item.id]?.min_quantity ?? String(item.min_quantity)} onChange={(event) => setInventoryForms({ ...inventoryForms, [item.id]: { ...(inventoryForms[item.id] || {}), min_quantity: event.target.value } })} /></td>
+                  <td><Badge variant={item.missing ? 'warning' : isLow ? 'danger' : 'success'}>{item.missing ? 'Sem registro' : isCritical ? 'Crítico' : isLow ? 'Baixo' : 'Ok'}</Badge></td>
+                  <td className="pr-4 text-right"><Button size="sm" onClick={() => item.missing ? onCreateInventory(item) : onSaveInventory(item.id)}>{item.missing ? 'Criar estoque' : 'Salvar'}</Button></td>
                 </tr>
               );
             })}
@@ -912,7 +1034,7 @@ function CustomersPanel({ customers }) {
 
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-          <section className="gp-surface-premium max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
+          <section className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <Badge variant="neutral">Cliente</Badge>
@@ -956,7 +1078,7 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
   return (
     <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,360px)]">
-      <form onSubmit={submitSettings} className="gp-surface-premium min-w-0 p-5">
+      <form onSubmit={submitSettings} className="gp-admin-panel min-w-0 p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-lg font-black">Configurações</h2>
@@ -984,11 +1106,11 @@ function SettingsPanel({ settings, onSaveSettings }) {
         </div>
       </form>
 
-      <aside className="gp-surface-premium min-w-0 p-5">
+      <aside className="gp-admin-panel min-w-0 p-5">
         <Badge variant="neutral">Preview</Badge>
         <h2 className="mt-3 text-lg font-black">Mensagem WhatsApp</h2>
-        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-gp bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
-        <div className="mt-4 break-words rounded-gp bg-black/20 p-4 text-sm text-slate-300">
+        <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-gp border border-white/10 bg-black/30 p-4 text-sm leading-6 text-slate-300">{preview}</pre>
+        <div className="mt-4 break-words rounded-gp border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-300">
           {form.totem_message}
         </div>
       </aside>
@@ -998,14 +1120,20 @@ function SettingsPanel({ settings, onSaveSettings }) {
 
 function DataCard({ title, subtitle, count, danger = false, children }) {
   return (
-    <section className="gp-surface-premium min-w-0 overflow-hidden">
-      <PanelHeader title={title} subtitle={subtitle} action={<Badge variant={danger ? 'danger' : 'neutral'}>{count}</Badge>} />
-      <div className="overflow-x-auto p-4">{children}</div>
+    <section className="gp-admin-panel min-w-0 overflow-hidden">
+      <PanelHeader
+        title={title}
+        subtitle={subtitle}
+        className="gp-admin-panel-header"
+        action={<Badge variant="inverse" className={danger ? 'border border-red-400/[0.35] bg-red-500/10 text-red-300' : ''}>{count}</Badge>}
+      />
+      <div className="gp-scrollbar-soft max-w-full overflow-x-auto p-3 sm:p-4">{children}</div>
     </section>
   );
 }
 
 function AdminSummaryCard({ analytics, orders, inventory }) {
+  const [summaryOpen, setSummaryOpen] = useState(true);
   const revenue = analytics?.kpis?.sales_today ?? orders.reduce((total, order) => total + Number(order.total_amount), 0);
   const ordersToday = analytics?.kpis?.orders_today ?? orders.length;
   const itemsSold = analytics?.kpis?.items_sold_today ?? orders.reduce((total, order) => total + order.items.reduce((sum, item) => sum + item.quantity, 0), 0);
@@ -1013,19 +1141,24 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
 
   return (
-    <section className="min-w-0 rounded-gp border border-gp-border-inverse bg-white/[0.055] p-4 shadow-gp-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <section className="gp-admin-summary min-w-0 p-4">
+      <button
+        type="button"
+        className={`flex w-full items-center justify-between gap-3 text-left ${summaryOpen ? 'mb-4' : ''}`}
+        onClick={() => setSummaryOpen(!summaryOpen)}
+        aria-expanded={summaryOpen}
+      >
         <h2 className="text-sm font-black">Resumo do dia</h2>
-        <ChevronDown size={17} className="text-slate-300" />
-      </div>
-      {[
+        <ChevronDown size={17} className={`text-slate-300 transition ${summaryOpen ? '' : '-rotate-90'}`} />
+      </button>
+      {summaryOpen && [
         ['Vendas', formatCurrency(revenue)],
         ['Pedidos', ordersToday],
         ['Itens vendidos', itemsSold],
         ['Clientes atendidos', customersServed],
         ['Alertas estoque', lowInventory],
       ].map(([label, value]) => (
-        <div key={label} className="border-t border-gp-border-inverse py-3 first:border-t-0 first:pt-0">
+        <div key={label} className="border-t border-white/10 py-3 first:border-t-0 first:pt-0">
           <span className="block text-xs font-medium text-slate-300">{label}</span>
           <strong className="mt-1 block break-words text-lg font-black text-gp-lime">{value}</strong>
         </div>
@@ -1049,6 +1182,7 @@ export function AdminPage() {
   const [analytics, setAnalytics] = useState(null);
   const [salesSeries, setSalesSeries] = useState(null);
   const [salesPeriod, setSalesPeriod] = useState('hour');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [inventoryForms, setInventoryForms] = useState({});
   const [productToDelete, setProductToDelete] = useState(null);
   const [errorDialog, setErrorDialog] = useState('');
@@ -1152,6 +1286,7 @@ export function AdminPage() {
       code: productForm.code,
       description: productForm.description || null,
       price: productForm.price,
+      category: productForm.category,
       is_active: productForm.is_active,
     };
     try {
@@ -1202,6 +1337,22 @@ export function AdminPage() {
       await gymPrimeApi.updateInventory(itemId, { quantity: Number(form.quantity), min_quantity: Number(form.min_quantity) });
       await refreshAdminData();
       toast.success('Estoque atualizado');
+    } catch (error) {
+      handleAdminError(error);
+    }
+  }
+
+  async function createInventory(item) {
+    const form = inventoryForms[item.id] || {};
+    try {
+      await gymPrimeApi.createInventory({
+        product_id: item.product_id,
+        variant_id: item.variant_id,
+        quantity: Number(form.quantity ?? item.quantity),
+        min_quantity: Number(form.min_quantity ?? item.min_quantity),
+      });
+      await refreshAdminData();
+      toast.success('Estoque criado');
     } catch (error) {
       handleAdminError(error);
     }
@@ -1259,39 +1410,56 @@ export function AdminPage() {
   const activeTabLabel = ADMIN_TABS.find((item) => item.key === tab)?.label || 'Dashboard';
 
   return (
-    <main className="gp-app-bg grid h-screen min-h-0 grid-cols-[210px_minmax(0,1fr)] overflow-hidden text-white xl:grid-cols-[228px_minmax(0,1fr)]">
-      <aside className="gp-scrollbar-soft flex min-h-0 min-w-0 flex-col overflow-y-auto border-r border-gp-border-inverse bg-gp-bg-main/90 p-4 text-white backdrop-blur xl:p-5">
-        <BrandMark label="Gym Prime" tone="dark" />
-        <span className="mt-3 inline-flex min-h-7 w-fit items-center rounded-gp-pill border border-gp-border-inverse bg-white/[0.07] px-3 text-xs font-black uppercase tracking-normal text-gp-lime">ADMIN</span>
+    <main className={`gp-admin-shell gp-admin-layout ${sidebarCollapsed ? 'is-sidebar-collapsed' : ''}`}>
+      <aside className="gp-admin-sidebar gp-scrollbar-soft flex min-h-0 min-w-0 flex-col overflow-y-auto p-4 text-white backdrop-blur xl:p-5">
+        <div className={`gp-admin-brand-row flex min-w-0 items-center ${sidebarCollapsed ? 'flex-col justify-center gap-2' : 'justify-between gap-3'}`}>
+          {sidebarCollapsed ? (
+            <span className="flex h-11 w-11 items-center justify-center rounded-gp border border-gp-lime/30 bg-gp-lime/10 text-sm font-black text-gp-lime">GP</span>
+          ) : (
+            <BrandMark label="Gym Prime" tone="dark" />
+          )}
+          <button
+            type="button"
+            className="gp-admin-chip flex h-9 w-9 shrink-0 items-center justify-center p-0"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label={sidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
+            aria-expanded={!sidebarCollapsed}
+          >
+            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        </div>
+        {!sidebarCollapsed && <span className="gp-admin-eyebrow mt-3 inline-flex min-h-7 w-fit items-center px-3 text-xs font-black uppercase tracking-normal">ADMIN</span>}
         <nav className="mt-8 space-y-2">
           {ADMIN_TABS.map(({ key, label, icon }) => (
             <button
               key={key}
               type="button"
-              className={`flex min-h-12 w-full min-w-0 items-center gap-3 rounded-gp-sm px-3 text-left text-sm font-black transition ${tab === key ? 'gp-active-item' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
+              className={`gp-admin-nav-item flex min-h-12 w-full min-w-0 items-center rounded-gp-sm px-3 text-left text-sm font-black transition ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${tab === key ? 'is-active' : ''}`}
               onClick={() => setTab(key)}
+              aria-label={label}
+              title={label}
             >
               <span className="shrink-0">{icon}</span>
-              <span className="truncate">{label}</span>
+              <span className={sidebarCollapsed ? 'sr-only' : 'truncate'}>{label}</span>
             </button>
           ))}
         </nav>
         <div className="mt-auto space-y-4">
-          <AdminSummaryCard analytics={analytics} orders={orders} inventory={inventory} />
-          <Link to={APP_ROUTES.totem} className="flex min-h-10 items-center justify-center rounded-gp-sm border border-gp-border-inverse text-xs font-black text-slate-300 hover:bg-white/10 hover:text-white">
-            Abrir Totem
+          {!sidebarCollapsed && <AdminSummaryCard analytics={analytics} orders={orders} inventory={inventory} />}
+          <Link to={APP_ROUTES.totem} className="gp-admin-chip flex min-h-10 items-center justify-center rounded-gp-sm px-3 text-xs font-black" aria-label="Abrir Totem" title="Abrir Totem">
+            {sidebarCollapsed ? <span aria-hidden="true">T</span> : 'Abrir Totem'}
           </Link>
-          <div className="text-xs font-medium leading-6 text-slate-400">
+          <div className={`text-xs font-medium leading-6 text-slate-400 ${sidebarCollapsed ? 'sr-only' : ''}`}>
             <span className="block">(c) 2026 Gym Prime</span>
             <span className="block">v1.0.0</span>
           </div>
         </div>
       </aside>
 
-      <section className="gp-scrollbar-soft min-h-0 min-w-0 overflow-y-auto bg-[radial-gradient(circle_at_48%_4%,rgb(var(--gp-lime-rgb)/0.06),transparent_34%)] p-4 xl:p-7">
+      <section className="gp-admin-content gp-scrollbar-soft min-h-0 min-w-0 overflow-y-auto p-4 xl:p-7">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="truncate text-3xl font-black leading-none xl:text-4xl">{activeTabLabel}</h1>
+            <h1 className="truncate text-2xl font-black leading-none xl:text-3xl">{activeTabLabel}</h1>
             {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operação local da lanchonete Gym Prime.</p>}
           </div>
           <div className="flex flex-wrap items-center justify-end gap-3">
@@ -1299,17 +1467,17 @@ export function AdminPage() {
               <span className="h-3 w-3 shrink-0 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
               Servidor local online
             </div>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-4 text-sm font-black shadow-gp-sm">
+            <button type="button" className="gp-admin-chip flex min-h-11 items-center gap-3 px-4 text-sm font-black">
               <CalendarDays size={16} />
               Hoje
               <ChevronDown size={15} />
             </button>
-            <button type="button" className="flex min-h-11 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.055] px-4 text-sm font-black shadow-gp-sm">
+            <button type="button" className="gp-admin-chip flex min-h-11 items-center gap-3 px-4 text-sm font-black">
               <Shield size={16} />
               Administrador
               <ChevronDown size={15} />
             </button>
-            <button type="button" className="text-xs font-black text-slate-400 underline-offset-4 hover:text-white hover:underline" onClick={handleLogout}>
+            <button type="button" className="gp-admin-link text-xs font-black underline-offset-4 hover:underline" onClick={handleLogout}>
               Sair
             </button>
           </div>
@@ -1330,7 +1498,7 @@ export function AdminPage() {
         )}
         {tab === 'orders' && <OrdersPanel orders={orders} productMap={productMap} onUpdateStatus={updateOrderStatus} />}
         {tab === 'products' && <ProductsPanel products={products} onSaveProduct={saveProduct} onCreateVariant={createVariant} onUpdateVariant={updateVariant} onDeleteVariant={deleteVariant} onDeleteProduct={setProductToDelete} />}
-        {tab === 'inventory' && <InventoryPanel inventory={inventory} inventoryForms={inventoryForms} setInventoryForms={setInventoryForms} onSaveInventory={saveInventory} productMap={productMap} />}
+        {tab === 'inventory' && <InventoryPanel inventory={inventory} inventoryForms={inventoryForms} setInventoryForms={setInventoryForms} onSaveInventory={saveInventory} onCreateInventory={createInventory} productMap={productMap} />}
         {tab === 'audit' && <AuditPanel auditLogs={auditLogs} />}
         {tab === 'customers' && <CustomersPanel customers={customers} />}
         {tab === 'settings' && <SettingsPanel key={settings ? JSON.stringify(settings) : 'settings'} settings={settings} onSaveSettings={saveSettings} />}
