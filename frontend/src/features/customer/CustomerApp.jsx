@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ChevronRight, Dumbbell, Grid2X2, Leaf, LogIn, Plus, Search, ShoppingBag, UserPlus, Zap } from 'lucide-react';
+import { Check, ChevronRight, Dumbbell, Grid2X2, Leaf, LogIn, Plus, RotateCcw, Search, ShoppingBag, Trash2, UserPlus, X, Zap } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Feedback, ModalActions, TextInput } from '../../components/ui.jsx';
 import { APP_ROUTES } from '../../app/routes.js';
 import { toast } from '../../app/toast.js';
 import { gymPrimeApi } from '../../services/gymPrimeApi.js';
-import { buildProductMap, filterProductsByCategory, formatCurrency, getProductCategory, PRODUCT_CATEGORIES } from '../shared/catalog.js';
+import { buildLocalCart, buildProductMap, filterProductsByCategory, formatCurrency, getProductCategory, PRODUCT_CATEGORIES } from '../shared/catalog.js';
 import { BrandMark, ErrorDialog, OrderSuccessModal, PriceSummary, ProductDetailsModal, ProductImage, ProductPromoBadge, ProductStockBadge, VariantPickerModal } from '../shared/SharedUi.jsx';
 
 const CATEGORY_ICONS = {
@@ -22,6 +22,35 @@ function matchesProductSearch(product, searchTerm) {
   const categoryKey = getProductCategory(product);
   const categoryLabel = PRODUCT_CATEGORIES.find((item) => item.key === categoryKey)?.label || categoryKey;
   return [product.name, product.description, categoryKey, categoryLabel].some((value) => String(value || '').toLowerCase().includes(query));
+}
+
+function getCartItemKey(item) {
+  return `${item.product_id}-${item.variant_id || 'base'}`;
+}
+
+function cartItemsToLines(items) {
+  return items.map((item) => ({
+    product_id: item.product_id,
+    variant_id: item.variant_id || null,
+    quantity: item.quantity,
+  }));
+}
+
+function getCartSyncDeltas(serverItems, draftItems) {
+  const draftByKey = new Map(draftItems.map((item) => [getCartItemKey(item), item]));
+  const serverByKey = new Map(serverItems.map((item) => [getCartItemKey(item), item]));
+
+  for (const serverItem of serverItems) {
+    const draftItem = draftByKey.get(getCartItemKey(serverItem));
+    if (!draftItem || Number(serverItem.quantity) > Number(draftItem.quantity)) return null;
+  }
+
+  return draftItems.flatMap((draftItem) => {
+    const serverItem = serverByKey.get(getCartItemKey(draftItem));
+    const quantity = Number(draftItem.quantity) - Number(serverItem?.quantity || 0);
+    if (quantity <= 0) return [];
+    return [{ product_id: draftItem.product_id, variant_id: draftItem.variant_id || null, quantity }];
+  });
 }
 
 function AuthField({ label, hint, ...props }) {
@@ -150,22 +179,23 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
   );
 }
 
-function CustomerCartBar({ cart, onCheckout }) {
-  const hasItems = cart.items.length > 0;
+function CustomerCartBar({ cart, onOpen }) {
+  const itemCount = cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+  const hasItems = itemCount > 0;
   return (
     <div className="gp-bottom-bar fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 text-gp-text-primary">
       <div className="mx-auto flex max-w-xl min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-gp-pill border border-gp-border-inverse bg-white/10 shadow-gp-sm">
             <ShoppingBag size={26} />
-            {cart.items.length > 0 && <span className="absolute -right-1 -top-1 rounded-gp-pill bg-gp-lime px-2 py-0.5 text-gp-xs font-gp-black text-gp-text-inverse">{cart.items.length}</span>}
+            {itemCount > 0 && <span className="absolute -right-1 -top-1 rounded-gp-pill bg-gp-lime px-2 py-0.5 text-gp-xs font-gp-black text-gp-text-inverse">{itemCount}</span>}
           </div>
           <div className="min-w-0">
-            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">{cart.items.length} itens</span>
+            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">{itemCount} itens</span>
             <strong className="block truncate text-xl font-gp-black text-gp-lime sm:text-2xl">{formatCurrency(cart.total_amount)}</strong>
           </div>
         </div>
-        <Button className={`gp-primary-cta min-h-12 shrink-0 px-4 text-gp-sm sm:min-h-14 sm:px-6 sm:text-gp-base ${hasItems ? 'shadow-gp-glow' : ''}`} disabled={!hasItems} onClick={onCheckout}>
+        <Button className={`gp-primary-cta min-h-12 shrink-0 px-4 text-gp-sm sm:min-h-14 sm:px-6 sm:text-gp-base ${hasItems ? 'shadow-gp-glow' : ''}`} disabled={!hasItems} onClick={onOpen}>
           Ver carrinho
           <ChevronRight size={20} />
         </Button>
@@ -174,25 +204,78 @@ function CustomerCartBar({ cart, onCheckout }) {
   );
 }
 
-function CheckoutConfirmModal({ cart, onCancel, onConfirm }) {
+function CustomerCartModal({ cart, onCancel, onConfirm, onIncrement, onDecrement, onRemove, onClear }) {
+  const hasItems = cart.items.length > 0;
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-panel/70 p-4 sm:items-center">
       <section className="gp-card-light max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-gp p-5 shadow-gp-modal sm:rounded-gp">
-        <Badge variant="success">Confirmação</Badge>
-        <h2 className="mt-3 text-xl font-gp-black text-gp-text-inverse">Finalizar pedido?</h2>
-        <p className="mt-1 text-gp-sm text-slate-700">Confira o total antes de gerar o pedido para a administração.</p>
-        <div className="mt-4 max-h-56 space-y-2 overflow-y-auto">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <Badge variant="success">Carrinho</Badge>
+            <h2 className="mt-3 text-xl font-gp-black text-gp-text-inverse">Revise seu pedido</h2>
+            <p className="mt-1 text-gp-sm text-slate-700">Ajuste quantidades antes de finalizar.</p>
+          </div>
+          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={onCancel} aria-label="Fechar carrinho">
+            <X size={18} />
+          </Button>
+        </div>
+
+        <div className="mt-4 max-h-[42dvh] space-y-2 overflow-y-auto pr-1">
+          {!hasItems && (
+            <EmptyState className="border-slate-200 bg-slate-50 py-6" icon={<ShoppingBag size={32} />} iconClassName="text-slate-500" title="Carrinho vazio">
+              Adicione produtos para revisar seu pedido.
+            </EmptyState>
+          )}
           {cart.items.map((item) => (
-            <div key={`${item.product_id}-${item.variant_id || 'base'}`} className="flex items-start justify-between gap-3 rounded-gp bg-slate-50 px-3 py-2 text-gp-sm">
-              <span className="min-w-0 break-words text-slate-700">{item.quantity}x {item.name}</span>
-              <strong className="shrink-0 text-gp-text-inverse">{formatCurrency(item.total_price)}</strong>
+            <div key={getCartItemKey(item)} className="rounded-gp border border-slate-200 bg-slate-50 p-3 text-gp-sm shadow-gp-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <strong className="line-clamp-2 break-words text-gp-text-inverse">{item.name}</strong>
+                  <span className="mt-1 block font-gp-bold text-slate-600">{formatCurrency(item.unit_price)} un.</span>
+                </div>
+                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-gp-danger hover:bg-red-50 hover:text-gp-danger" onClick={() => onRemove(item)} aria-label={`Remover ${item.name}`}>
+                  <Trash2 size={17} />
+                </Button>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
+                    style={{ fontFamily: 'Arial, sans-serif', fontSize: '24px', lineHeight: '1', color: '#06110b' }}
+                    onClick={() => onDecrement(item)}
+                    aria-label={`Diminuir ${item.name}`}
+                  >
+                    -
+                  </button>
+                  <strong className="w-8 text-center text-gp-base text-gp-text-inverse">{item.quantity}</strong>
+                  <button
+                    type="button"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gp-lime/60 bg-gp-lime p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
+                    style={{ fontFamily: 'Arial, sans-serif', fontSize: '24px', lineHeight: '1', color: '#06110b' }}
+                    onClick={() => onIncrement(item)}
+                    aria-label={`Aumentar ${item.name}`}
+                  >
+                    +
+                  </button>
+                </div>
+                <strong className="text-base text-gp-text-inverse">{formatCurrency(item.total_price)}</strong>
+              </div>
             </div>
           ))}
         </div>
+
         <PriceSummary className="mt-4" value={cart.total_amount} />
+        {hasItems && (
+          <Button className="mt-3 w-full" variant="danger" onClick={onClear}>
+            <RotateCcw size={18} />
+            Limpar carrinho
+          </Button>
+        )}
         <ModalActions>
           <Button variant="secondary" onClick={onCancel}>Voltar</Button>
-          <Button className="gp-primary-cta" onClick={onConfirm}><Check size={18} /> Confirmar</Button>
+          <Button className="gp-primary-cta" disabled={!hasItems} onClick={onConfirm}><Check size={18} /> Finalizar</Button>
         </ModalActions>
       </section>
     </div>
@@ -240,7 +323,7 @@ function CustomerMenuPage({ user, onLogout }) {
   const [productsError, setProductsError] = useState('');
   const [category, setCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [cart, setCart] = useState({ items: [], total_amount: 0 });
+  const [cartLines, setCartLines] = useState([]);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
   const [view, setView] = useState('menu');
   const [myOrders, setMyOrders] = useState([]);
@@ -252,6 +335,7 @@ function CustomerMenuPage({ user, onLogout }) {
   const categoryProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
   const visibleProducts = useMemo(() => categoryProducts.filter((product) => matchesProductSearch(product, searchTerm)), [categoryProducts, searchTerm]);
   const productMap = useMemo(() => buildProductMap(products), [products]);
+  const cart = useMemo(() => buildLocalCart(cartLines, products), [cartLines, products]);
 
   useEffect(() => {
     Promise.all([gymPrimeApi.listProducts(), gymPrimeApi.getPublicSettings().catch(() => null)])
@@ -264,7 +348,7 @@ function CustomerMenuPage({ user, onLogout }) {
         toast.error(error.message);
       })
       .finally(() => setProductsLoading(false));
-    gymPrimeApi.getCart().then(setCart).catch(() => {});
+    gymPrimeApi.getCart().then((data) => setCartLines(cartItemsToLines(data.items))).catch(() => {});
     refreshMyOrders();
   }, []);
 
@@ -276,19 +360,36 @@ function CustomerMenuPage({ user, onLogout }) {
     }
   }
 
-  async function handleAdd(productId, variantId) {
+  function handleAdd(productId, variantId) {
     if (!publicSettings.menu_is_open) {
       toast.error('Cardápio fechado no momento');
       return;
     }
-    try {
-      const data = await gymPrimeApi.addCartItem({ product_id: productId, variant_id: variantId, quantity: 1 });
-      setCart(data);
-      toast.success('Item adicionado');
-    } catch (error) {
-      setErrorDialog(error.message);
-      toast.error(error.message);
+    setCartLines((current) => {
+      const normalizedVariantId = variantId || null;
+      const existing = current.find((line) => line.product_id === productId && line.variant_id === normalizedVariantId);
+      if (existing) {
+        return current.map((line) => (line === existing ? { ...line, quantity: line.quantity + 1 } : line));
+      }
+      return [...current, { product_id: productId, variant_id: normalizedVariantId, quantity: 1 }];
+    });
+    toast.success('Item adicionado');
+  }
+
+  async function syncCartBeforeCheckout() {
+    const serverCart = await gymPrimeApi.getCart();
+    const deltas = getCartSyncDeltas(serverCart.items, cart.items);
+
+    if (deltas === null) {
+      setCartLines(cartItemsToLines(serverCart.items));
+      throw new Error('Encontramos um carrinho anterior no servidor. Revise os itens antes de finalizar.');
     }
+
+    let syncedCart = serverCart;
+    for (const delta of deltas) {
+      syncedCart = await gymPrimeApi.addCartItem(delta);
+    }
+    return syncedCart;
   }
 
   async function handleCheckout() {
@@ -297,9 +398,14 @@ function CustomerMenuPage({ user, onLogout }) {
       toast.error('Cardápio fechado no momento');
       return;
     }
+    if (cart.items.length === 0) {
+      toast.error('Carrinho vazio');
+      return;
+    }
     try {
+      await syncCartBeforeCheckout();
       const result = await gymPrimeApi.checkoutCart();
-      setCart({ items: [], total_amount: 0 });
+      setCartLines([]);
       setShowCheckoutConfirm(false);
       setSuccessResult(result);
       refreshMyOrders();
@@ -308,6 +414,26 @@ function CustomerMenuPage({ user, onLogout }) {
       setErrorDialog(error.message);
       toast.error(error.message);
     }
+  }
+
+  function incrementCartItem(item) {
+    setCartLines((current) => current.map((line) => (
+      line.product_id === item.product_id && line.variant_id === (item.variant_id || null)
+        ? { ...line, quantity: line.quantity + 1 }
+        : line
+    )));
+  }
+
+  function decrementCartItem(item) {
+    setCartLines((current) => current.flatMap((line) => {
+      if (line.product_id !== item.product_id || line.variant_id !== (item.variant_id || null)) return [line];
+      if (line.quantity <= 1) return [];
+      return [{ ...line, quantity: line.quantity - 1 }];
+    }));
+  }
+
+  function removeCartItem(item) {
+    setCartLines((current) => current.filter((line) => line.product_id !== item.product_id || line.variant_id !== (item.variant_id || null)));
   }
 
   return (
@@ -390,8 +516,18 @@ function CustomerMenuPage({ user, onLogout }) {
         </div>
       </section>
 
-      <CustomerCartBar cart={cart} onCheckout={() => setShowCheckoutConfirm(true)} />
-      {showCheckoutConfirm && <CheckoutConfirmModal cart={cart} onCancel={() => setShowCheckoutConfirm(false)} onConfirm={handleCheckout} />}
+      <CustomerCartBar cart={cart} onOpen={() => setShowCheckoutConfirm(true)} />
+      {showCheckoutConfirm && (
+        <CustomerCartModal
+          cart={cart}
+          onCancel={() => setShowCheckoutConfirm(false)}
+          onConfirm={handleCheckout}
+          onIncrement={incrementCartItem}
+          onDecrement={decrementCartItem}
+          onRemove={removeCartItem}
+          onClear={() => setCartLines([])}
+        />
+      )}
       {detailsProduct && <ProductDetailsModal product={detailsProduct} onClose={() => setDetailsProduct(null)} />}
       {successResult && <OrderSuccessModal result={successResult} onClose={() => setSuccessResult(null)} />}
       {errorDialog && <ErrorDialog message={errorDialog} onClose={() => setErrorDialog('')} />}

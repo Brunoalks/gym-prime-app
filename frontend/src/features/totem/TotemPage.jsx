@@ -38,25 +38,25 @@ function TotemProductCard({ product, onAdd, onDetails }) {
   }
 
   return (
-    <article className="gp-card-light gp-card-hover flex min-h-[282px] min-w-0 flex-col overflow-hidden">
-      <ProductImage product={product} className="h-24 shrink-0 sm:h-28 2xl:h-32" />
-      <div className="gp-product-card-content flex min-h-0 min-w-0 flex-1 flex-col p-3">
-        <h3 className="gp-product-card-title line-clamp-2 min-h-[2.5rem] min-w-0 text-lg font-gp-black leading-tight">{product.name}</h3>
+    <article className="gp-card-light gp-card-hover flex min-h-[248px] min-w-0 flex-col overflow-hidden">
+      <ProductImage product={product} className="h-20 shrink-0 sm:h-24 min-[900px]:h-28 min-[1200px]:h-24 2xl:h-28" />
+      <div className="gp-product-card-content flex min-h-0 min-w-0 flex-1 flex-col p-2.5 sm:p-3">
+        <h3 className="gp-product-card-title line-clamp-2 min-h-[2.35rem] min-w-0 text-base font-gp-black leading-tight min-[900px]:text-lg">{product.name}</h3>
         <div className="mt-1.5 flex min-h-6 flex-wrap items-center gap-1.5">
           {product.variants.length > 0 && <ProductPromoBadge className="max-w-full shrink-0 truncate px-2 text-[0.68rem]">Variante</ProductPromoBadge>}
           <ProductStockBadge className="min-h-6 w-fit px-2 text-[0.68rem]" />
         </div>
-        <p className="mt-1.5 line-clamp-2 min-h-9 text-gp-sm font-gp-medium leading-[1.15rem] text-slate-700">
+        <p className="mt-1.5 line-clamp-2 min-h-8 text-[0.82rem] font-gp-medium leading-4 text-slate-700 sm:text-gp-sm sm:leading-[1.15rem]">
           {product.description || 'Produto disponível no cardápio.'}
         </p>
-        <div className="mt-auto pt-2.5">
-          <strong className="gp-product-card-price block truncate text-xl font-gp-black leading-none 2xl:text-2xl">{formatCurrency(price)}</strong>
-          <div className="gp-product-card-actions mt-2.5 grid grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-2 pt-2.5">
-            <Button variant="secondary" className="min-h-11 min-w-0 px-2 text-sm" onClick={() => onDetails(product)}>
+        <div className="mt-auto pt-2">
+          <strong className="gp-product-card-price block truncate text-lg font-gp-black leading-none sm:text-xl 2xl:text-2xl">{formatCurrency(price)}</strong>
+          <div className="gp-product-card-actions mt-2 grid grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-2 pt-2">
+            <Button variant="secondary" className="min-h-10 min-w-0 px-2 text-sm" onClick={() => onDetails(product)}>
               <span className="truncate">Detalhes</span>
               <Info size={17} />
             </Button>
-            <Button className="gp-primary-cta min-h-11 min-w-0 px-2 text-sm" onClick={handleAdd}>
+            <Button className="gp-primary-cta min-h-10 min-w-0 px-2 text-sm" onClick={handleAdd}>
               <Plus size={18} />
               <span className="truncate">Adicionar</span>
             </Button>
@@ -81,7 +81,8 @@ function TotemProductCard({ product, onAdd, onDetails }) {
 }
 
 function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemove, onClose = null, className = '', compact = false }) {
-  const hasItems = cart.items.length > 0;
+  const itemCount = cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+  const hasItems = itemCount > 0;
   const listClassName = compact ? 'max-h-[min(34dvh,22rem)] flex-none' : 'flex-1';
   const footerClassName = compact ? 'mt-3 border-t border-gp-border-inverse pt-3' : '';
   const maxHeightClassName = compact ? '' : 'max-h-[calc(100vh-2rem)]';
@@ -99,7 +100,7 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
           {!compact && <p className="mt-1 text-gp-sm font-gp-bold text-gp-text-secondary">Revise antes de finalizar.</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Badge variant={hasItems ? 'success' : 'neutral'}>{cart.items.length} itens</Badge>
+          <Badge variant={hasItems ? 'success' : 'neutral'}>{itemCount} itens</Badge>
           {onClose && (
             <Button variant="ghost" size="icon" className="h-10 w-10 text-gp-text-primary hover:bg-white/10" onClick={onClose} aria-label="Fechar pedido">
               <X size={19} />
@@ -164,13 +165,15 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
 }
 
 function TotemNameModal({ cart, customerName, setCustomerName, onCancel, onConfirm }) {
+  const itemCount = cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gp-bg-panel/70 p-4 sm:p-6">
       <form onSubmit={onConfirm} className="gp-card-light max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 shadow-gp-modal sm:p-7">
         <Badge variant="success">Totem</Badge>
         <h2 className="mt-3 text-2xl font-gp-black text-gp-text-inverse sm:text-3xl">Para quem é o pedido?</h2>
         <p className="mt-2 text-gp-base font-gp-medium text-slate-700">Informe apenas o nome para a administração chamar no balcão.</p>
-        <PriceSummary className="mt-5 p-5" label={`${cart.items.length} itens`} value={cart.total_amount} valueClassName="text-3xl" />
+        <PriceSummary className="mt-5 p-5" label={`${itemCount} itens`} value={cart.total_amount} valueClassName="text-3xl" />
         <TextInput
           className="mt-5 min-h-14 text-gp-lg"
           placeholder="Nome do pedido"
@@ -208,6 +211,7 @@ export function TotemPage() {
   const categoryProducts = useMemo(() => filterProductsByCategory(activeProducts, category), [activeProducts, category]);
   const visibleProducts = useMemo(() => categoryProducts.filter((product) => matchesProductSearch(product, searchTerm)), [categoryProducts, searchTerm]);
   const cart = useMemo(() => buildLocalCart(cartLines, products), [cartLines, products]);
+  const cartItemCount = cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
 
   useEffect(() => {
     Promise.all([gymPrimeApi.listProducts(), gymPrimeApi.getPublicSettings().catch(() => null)])
@@ -284,17 +288,17 @@ export function TotemPage() {
   }
 
   return (
-    <main className="gp-app-bg grid min-h-screen grid-cols-1 gap-2 overflow-x-hidden p-2 text-gp-text-primary min-[1200px]:h-screen min-[1200px]:min-h-0 min-[1200px]:grid-cols-[minmax(180px,200px)_minmax(0,1fr)_minmax(300px,320px)] min-[1200px]:gap-4 min-[1200px]:overflow-hidden min-[1200px]:p-4 2xl:grid-cols-[220px_minmax(0,1fr)_360px]">
-      <nav className="gp-surface-premium flex min-w-0 flex-col gap-2 overflow-hidden p-2 text-gp-text-primary min-[1200px]:min-h-0 min-[1200px]:gap-0 min-[1200px]:p-4">
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gp-border-inverse pb-2 min-[1200px]:block min-[1200px]:pb-5">
+    <main className="gp-app-bg grid min-h-screen grid-cols-1 gap-1.5 overflow-x-hidden p-1.5 text-gp-text-primary min-[1200px]:h-screen min-[1200px]:min-h-0 min-[1200px]:grid-cols-[minmax(180px,200px)_minmax(0,1fr)_minmax(300px,320px)] min-[1200px]:gap-4 min-[1200px]:overflow-hidden min-[1200px]:p-4 2xl:grid-cols-[220px_minmax(0,1fr)_360px]">
+      <nav className="gp-surface-premium flex min-w-0 flex-col gap-1.5 overflow-hidden p-1.5 text-gp-text-primary sm:p-2 min-[1200px]:min-h-0 min-[1200px]:gap-0 min-[1200px]:p-4">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gp-border-inverse pb-1.5 min-[1200px]:block min-[1200px]:pb-4">
           <BrandMark label="Gym Prime" tone="dark" />
           <strong className="shrink-0 text-base font-black italic text-gp-lime min-[1200px]:mt-3 min-[1200px]:block min-[1200px]:text-xl">TOTEM</strong>
         </div>
-        <div className="gp-scrollbar-soft -mx-1 flex min-w-0 gap-2 overflow-x-auto px-1 pb-1 min-[1200px]:mx-0 min-[1200px]:mt-5 min-[1200px]:min-h-0 min-[1200px]:flex-1 min-[1200px]:flex-col min-[1200px]:space-y-2 min-[1200px]:overflow-x-hidden min-[1200px]:overflow-y-auto min-[1200px]:px-0 min-[1200px]:pb-0 min-[1200px]:pr-1">
+        <div className="gp-scrollbar-soft -mx-1 flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 min-[1200px]:mx-0 min-[1200px]:mt-4 min-[1200px]:min-h-0 min-[1200px]:flex-1 min-[1200px]:flex-col min-[1200px]:space-y-2 min-[1200px]:overflow-x-hidden min-[1200px]:overflow-y-auto min-[1200px]:px-0 min-[1200px]:pb-0 min-[1200px]:pr-1">
           {PRODUCT_CATEGORIES.map((item) => (
             <Button
               key={item.key}
-              className={`min-h-11 shrink-0 justify-start px-3 text-sm min-[1200px]:min-h-14 min-[1200px]:w-full min-[1200px]:px-4 min-[1200px]:text-base xl:min-h-16 xl:text-lg ${category === item.key ? '' : 'bg-white/[0.065]'}`}
+              className={`min-h-10 shrink-0 justify-start px-2.5 text-sm min-[1200px]:min-h-12 min-[1200px]:w-full min-[1200px]:px-4 min-[1200px]:text-base xl:min-h-14 xl:text-lg ${category === item.key ? '' : 'bg-white/[0.065]'}`}
               variant={category === item.key ? 'primary' : 'inverse'}
               onClick={() => setCategory(item.key)}
             >
@@ -303,23 +307,23 @@ export function TotemPage() {
             </Button>
           ))}
         </div>
-        <div className="gp-promo-card flex shrink-0 items-center gap-2 p-2.5 min-[1200px]:mt-4 min-[1200px]:block min-[1200px]:p-4 xl:p-5">
-          <Zap className="h-7 w-7 shrink-0 text-gp-lime min-[1200px]:h-10 min-[1200px]:w-10" />
+        <div className="gp-promo-card flex shrink-0 items-center gap-2 p-2 min-[1200px]:mt-3 min-[1200px]:block min-[1200px]:p-3 xl:p-4">
+          <Zap className="h-6 w-6 shrink-0 text-gp-lime min-[1200px]:h-9 min-[1200px]:w-9" />
           <div className="min-w-0">
-            <strong className="block text-sm font-gp-black italic leading-tight min-[1200px]:mt-3 min-[1200px]:text-xl"><span className="min-[1200px]:hidden">ENERGIA / FOCO</span><span className="hidden min-[1200px]:block">ENERGIA<br />FOCO<br />RESULTADO</span></strong>
-            <span className="mt-0.5 line-clamp-1 text-gp-xs font-gp-black uppercase text-gp-lime min-[1200px]:mt-5 min-[1200px]:line-clamp-2">{publicSettings.totem_message}</span>
+            <strong className="block text-sm font-gp-black italic leading-tight min-[1200px]:mt-2 min-[1200px]:text-lg"><span className="min-[1200px]:hidden">ENERGIA / FOCO</span><span className="hidden min-[1200px]:block">ENERGIA<br />FOCO<br />RESULTADO</span></strong>
+            <span className="mt-0.5 line-clamp-1 text-gp-xs font-gp-black uppercase text-gp-lime min-[1200px]:mt-3 min-[1200px]:line-clamp-2">{publicSettings.totem_message}</span>
           </div>
         </div>
       </nav>
 
-      <section className="gp-surface-premium flex min-w-0 items-center justify-between gap-2 px-3 py-2 min-[1200px]:hidden">
+      <section className="gp-surface-premium flex min-w-0 items-center justify-between gap-2 px-3 py-1.5 min-[1200px]:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-gp-pill border border-gp-lime/25 bg-gp-lime/10 text-gp-lime shadow-gp-sm">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-gp-pill border border-gp-lime/25 bg-gp-lime/10 text-gp-lime shadow-gp-sm">
             <ShoppingBag size={21} />
           </span>
           <div className="min-w-0">
-            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">Seu pedido - {cart.items.length} itens</span>
-            <strong className="block truncate text-xl font-gp-black text-gp-lime">{formatCurrency(cart.total_amount)}</strong>
+            <span className="block text-gp-xs font-gp-black uppercase text-gp-text-muted">Seu pedido - {cartItemCount} itens</span>
+            <strong className="block truncate text-lg font-gp-black text-gp-lime">{formatCurrency(cart.total_amount)}</strong>
           </div>
         </div>
         <Button className="gp-primary-cta min-h-10 shrink-0 px-3 text-sm" onClick={() => setCartDrawerOpen(true)}>
@@ -327,13 +331,13 @@ export function TotemPage() {
         </Button>
       </section>
 
-      <section className="gp-surface-premium flex min-w-0 flex-col overflow-visible p-2.5 min-[1200px]:min-h-0 min-[1200px]:overflow-hidden min-[1200px]:p-4">
-        <header className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
+      <section className="gp-surface-premium flex min-w-0 flex-col overflow-visible p-2 min-[1200px]:min-h-0 min-[1200px]:overflow-hidden min-[1200px]:p-4">
+        <header className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
             <h1 className="text-2xl font-gp-black tracking-normal min-[1200px]:text-3xl xl:text-4xl">Cardápio</h1>
             <p className="mt-0.5 text-gp-sm font-gp-medium text-gp-text-secondary min-[1200px]:text-gp-base">Toque para adicionar ao pedido.</p>
           </div>
-          <label className="flex min-h-11 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-3 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
+          <label className="flex min-h-10 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-3 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
             <Search className="shrink-0 text-gp-lime" size={20} />
             <input
               className="min-w-0 flex-1 bg-transparent font-gp-bold text-gp-text-primary outline-none placeholder:text-gp-text-secondary"
@@ -352,11 +356,11 @@ export function TotemPage() {
         ) : productsLoading ? (
           <Feedback>Carregando produtos...</Feedback>
         ) : visibleProducts.length === 0 ? (
-          <EmptyState className="!py-4 min-[1200px]:!py-8" icon={<ShoppingBag size={28} />} iconClassName="text-gp-lime/80" title="Nenhum produto encontrado">
+          <EmptyState className="!py-4" icon={<ShoppingBag size={28} />} iconClassName="text-gp-lime/80" title="Nenhum produto encontrado">
             Ajuste a busca ou escolha outra categoria.
           </EmptyState>
         ) : (
-          <div className="gp-scrollbar-soft grid grid-cols-[repeat(auto-fit,minmax(min(19rem,100%),1fr))] gap-3 min-[1200px]:min-h-0 min-[1200px]:grid-cols-[repeat(auto-fill,minmax(min(16.5rem,100%),1fr))] min-[1200px]:overflow-y-auto min-[1200px]:pr-1 2xl:grid-cols-[repeat(auto-fill,minmax(17.5rem,1fr))]">
+          <div className="gp-scrollbar-soft grid grid-cols-[repeat(auto-fit,minmax(min(15rem,100%),17.5rem))] justify-center gap-2.5 min-[900px]:grid-cols-[repeat(auto-fit,minmax(16rem,18.5rem))] min-[1200px]:min-h-0 min-[1200px]:grid-cols-[repeat(auto-fit,minmax(min(15rem,100%),18rem))] min-[1200px]:overflow-y-auto min-[1200px]:pr-1 2xl:grid-cols-[repeat(auto-fit,minmax(16rem,18.5rem))]">
             {visibleProducts.map((product) => (
               <TotemProductCard key={product.id} product={product} onAdd={handleAdd} onDetails={setDetailsProduct} />
             ))}
