@@ -9,8 +9,61 @@ export const PRODUCT_CATEGORIES = [
 
 export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.filter((category) => category.key !== 'all');
 
+const PRODUCT_CATEGORY_ALIASES = {
+  all: 'all',
+  todos: 'all',
+  drinks: 'drinks',
+  drink: 'drinks',
+  bebida: 'drinks',
+  bebidas: 'drinks',
+  beverage: 'drinks',
+  beverages: 'drinks',
+  agua: 'drinks',
+  aguas: 'drinks',
+  suco: 'drinks',
+  sucos: 'drinks',
+  refrigerante: 'drinks',
+  refrigerantes: 'drinks',
+  isotonico: 'drinks',
+  isotonicos: 'drinks',
+  protein: 'protein',
+  proteins: 'protein',
+  proteina: 'protein',
+  proteinas: 'protein',
+  whey: 'protein',
+  snack: 'snacks',
+  snacks: 'snacks',
+  lanche: 'snacks',
+  lanches: 'snacks',
+  preworkout: 'preworkout',
+  preworkouts: 'preworkout',
+  'pre workout': 'preworkout',
+  pretreino: 'preworkout',
+  'pre treino': 'preworkout',
+  cafeina: 'preworkout',
+  combo: 'combos',
+  combos: 'combos',
+};
+
+function normalizeCategoryValue(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function normalizeCategoryKey(value) {
+  const normalized = normalizeCategoryValue(value);
+  const compact = normalized.replace(/\s+/g, '');
+  return PRODUCT_CATEGORY_ALIASES[normalized] || PRODUCT_CATEGORY_ALIASES[compact] || '';
+}
+
 export function getProductCategoryLabel(categoryKey) {
-  return PRODUCT_CATEGORIES.find((category) => category.key === categoryKey)?.label || categoryKey || 'Snacks';
+  const normalizedKey = normalizeCategoryKey(categoryKey) || categoryKey;
+  return PRODUCT_CATEGORIES.find((category) => category.key === normalizedKey)?.label || categoryKey || 'Snacks';
 }
 
 export function formatCurrency(value) {
@@ -23,19 +76,21 @@ export function getProductPrice(product, variantId = null) {
 }
 
 export function getProductCategory(product) {
-  if (PRODUCT_CATEGORY_OPTIONS.some((category) => category.key === product.category)) return product.category;
+  const categoryKey = normalizeCategoryKey(product?.category);
+  if (categoryKey && categoryKey !== 'all') return categoryKey;
 
-  const text = `${product.name} ${product.description || ''}`.toLowerCase();
+  const text = `${product?.name || ''} ${product?.description || ''}`.toLowerCase();
   if (text.includes('combo')) return 'combos';
   if (text.includes('pre') || text.includes('cafeina')) return 'preworkout';
   if (text.includes('shake') || text.includes('whey') || text.includes('prote')) return 'protein';
-  if (text.includes('coca') || text.includes('agua') || text.includes('suco') || text.includes('bebida')) return 'drinks';
+  if (text.includes('coca') || text.includes('gatorade') || text.includes('agua') || text.includes('suco') || text.includes('bebida') || text.includes('isotonico')) return 'drinks';
   return 'snacks';
 }
 
 export function filterProductsByCategory(products, category) {
-  if (category === 'all') return products;
-  return products.filter((product) => getProductCategory(product) === category);
+  const categoryKey = normalizeCategoryKey(category) || category;
+  if (categoryKey === 'all') return products;
+  return products.filter((product) => getProductCategory(product) === categoryKey);
 }
 
 export function buildLocalCart(cartLines, products) {

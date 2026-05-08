@@ -112,24 +112,24 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
   }
 
   return (
-    <article className="gp-card-light gp-card-hover grid grid-cols-[clamp(6.25rem,30vw,7.25rem)_minmax(0,1fr)] gap-3 overflow-hidden p-2.5">
+    <article className="gp-card-light gp-card-hover grid grid-cols-[clamp(5.5rem,26vw,6.5rem)_minmax(0,1fr)] gap-2.5 overflow-hidden p-2">
       <ProductImage product={product} className="aspect-square rounded-gp" />
-      <div className="gp-product-card-content flex min-w-0 flex-col rounded-gp px-2 py-2">
-        <div className="flex items-start justify-between gap-2">
-          <h2 className="gp-product-card-title line-clamp-2 min-w-0 text-lg font-gp-black leading-tight sm:text-xl">{product.name}</h2>
-          {product.variants.length > 0 && <ProductPromoBadge className="min-h-6 shrink-0 px-2 text-[0.68rem]">Variante</ProductPromoBadge>}
+      <div className="gp-product-card-content flex min-w-0 flex-col rounded-gp px-2 py-1.5">
+        <h2 className="gp-product-card-title line-clamp-2 min-w-0 text-base font-gp-black leading-tight sm:text-lg">{product.name}</h2>
+        <div className="mt-1.5 flex min-h-6 flex-wrap items-center gap-1.5">
+          {product.variants.length > 0 && <ProductPromoBadge className="min-h-6 max-w-full shrink-0 truncate px-2 text-[0.68rem]">Variante</ProductPromoBadge>}
+          <ProductStockBadge className="min-h-6 w-fit px-2 text-[0.68rem]" showIcon />
         </div>
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-700 sm:text-gp-base">{product.description || 'Produto disponível para pedido.'}</p>
-        <ProductStockBadge className="mt-3 min-h-6 w-fit px-2 text-[0.68rem]" showIcon />
-        <div className="mt-auto pt-3">
-          <strong className="gp-product-card-price text-xl font-gp-black leading-none">{formatCurrency(price)}</strong>
-          <div className="gp-product-card-actions mt-3 grid grid-cols-[1fr_44px] gap-2 pt-3">
-            <Button size="sm" variant="secondary" className="min-h-11 min-w-0 px-2" onClick={() => onDetails(product)}>
+        <div className="mt-auto pt-2.5">
+          <strong className="gp-product-card-price block truncate text-lg font-gp-black leading-none sm:text-xl">{formatCurrency(price)}</strong>
+          <div className="gp-product-card-actions mt-2.5 grid grid-cols-[1fr_42px] gap-2 pt-2.5">
+            <Button size="sm" variant="secondary" className="min-h-10 min-w-0 px-2" onClick={() => onDetails(product)}>
               <span className="truncate">Detalhes</span>
               <ChevronRight size={16} />
             </Button>
-            <Button size="icon" className="gp-primary-cta h-11 w-11" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
-              <Plus size={23} />
+            <Button size="icon" className="gp-primary-cta h-10 w-10" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
+              <Plus size={22} />
             </Button>
           </div>
         </div>
