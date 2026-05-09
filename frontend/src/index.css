@@ -206,6 +206,14 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
   }
 
+  .gp-admin-shell .gp-field-dark {
+    border-color: rgba(255, 255, 255, 0.075);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.026) 100%);
+    color: var(--gp-text-primary);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
   .gp-field-dark:focus {
     box-shadow: var(--gp-shadow-focus), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
@@ -323,16 +331,16 @@
 
   .gp-admin-shell {
     background:
-      radial-gradient(circle at 54% -12%, rgb(var(--gp-lime-rgb) / 0.055), transparent 34%),
-      radial-gradient(circle at 96% 18%, rgb(var(--gp-purple-rgb) / 0.07), transparent 30%),
-      linear-gradient(180deg, #070808 0%, #040505 100%);
+      radial-gradient(ellipse at 28% -16%, rgb(var(--gp-lime-rgb) / 0.13), transparent 38%),
+      radial-gradient(ellipse at 88% -8%, rgb(var(--gp-purple-rgb) / 0.13), transparent 36%),
+      linear-gradient(180deg, #080b0a 0%, #050606 48%, #030404 100%);
   }
 
   .gp-admin-layout {
     display: grid;
     height: 100vh;
     min-height: 0;
-    grid-template-columns: minmax(13.75rem, 13.75rem) minmax(0, 1fr);
+    grid-template-columns: minmax(13.25rem, 13.25rem) minmax(0, 1fr);
     overflow: hidden;
     color: var(--gp-text-primary);
   }
@@ -342,10 +350,11 @@
   }
 
   .gp-admin-sidebar {
-    border-right: 1px solid rgba(255, 255, 255, 0.085);
+    border-right: 1px solid rgba(255, 255, 255, 0.065);
     background:
-      linear-gradient(180deg, rgb(var(--gp-bg-panel-rgb) / 0.92) 0%, rgb(var(--gp-bg-main-rgb) / 0.98) 100%);
-    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.025);
+      radial-gradient(circle at 50% -12%, rgb(var(--gp-lime-rgb) / 0.075), transparent 34%),
+      linear-gradient(180deg, rgba(13, 16, 16, 0.96) 0%, rgba(5, 6, 6, 0.985) 100%);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.018);
   }
 
   .gp-admin-content {
@@ -353,8 +362,22 @@
     max-width: 100%;
     overflow-x: hidden;
     background:
-      radial-gradient(circle at 48% 0%, rgb(var(--gp-lime-rgb) / 0.045), transparent 32%),
-      radial-gradient(circle at 100% 10%, rgb(var(--gp-purple-rgb) / 0.055), transparent 28%);
+      radial-gradient(ellipse at 30% -10%, rgb(var(--gp-lime-rgb) / 0.12), transparent 34%),
+      radial-gradient(ellipse at 86% -6%, rgb(var(--gp-purple-rgb) / 0.11), transparent 38%),
+      linear-gradient(180deg, rgba(9, 12, 11, 0.94) 0%, rgba(4, 5, 5, 0.98) 46%, rgba(4, 5, 5, 0.99) 100%);
+  }
+
+  .gp-admin-topbar {
+    position: relative;
+    isolation: isolate;
+    border: 1px solid rgba(255, 255, 255, 0.058);
+    border-radius: var(--gp-radius-lg);
+    padding: 0.875rem;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgb(var(--gp-lime-rgb) / 0.095), transparent 42%),
+      radial-gradient(ellipse at 82% 0%, rgb(var(--gp-purple-rgb) / 0.105), transparent 42%),
+      linear-gradient(135deg, rgba(21, 25, 24, 0.70) 0%, rgba(12, 14, 15, 0.58) 52%, rgba(7, 8, 8, 0.48) 100%);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .gp-admin-eyebrow {
@@ -372,17 +395,17 @@
 
   .gp-admin-nav-item {
     border: 1px solid transparent;
-    color: var(--gp-text-muted);
+    color: rgb(var(--gp-text-muted-rgb) / 0.82);
     background: transparent;
   }
 
   .gp-admin-nav-item svg {
-    color: var(--gp-text-muted);
+    color: rgb(var(--gp-text-muted-rgb) / 0.76);
   }
 
   .gp-admin-nav-item:hover {
-    border-color: rgba(255, 255, 255, 0.085);
-    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.075);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--gp-text-primary);
   }
 
@@ -391,11 +414,11 @@
   }
 
   .gp-admin-nav-item.is-active {
-    border-color: rgb(var(--gp-lime-rgb) / 0.32);
+    border-color: rgb(var(--gp-lime-rgb) / 0.24);
     background:
-      linear-gradient(90deg, rgb(var(--gp-lime-rgb) / 0.16) 0%, rgba(255, 255, 255, 0.045) 100%);
+      linear-gradient(90deg, rgb(var(--gp-lime-rgb) / 0.13) 0%, rgba(255, 255, 255, 0.035) 100%);
     color: var(--gp-text-primary);
-    box-shadow: inset 3px 0 0 var(--gp-lime), 0 10px 24px rgba(0, 0, 0, 0.16);
+    box-shadow: inset 2px 0 0 rgb(var(--gp-lime-rgb) / 0.86), 0 12px 28px rgba(0, 0, 0, 0.12);
   }
 
   .gp-admin-nav-item.is-active svg {
@@ -403,8 +426,8 @@
   }
 
   .gp-admin-layout.is-sidebar-collapsed .gp-admin-sidebar {
-    padding-right: 1rem;
-    padding-left: 1rem;
+    padding-right: 0.875rem;
+    padding-left: 0.875rem;
   }
 
   .gp-admin-layout.is-sidebar-collapsed .gp-admin-nav-item {
@@ -414,33 +437,32 @@
 
   .gp-admin-panel {
     min-width: 0;
-    border: 1px solid rgba(255, 255, 255, 0.105);
+    border: 1px solid rgba(255, 255, 255, 0.064);
     border-radius: var(--gp-radius-lg);
     background:
-      radial-gradient(circle at 12% 0%, rgb(var(--gp-lime-rgb) / 0.04), transparent 30%),
-      radial-gradient(circle at 100% 0%, rgb(var(--gp-purple-rgb) / 0.045), transparent 30%),
-      linear-gradient(180deg, rgb(var(--gp-bg-elevated-rgb) / 0.96) 0%, rgb(var(--gp-bg-card-rgb) / 0.94) 100%);
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+      linear-gradient(180deg, rgba(24, 27, 28, 0.82) 0%, rgba(14, 16, 17, 0.76) 100%);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.038);
+    backdrop-filter: blur(10px);
   }
 
   .gp-admin-panel-flat {
     min-width: 0;
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.065);
     border-radius: var(--gp-radius-lg);
-    background: rgb(var(--gp-bg-panel-rgb) / 0.64);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
   .gp-admin-panel-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .gp-admin-chip {
-    border: 1px solid rgba(255, 255, 255, 0.095);
+    border: 1px solid rgba(255, 255, 255, 0.075);
     border-radius: var(--gp-radius-pill);
-    background: rgba(255, 255, 255, 0.055);
+    background: rgba(255, 255, 255, 0.045);
     color: var(--gp-text-secondary);
-    box-shadow: var(--gp-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: var(--gp-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.035);
     transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
   }
 
@@ -457,22 +479,31 @@
   }
 
   .gp-admin-summary {
-    border: 1px solid rgba(255, 255, 255, 0.085);
+    border: 1px solid rgba(255, 255, 255, 0.065);
     border-radius: var(--gp-radius-lg);
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.025) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.018) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .gp-admin-dashboard-hero {
+    border: 1px solid rgba(255, 255, 255, 0.058);
+    border-radius: var(--gp-radius-lg);
+    background:
+      radial-gradient(ellipse at 18% 0%, rgb(var(--gp-lime-rgb) / 0.105), transparent 42%),
+      radial-gradient(ellipse at 96% 14%, rgb(var(--gp-purple-rgb) / 0.095), transparent 40%),
+      linear-gradient(135deg, rgba(22, 27, 25, 0.66) 0%, rgba(12, 14, 15, 0.50) 56%, rgba(6, 7, 7, 0.46) 100%);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .gp-admin-kpi {
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.105);
+    border: 1px solid rgba(255, 255, 255, 0.058);
     border-radius: var(--gp-radius-lg);
     background:
-      radial-gradient(circle at 88% 8%, rgb(var(--gp-lime-rgb) / 0.07), transparent 32%),
-      radial-gradient(circle at 0% 0%, rgb(var(--gp-purple-rgb) / 0.045), transparent 30%),
-      linear-gradient(180deg, rgba(24, 27, 28, 0.96) 0%, rgba(15, 17, 18, 0.96) 100%);
-    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+      radial-gradient(circle at 92% 0%, rgb(var(--gp-lime-rgb) / 0.055), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.064) 0%, rgba(255, 255, 255, 0.030) 100%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.038);
   }
 
   .gp-admin-kpi::after {
@@ -480,16 +511,21 @@
     position: absolute;
     inset: auto 1rem 0 1rem;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(var(--gp-lime-rgb) / 0.24), transparent);
-    opacity: 0.75;
+    background: linear-gradient(90deg, transparent, rgb(var(--gp-lime-rgb) / 0.16), transparent);
+    opacity: 0.55;
   }
 
   .gp-admin-kpi-icon {
-    border: 1px solid rgb(var(--gp-lime-rgb) / 0.24);
+    border: 1px solid rgb(var(--gp-lime-rgb) / 0.18);
     border-radius: var(--gp-radius);
-    background: rgb(var(--gp-lime-rgb) / 0.075);
-    color: var(--gp-lime);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    background: rgb(var(--gp-lime-rgb) / 0.055);
+    color: rgb(var(--gp-lime-rgb) / 0.88);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  .gp-admin-kpi-icon svg {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   .gp-admin-kpi-icon-danger {
@@ -501,8 +537,8 @@
   .gp-admin-progress {
     overflow: hidden;
     border-radius: var(--gp-radius-pill);
-    background: rgba(255, 255, 255, 0.075);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.22);
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
   }
 
   .gp-admin-progress-bar {
@@ -512,12 +548,12 @@
   }
 
   .gp-admin-chart {
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: var(--gp-radius-lg);
     background:
-      radial-gradient(circle at 50% 0%, rgb(var(--gp-lime-rgb) / 0.055), transparent 32%),
-      linear-gradient(180deg, rgba(3, 4, 4, 0.34) 0%, rgba(3, 4, 4, 0.18) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      radial-gradient(circle at 50% 0%, rgb(var(--gp-lime-rgb) / 0.04), transparent 34%),
+      linear-gradient(180deg, rgba(3, 4, 4, 0.26) 0%, rgba(3, 4, 4, 0.12) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
   .gp-admin-link {
@@ -537,7 +573,7 @@
 
   @media (min-width: 1280px) {
     .gp-admin-layout {
-      grid-template-columns: minmax(14.75rem, 14.75rem) minmax(0, 1fr);
+      grid-template-columns: minmax(14rem, 14rem) minmax(0, 1fr);
     }
 
     .gp-admin-layout.is-sidebar-collapsed {
@@ -547,7 +583,7 @@
 
   @media (max-width: 1279px) {
     .gp-admin-layout {
-      grid-template-columns: minmax(12.5rem, 12.5rem) minmax(0, 1fr);
+      grid-template-columns: minmax(11.75rem, 11.75rem) minmax(0, 1fr);
     }
 
     .gp-admin-brand-row img {
@@ -716,15 +752,15 @@
   }
 
   .gp-table thead {
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--gp-text-muted);
+    background: rgba(255, 255, 255, 0.026);
+    color: rgb(var(--gp-text-muted-rgb) / 0.92);
     font-size: var(--gp-font-xs);
     font-weight: var(--gp-weight-black);
     text-transform: uppercase;
   }
 
   .gp-table thead th {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .gp-table tbody {
@@ -736,16 +772,16 @@
   }
 
   .gp-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.032);
+    background: rgba(255, 255, 255, 0.026);
   }
 
   .gp-table th,
   .gp-table td {
-    padding: 0.95rem 1rem;
+    padding: 0.78rem 0.875rem;
     vertical-align: middle;
   }
 
   .gp-table tbody td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.048);
   }
 }

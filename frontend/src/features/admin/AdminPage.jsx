@@ -149,16 +149,16 @@ function StatusPill({ status }) {
 
 function Sparkline({ danger = false }) {
   const stroke = danger ? 'var(--gp-warning)' : 'var(--gp-lime)';
-  const bars = [18, 30, 22, 42, 28, 52];
+  const bars = [10, 16, 12, 22, 15, 26];
   if (danger) {
     return (
-      <div className="flex h-10 items-end gap-1 opacity-80">
+      <div className="flex h-7 items-end gap-1 opacity-55">
         {bars.map((height, index) => <span key={index} className="w-1.5 rounded-gp-sm bg-amber-400/70" style={{ height }} />)}
       </div>
     );
   }
   return (
-    <svg viewBox="0 0 92 42" className="h-10 w-24 opacity-90" aria-hidden="true">
+    <svg viewBox="0 0 92 42" className="h-7 w-16 opacity-55" aria-hidden="true">
       <polyline points="0,34 12,35 22,30 34,31 46,22 57,14 68,24 80,15 92,10" fill="none" stroke={stroke} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -275,18 +275,20 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
   });
 
   return (
-    <section className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
-        <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" helper="vs ontem" icon={<DollarSign size={24} />} />
-        <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" helper="vs ontem" icon={<ShoppingBag size={24} />} />
-        <KpiCard title="Ticket médio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
-        <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atenção' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
+    <section className="gp-admin-dashboard space-y-3">
+      <div className="gp-admin-dashboard-hero p-2.5 sm:p-3 xl:p-3.5">
+        <div className="grid gap-2.5 sm:grid-cols-2 2xl:grid-cols-4">
+          <KpiCard title="Vendas hoje" value={formatCurrency(kpis?.sales_today ?? revenue)} badge="18,8%" helper="vs ontem" icon={<DollarSign size={24} />} />
+          <KpiCard title="Pedidos" value={kpis?.orders_today ?? orders.length} badge="11,8%" helper="vs ontem" icon={<ShoppingBag size={24} />} />
+          <KpiCard title="Ticket médio" value={formatCurrency(kpis?.average_ticket ?? (orders.length ? revenue / orders.length : 0))} badge="6,3%" helper="vs ontem" icon={<TrendingUp size={24} />} />
+          <KpiCard title="Estoque em alerta" value={lowInventoryItems.length} badge={lowInventoryItems.length ? 'Requer atenção' : 'Ok'} danger={lowInventoryItems.length > 0} icon={<AlertTriangle size={24} />} />
+        </div>
       </div>
 
-      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(18rem,380px)]">
+      <div className="grid min-w-0 gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(18rem,360px)]">
         <section className="gp-admin-panel min-w-0 overflow-hidden">
-          <div className="gp-admin-panel-header flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-            <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><ClipboardList className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Pedidos recentes</span></h2>
+          <div className="gp-admin-panel-header flex flex-wrap items-center justify-between gap-2.5 px-4 py-3">
+            <h2 className="flex min-w-0 items-center gap-2.5 text-base font-black"><ClipboardList className="shrink-0 text-gp-lime" size={18} /> <span className="truncate">Pedidos recentes</span></h2>
             <div className="flex flex-wrap items-center gap-2">
               <AdminSelect className="min-h-9 w-40 px-2 text-xs" value={recentOrdersPeriod} onChange={(event) => setRecentOrdersPeriod(event.target.value)}>
                 {DASHBOARD_ORDER_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -300,19 +302,19 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
             <div className="gp-scrollbar-soft overflow-x-auto">
               <DataTable className="min-w-[760px]">
                 <thead>
-                  <tr><th className="px-5 py-3"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-6 text-right">Total</th><th className="pl-3">Status</th></tr>
+                  <tr><th className="px-4 py-2.5"># Pedido</th><th>Hora</th><th>Origem / Cliente</th><th>Itens</th><th className="pr-5 text-right">Total</th><th className="pl-3">Status</th></tr>
                 </thead>
                 <tbody>
                   {recentOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-white/[0.025]">
-                      <td className="px-5 py-3.5 font-black">#{order.id}</td>
+                      <td className="px-4 py-3 font-black">#{order.id}</td>
                       <td className="text-slate-300">{formatTime(order.created_at)}</td>
                       <td className="text-slate-200">
                         {order.customer_label || order.customer_name || `Usuário ${order.user_id}`}
                         <Badge className="ml-2 min-h-6 border border-sky-400/40 bg-sky-400/10 px-2 text-sky-300">{order.origin || (order.user_id ? 'Cliente' : 'Totem')}</Badge>
                       </td>
                       <td className="text-slate-300">{order.items_count ?? order.items?.length ?? 0} itens</td>
-                      <td className="pr-6 text-right font-black">{formatCurrency(order.total_amount)}</td>
+                      <td className="pr-5 text-right font-black">{formatCurrency(order.total_amount)}</td>
                       <td className="pl-3 pr-5"><StatusPill status={order.status} /></td>
                     </tr>
                   ))}
@@ -320,23 +322,23 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
               </DataTable>
             </div>
           )}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 text-sm text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-2.5 text-sm text-slate-400">
             <span>{recentOrdersSummary}</span>
             <button type="button" className="gp-admin-link font-black" onClick={() => setTab('orders')}>Ver todos os pedidos</button>
           </div>
         </section>
 
-        <div className="grid min-w-0 gap-4 lg:grid-cols-2 2xl:block 2xl:space-y-4">
-          <section className="gp-admin-panel min-w-0 p-4">
-            <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
-              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><AlertTriangle className="shrink-0 text-amber-400" size={20} /> <span className="truncate">Estoque baixo</span></h2>
+        <div className="grid min-w-0 gap-3 lg:grid-cols-2 2xl:block 2xl:space-y-3">
+          <section className="gp-admin-panel min-w-0 p-3">
+            <div className="gp-admin-panel-header mb-3 flex flex-wrap items-center justify-between gap-2.5 pb-3">
+              <h2 className="flex min-w-0 items-center gap-2.5 text-base font-black"><AlertTriangle className="shrink-0 text-amber-400" size={18} /> <span className="truncate">Estoque baixo</span></h2>
               <button type="button" className="gp-admin-link text-sm font-black" onClick={() => setTab('inventory')}>Ver estoque</button>
             </div>
             {lowInventoryItems.length === 0 ? <Feedback variant="success">Nenhum item abaixo do mínimo.</Feedback> : (
               <div className="space-y-2">
                 {lowInventoryItems.slice(0, 4).map((item) => (
-                  <div key={item.inventory_id} className="grid grid-cols-[40px_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-gp border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm sm:grid-cols-[44px_minmax(0,1fr)_auto_auto_auto]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-gp-sm border border-white/10 bg-black/20 text-gp-lime"><Package size={19} /></div>
+                  <div key={item.inventory_id} className="grid grid-cols-[36px_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-gp border border-white/10 bg-white/[0.035] px-2.5 py-2 text-sm sm:grid-cols-[38px_minmax(0,1fr)_auto_auto_auto]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-gp-sm border border-white/10 bg-black/20 text-gp-lime"><Package size={17} /></div>
                     <strong className="min-w-0 truncate">{item.product_name}{item.variant_name ? ` - ${item.variant_name}` : ''}</strong>
                     <span className="whitespace-nowrap font-black">{item.quantity}</span>
                     <span className="hidden whitespace-nowrap text-slate-400 sm:inline">{item.min_quantity}</span>
@@ -347,26 +349,26 @@ function Dashboard({ orders, inventory, productMap, analytics, salesSeries, sale
             )}
           </section>
 
-          <section className="gp-admin-panel min-w-0 p-4">
-            <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
-              <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Produtos mais vendidos</span></h2>
+          <section className="gp-admin-panel min-w-0 p-3">
+            <div className="gp-admin-panel-header mb-3 flex flex-wrap items-center justify-between gap-2.5 pb-3">
+              <h2 className="flex min-w-0 items-center gap-2.5 text-base font-black"><BarChart3 className="shrink-0 text-gp-lime" size={18} /> <span className="truncate">Produtos mais vendidos</span></h2>
               <button type="button" className="gp-admin-link text-sm font-black">Ver relatório</button>
             </div>
             {topProducts.length === 0 ? <Feedback>Nenhum ranking disponível.</Feedback> : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {topProducts.map((item, index) => (
                   <div key={item.productId || item.product_id}>
-                    <div className="grid grid-cols-[24px_minmax(0,1fr)_auto_auto] items-center gap-3 text-sm">
+                    <div className="grid grid-cols-[22px_minmax(0,1fr)_auto_auto] items-center gap-2.5 text-sm">
                       <span className="font-black text-slate-400">{index + 1}</span>
                       <div className="flex min-w-0 items-center gap-3">
-                        {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-9 w-9 rounded-gp-sm object-cover" />}
+                        {(item.product?.image_url || item.image_url) && <img src={item.product?.image_url || item.image_url} alt="" className="h-8 w-8 rounded-gp-sm object-cover" />}
                         <strong className="truncate">{item.product_name || item.product?.name || `Produto #${item.productId || item.product_id}`}</strong>
                       </div>
                       <span className="whitespace-nowrap font-black text-slate-300">{item.quantity} un.</span>
                       <span className="whitespace-nowrap text-right font-black">{formatCurrency(item.revenue)}</span>
                     </div>
-                    <div className="gp-admin-progress ml-8 mt-2 h-2">
-                      <div className="gp-admin-progress-bar h-2" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
+                    <div className="gp-admin-progress ml-7 mt-1.5 h-1.5">
+                      <div className="gp-admin-progress-bar h-1.5" style={{ width: `${Math.min(100, item.quantity * 12)}%` }} />
                     </div>
                   </div>
                 ))}
@@ -409,21 +411,21 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
   const activePeriodLabel = SALES_PERIOD_OPTIONS.find((option) => option.value === period)?.label || 'Por hora';
 
   return (
-    <section className="gp-admin-panel min-w-0 overflow-hidden p-4">
-      <div className="gp-admin-panel-header mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
+    <section className="gp-admin-panel min-w-0 overflow-hidden p-3 xl:p-4">
+      <div className="gp-admin-panel-header mb-3 flex flex-wrap items-center justify-between gap-2.5 pb-3">
         <div className="min-w-0">
-          <h2 className="flex min-w-0 items-center gap-3 text-lg font-black"><BarChart3 className="shrink-0 text-gp-lime" size={20} /> <span className="truncate">Evolução das vendas</span></h2>
+          <h2 className="flex min-w-0 items-center gap-2.5 text-base font-black"><BarChart3 className="shrink-0 text-gp-lime" size={18} /> <span className="truncate">Evolução das vendas</span></h2>
           <p className="mt-1 text-sm text-slate-400">Série real de pedidos agregada {activePeriodLabel.toLowerCase()}.</p>
         </div>
         <AdminSelect value={period} onChange={(event) => onPeriodChange(event.target.value)} className="w-36">
           {SALES_PERIOD_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </AdminSelect>
       </div>
-      <div className="gp-admin-chart relative h-56 px-4 pb-8 pl-14 pt-5 xl:h-64">
+      <div className="gp-admin-chart relative h-48 px-4 pb-7 pl-12 pt-4 xl:h-56">
         <div className="absolute bottom-8 left-4 top-5 flex flex-col-reverse justify-between text-xs font-bold leading-none text-slate-400">
           {yAxisValues.slice().reverse().map((value) => <span key={value}>{formatAxisValue(value)}</span>)}
         </div>
-        <div className="absolute bottom-2 left-14 right-4 grid text-center text-[11px] font-bold leading-none text-slate-400" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
+        <div className="absolute bottom-2 left-12 right-4 grid text-center text-[11px] font-bold leading-none text-slate-400" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
           {points.map((point, index) => (
             <span key={point.key} className={index % labelInterval === 0 || index === points.length - 1 ? 'truncate' : 'opacity-0'}>{point.label}</span>
           ))}
@@ -456,17 +458,17 @@ function SalesChart({ salesSeries, period, onPeriodChange, fallbackHourlySales }
 
 function KpiCard({ title, value, badge, helper, danger = false, icon }) {
   return (
-    <section className="gp-admin-kpi min-w-0 overflow-hidden p-4 xl:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center ${danger ? 'gp-admin-kpi-icon gp-admin-kpi-icon-danger' : 'gp-admin-kpi-icon'}`}>
+    <section className="gp-admin-kpi min-w-0 overflow-hidden p-3 xl:p-3.5">
+      <div className="flex items-start justify-between gap-2.5">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center ${danger ? 'gp-admin-kpi-icon gp-admin-kpi-icon-danger' : 'gp-admin-kpi-icon'}`}>
           {icon}
         </div>
         <Sparkline danger={danger} />
       </div>
-      <p className="mt-4 text-sm font-bold text-gp-text-secondary">{title}</p>
-      <strong className="mt-2 block break-words text-2xl font-black text-white 2xl:text-[1.7rem]">{value}</strong>
-      <div className={`mt-4 flex flex-wrap items-center gap-2 text-sm font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
-        {danger ? <AlertTriangle size={16} /> : <TrendingUp size={16} />}
+      <p className="mt-3 text-xs font-bold uppercase text-gp-text-secondary">{title}</p>
+      <strong className="mt-1.5 block break-words text-xl font-black text-white xl:text-2xl">{value}</strong>
+      <div className={`mt-3 flex flex-wrap items-center gap-1.5 text-xs font-black ${danger ? 'text-amber-400' : 'text-gp-lime'}`}>
+        {danger ? <AlertTriangle size={14} /> : <TrendingUp size={14} />}
         <span>{badge}</span>
         {helper && <span className="font-medium text-gp-text-muted">{helper}</span>}
       </div>
@@ -1145,10 +1147,10 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
   const lowInventory = inventory.filter((item) => item.quantity <= item.min_quantity).length;
 
   return (
-    <section className="gp-admin-summary min-w-0 p-4">
+    <section className="gp-admin-summary min-w-0 p-3">
       <button
         type="button"
-        className={`flex w-full items-center justify-between gap-3 text-left ${summaryOpen ? 'mb-4' : ''}`}
+        className={`flex w-full items-center justify-between gap-3 text-left ${summaryOpen ? 'mb-3' : ''}`}
         onClick={() => setSummaryOpen(!summaryOpen)}
         aria-expanded={summaryOpen}
       >
@@ -1162,9 +1164,9 @@ function AdminSummaryCard({ analytics, orders, inventory }) {
         ['Clientes atendidos', customersServed],
         ['Alertas estoque', lowInventory],
       ].map(([label, value]) => (
-        <div key={label} className="border-t border-white/10 py-3 first:border-t-0 first:pt-0">
+        <div key={label} className="border-t border-white/10 py-2.5 first:border-t-0 first:pt-0">
           <span className="block text-xs font-medium text-slate-300">{label}</span>
-          <strong className="mt-1 block break-words text-lg font-black text-gp-lime">{value}</strong>
+          <strong className="mt-0.5 block break-words text-base font-black text-gp-lime">{value}</strong>
         </div>
       ))}
     </section>
@@ -1415,7 +1417,7 @@ export function AdminPage() {
 
   return (
     <main className={`gp-admin-shell gp-admin-layout ${sidebarCollapsed ? 'is-sidebar-collapsed' : ''}`}>
-      <aside className="gp-admin-sidebar gp-scrollbar-soft flex min-h-0 min-w-0 flex-col overflow-y-auto p-4 text-white backdrop-blur xl:p-5">
+      <aside className="gp-admin-sidebar gp-scrollbar-soft flex min-h-0 min-w-0 flex-col overflow-y-auto p-3.5 text-white backdrop-blur xl:p-4">
         <div className={`gp-admin-brand-row flex min-w-0 items-center ${sidebarCollapsed ? 'flex-col justify-center gap-2' : 'justify-between gap-3'}`}>
           {sidebarCollapsed ? (
             <span className="flex h-11 w-11 items-center justify-center rounded-gp border border-gp-lime/30 bg-gp-lime/10 text-sm font-black text-gp-lime">GP</span>
@@ -1433,12 +1435,12 @@ export function AdminPage() {
           </button>
         </div>
         {!sidebarCollapsed && <span className="gp-admin-eyebrow mt-3 inline-flex min-h-7 w-fit items-center px-3 text-xs font-black uppercase tracking-normal">ADMIN</span>}
-        <nav className="mt-8 space-y-2">
+        <nav className="mt-6 space-y-1.5">
           {ADMIN_TABS.map(({ key, label, icon }) => (
             <button
               key={key}
               type="button"
-              className={`gp-admin-nav-item flex min-h-12 w-full min-w-0 items-center rounded-gp-sm px-3 text-left text-sm font-black transition ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${tab === key ? 'is-active' : ''}`}
+              className={`gp-admin-nav-item flex min-h-11 w-full min-w-0 items-center rounded-gp-sm px-3 text-left text-sm font-black transition ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${tab === key ? 'is-active' : ''}`}
               onClick={() => setTab(key)}
               aria-label={label}
               title={label}
@@ -1448,7 +1450,7 @@ export function AdminPage() {
             </button>
           ))}
         </nav>
-        <div className="mt-auto space-y-4">
+        <div className="mt-auto space-y-3">
           {!sidebarCollapsed && <AdminSummaryCard analytics={analytics} orders={orders} inventory={inventory} />}
           <Link to={APP_ROUTES.totem} className="gp-admin-chip flex min-h-10 items-center justify-center rounded-gp-sm px-3 text-xs font-black" aria-label="Abrir Totem" title="Abrir Totem">
             {sidebarCollapsed ? <span aria-hidden="true">T</span> : 'Abrir Totem'}
@@ -1460,23 +1462,23 @@ export function AdminPage() {
         </div>
       </aside>
 
-      <section className="gp-admin-content gp-scrollbar-soft min-h-0 min-w-0 overflow-y-auto p-4 xl:p-7">
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <section className="gp-admin-content gp-scrollbar-soft min-h-0 min-w-0 overflow-y-auto p-3.5 xl:p-5">
+        <header className="gp-admin-topbar mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-black leading-none xl:text-3xl">{activeTabLabel}</h1>
+            <h1 className="truncate text-xl font-black leading-none xl:text-2xl">{activeTabLabel}</h1>
             {tab !== 'dashboard' && <p className="mt-2 text-sm font-medium text-slate-400">Operação local da lanchonete Gym Prime.</p>}
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <div className="gp-operational-status flex min-h-11 items-center gap-3 px-4 text-sm font-black">
-              <span className="h-3 w-3 shrink-0 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
+          <div className="flex flex-wrap items-center justify-end gap-2.5">
+            <div className="gp-operational-status flex min-h-10 items-center gap-2.5 px-3.5 text-sm font-black">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-gp-pill bg-gp-lime shadow-gp-glow" />
               Servidor local online
             </div>
-            <button type="button" className="gp-admin-chip flex min-h-11 items-center gap-3 px-4 text-sm font-black">
+            <button type="button" className="gp-admin-chip flex min-h-10 items-center gap-2.5 px-3.5 text-sm font-black">
               <CalendarDays size={16} />
               Hoje
               <ChevronDown size={15} />
             </button>
-            <button type="button" className="gp-admin-chip flex min-h-11 items-center gap-3 px-4 text-sm font-black">
+            <button type="button" className="gp-admin-chip flex min-h-10 items-center gap-2.5 px-3.5 text-sm font-black">
               <Shield size={16} />
               Administrador
               <ChevronDown size={15} />
