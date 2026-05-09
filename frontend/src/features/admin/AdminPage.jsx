@@ -571,7 +571,7 @@ function OrdersPanel({ orders, productMap, onUpdateStatus }) {
 function OrderDetailDialog({ order, productMap, onClose, onCopy, onUpdateStatus }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-      <section className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto p-5 text-white shadow-gp-modal">
+      <section className="gp-admin-panel max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <Badge variant="info">{getOrderOrigin(order)}</Badge>
@@ -680,6 +680,9 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
         <Button onClick={() => setProductModal({ product: null })}><Plus size={16} /> Novo produto</Button>
       </div>
 
+      {products.length === 0 ? (
+        <Feedback>Nenhum produto cadastrado. Crie o primeiro item do cardápio.</Feedback>
+      ) : (
       <div className="grid min-w-0 gap-3 2xl:grid-cols-2">
         {products.map((product) => {
           const isExpanded = expandedProductId === product.id;
@@ -759,10 +762,10 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
 
                     return (
                       <div key={variant.id} className="flex flex-wrap items-center justify-between gap-3 rounded-gp border border-white/10 bg-white/[0.035] p-3 text-sm">
-                        <div className="min-w-0">
-                          <strong className="break-words">{variant.name}</strong>
-                          <span className="ml-2 text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preço base'}</span>
-                          <Badge className="ml-2" variant={variant.is_active ? 'success' : 'neutral'}>{variant.is_active ? 'Ativa' : 'Inativa'}</Badge>
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <strong className="min-w-0 break-words">{variant.name}</strong>
+                          <span className="text-slate-400">{variant.price ? formatCurrency(variant.price) : 'Preço base'}</span>
+                          <Badge variant={variant.is_active ? 'success' : 'neutral'}>{variant.is_active ? 'Ativa' : 'Inativa'}</Badge>
                         </div>
                         <div className="flex shrink-0 flex-wrap gap-2">
                           <Button size="sm" variant="inverse" onClick={() => startVariantEdit(product.id, variant)}>Editar</Button>
@@ -815,6 +818,7 @@ function ProductsPanel({ products, onSaveProduct, onCreateVariant, onUpdateVaria
           );
         })}
       </div>
+      )}
 
       {productModal && (
         <ProductFormDialog
@@ -855,7 +859,7 @@ function ProductFormDialog({ product, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4">
-      <form onSubmit={submitProduct} className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
+      <form onSubmit={submitProduct} className="gp-admin-panel max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <Badge variant="neutral">{product ? 'Editar' : 'Novo'}</Badge>
@@ -1034,7 +1038,7 @@ function CustomersPanel({ customers }) {
 
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-end overflow-y-auto bg-black/70 p-4">
-          <section className="gp-admin-panel max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
+          <section className="gp-admin-panel max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 text-white shadow-gp-modal">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <Badge variant="neutral">Cliente</Badge>
@@ -1420,7 +1424,7 @@ export function AdminPage() {
           )}
           <button
             type="button"
-            className="gp-admin-chip flex h-9 w-9 shrink-0 items-center justify-center p-0"
+            className="gp-admin-chip flex h-11 w-11 shrink-0 items-center justify-center p-0"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             aria-label={sidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
             aria-expanded={!sidebarCollapsed}

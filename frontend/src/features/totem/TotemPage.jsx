@@ -52,11 +52,11 @@ function TotemProductCard({ product, onAdd, onDetails }) {
         <div className="mt-auto pt-2">
           <strong className="gp-product-card-price block truncate text-lg font-gp-black leading-none sm:text-xl 2xl:text-2xl">{formatCurrency(price)}</strong>
           <div className="gp-product-card-actions mt-2 grid grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-2 pt-2">
-            <Button variant="secondary" className="min-h-10 min-w-0 px-2 text-sm" onClick={() => onDetails(product)}>
+            <Button variant="secondary" className="min-h-11 min-w-0 px-2 text-sm" onClick={() => onDetails(product)}>
               <span className="truncate">Detalhes</span>
               <Info size={17} />
             </Button>
-            <Button className="gp-primary-cta min-h-10 min-w-0 px-2 text-sm" onClick={handleAdd}>
+            <Button className="gp-primary-cta min-h-11 min-w-0 px-2 text-sm" onClick={handleAdd}>
               <Plus size={18} />
               <span className="truncate">Adicionar</span>
             </Button>
@@ -85,7 +85,7 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
   const hasItems = itemCount > 0;
   const listClassName = compact ? 'max-h-[min(34dvh,22rem)] flex-none' : 'flex-1';
   const footerClassName = compact ? 'mt-3 border-t border-gp-border-inverse pt-3' : '';
-  const maxHeightClassName = compact ? '' : 'max-h-[calc(100vh-2rem)]';
+  const maxHeightClassName = compact ? '' : 'max-h-[calc(100dvh-2rem)]';
 
   return (
     <aside className={`gp-surface-premium flex ${maxHeightClassName} min-w-0 flex-col overflow-hidden p-3 text-gp-text-primary min-[1200px]:min-h-0 min-[1200px]:max-h-none min-[1200px]:p-4 xl:p-5 ${className}`}>
@@ -102,7 +102,7 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
         <div className="flex shrink-0 items-center gap-2">
           <Badge variant={hasItems ? 'success' : 'neutral'}>{itemCount} itens</Badge>
           {onClose && (
-            <Button variant="ghost" size="icon" className="h-10 w-10 text-gp-text-primary hover:bg-white/10" onClick={onClose} aria-label="Fechar pedido">
+            <Button variant="ghost" size="icon" className="h-11 w-11 text-gp-text-primary hover:bg-white/10" onClick={onClose} aria-label="Fechar pedido">
               <X size={19} />
             </Button>
           )}
@@ -111,7 +111,7 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
 
       <div className={`min-h-0 space-y-2.5 overflow-y-auto pr-1 ${listClassName}`}>
         {!hasItems && (
-          <EmptyState className="border-gp-lime/20 bg-white/[0.045]" icon={<ShoppingBag size={34} />} title="Carrinho vazio">
+          <EmptyState className={`border-gp-lime/20 bg-white/[0.045] ${compact ? 'py-5' : ''}`} icon={<ShoppingBag size={34} />} title="Carrinho vazio">
             Toque em Adicionar para começar.
           </EmptyState>
         )}
@@ -124,15 +124,15 @@ function TotemCart({ cart, onCheckout, onClear, onIncrement, onDecrement, onRemo
                   {formatCurrency(item.unit_price)}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-gp-text-primary hover:bg-white/10" onClick={() => onRemove(item)}>
+              <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-gp-text-primary hover:bg-white/10" onClick={() => onRemove(item)} aria-label={`Remover ${item.name}`}>
                 <Trash2 size={18} />
               </Button>
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex shrink-0 items-center gap-2">
-                <Button variant="inverse" className="h-9 min-h-0 w-9 p-0" onClick={() => onDecrement(item)}>-</Button>
+                <Button variant="inverse" className="h-11 min-h-11 w-11 p-0 text-lg" onClick={() => onDecrement(item)} aria-label={`Diminuir ${item.name}`}>-</Button>
                 <strong className="w-7 text-center">{item.quantity}</strong>
-                <Button className="h-9 min-h-0 w-9 p-0" onClick={() => onIncrement(item)}>+</Button>
+                <Button className="h-11 min-h-11 w-11 p-0 text-lg" onClick={() => onIncrement(item)} aria-label={`Aumentar ${item.name}`}>+</Button>
               </div>
               <strong className="min-w-0 text-base">{formatCurrency(item.total_price)}</strong>
             </div>
@@ -169,7 +169,7 @@ function TotemNameModal({ cart, customerName, setCustomerName, onCancel, onConfi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gp-bg-panel/70 p-4 sm:p-6">
-      <form onSubmit={onConfirm} className="gp-card-light max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 shadow-gp-modal sm:p-7">
+      <form onSubmit={onConfirm} className="gp-card-light max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain p-5 shadow-gp-modal sm:p-7">
         <Badge variant="success">Totem</Badge>
         <h2 className="mt-3 text-2xl font-gp-black text-gp-text-inverse sm:text-3xl">Para quem é o pedido?</h2>
         <p className="mt-2 text-gp-base font-gp-medium text-slate-700">Informe apenas o nome para a administração chamar no balcão.</p>
@@ -298,7 +298,7 @@ export function TotemPage() {
           {PRODUCT_CATEGORIES.map((item) => (
             <Button
               key={item.key}
-              className={`min-h-10 shrink-0 justify-start px-2.5 text-sm min-[1200px]:min-h-12 min-[1200px]:w-full min-[1200px]:px-4 min-[1200px]:text-base xl:min-h-14 xl:text-lg ${category === item.key ? '' : 'bg-white/[0.065]'}`}
+              className={`min-h-11 shrink-0 justify-start px-2.5 text-sm min-[1200px]:min-h-12 min-[1200px]:w-full min-[1200px]:px-4 min-[1200px]:text-base xl:min-h-14 xl:text-lg ${category === item.key ? '' : 'bg-white/[0.065]'}`}
               variant={category === item.key ? 'primary' : 'inverse'}
               onClick={() => setCategory(item.key)}
             >
@@ -326,7 +326,7 @@ export function TotemPage() {
             <strong className="block truncate text-lg font-gp-black text-gp-lime">{formatCurrency(cart.total_amount)}</strong>
           </div>
         </div>
-        <Button className="gp-primary-cta min-h-10 shrink-0 px-3 text-sm" onClick={() => setCartDrawerOpen(true)}>
+        <Button className="gp-primary-cta min-h-11 shrink-0 px-3 text-sm" onClick={() => setCartDrawerOpen(true)}>
           Ver pedido
         </Button>
       </section>
@@ -337,7 +337,7 @@ export function TotemPage() {
             <h1 className="text-2xl font-gp-black tracking-normal min-[1200px]:text-3xl xl:text-4xl">Cardápio</h1>
             <p className="mt-0.5 text-gp-sm font-gp-medium text-gp-text-secondary min-[1200px]:text-gp-base">Toque para adicionar ao pedido.</p>
           </div>
-          <label className="flex min-h-10 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-3 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
+          <label className="flex min-h-11 min-w-0 max-w-xs flex-1 items-center gap-3 rounded-gp border border-gp-border-inverse bg-white/[0.08] px-3 text-gp-text-secondary shadow-gp-sm backdrop-blur xl:w-80 xl:flex-none">
             <Search className="shrink-0 text-gp-lime" size={20} />
             <input
               className="min-w-0 flex-1 bg-transparent font-gp-bold text-gp-text-primary outline-none placeholder:text-gp-text-secondary"
@@ -394,7 +394,7 @@ export function TotemPage() {
               onRemove={removeCartItem}
               onClose={() => setCartDrawerOpen(false)}
               compact
-              className="relative z-10 max-h-[min(82dvh,44rem)] w-[min(84vw,48rem)] shadow-gp-modal"
+              className="relative z-10 max-h-[min(82dvh,44rem)] w-[min(94vw,48rem)] shadow-gp-modal"
             />
           </div>
         </div>

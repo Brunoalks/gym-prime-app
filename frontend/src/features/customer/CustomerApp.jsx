@@ -16,6 +16,14 @@ const CATEGORY_ICONS = {
   preworkout: <Zap size={19} />,
 };
 
+const CUSTOMER_ORDER_STATUS_LABELS = {
+  pending: 'Pendente',
+  preparing: 'Preparando',
+  ready: 'Pronto',
+  completed: 'Concluído',
+  canceled: 'Cancelado',
+};
+
 function matchesProductSearch(product, searchTerm) {
   const query = searchTerm.trim().toLowerCase();
   if (!query) return true;
@@ -152,12 +160,12 @@ function CustomerProductCard({ product, onAdd, onDetails }) {
         <p className="mt-2 line-clamp-2 min-h-10 text-gp-sm font-gp-medium leading-5 text-slate-700 sm:text-gp-base">{product.description || 'Produto disponível para pedido.'}</p>
         <div className="mt-auto pt-2.5">
           <strong className="gp-product-card-price block truncate text-lg font-gp-black leading-none sm:text-xl">{formatCurrency(price)}</strong>
-          <div className="gp-product-card-actions mt-2.5 grid grid-cols-[1fr_42px] gap-2 pt-2.5">
-            <Button size="sm" variant="secondary" className="min-h-10 min-w-0 px-2" onClick={() => onDetails(product)}>
+          <div className="gp-product-card-actions mt-2.5 grid grid-cols-[1fr_44px] gap-2 pt-2.5">
+            <Button size="sm" variant="secondary" className="min-h-11 min-w-0 px-2" onClick={() => onDetails(product)}>
               <span className="truncate">Detalhes</span>
               <ChevronRight size={16} />
             </Button>
-            <Button size="icon" className="gp-primary-cta h-10 w-10" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
+            <Button size="icon" className="gp-primary-cta h-11 w-11" onClick={handleAdd} aria-label={`Adicionar ${product.name}`}>
               <Plus size={22} />
             </Button>
           </div>
@@ -209,14 +217,14 @@ function CustomerCartModal({ cart, onCancel, onConfirm, onIncrement, onDecrement
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-gp-bg-panel/70 p-4 sm:items-center">
-      <section className="gp-card-light max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-gp p-5 shadow-gp-modal sm:rounded-gp">
+      <section className="gp-card-light max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-gp p-5 shadow-gp-modal sm:rounded-gp">
         <div className="flex items-start justify-between gap-3">
           <div>
             <Badge variant="success">Carrinho</Badge>
             <h2 className="mt-3 text-xl font-gp-black text-gp-text-inverse">Revise seu pedido</h2>
             <p className="mt-1 text-gp-sm text-slate-700">Ajuste quantidades antes de finalizar.</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={onCancel} aria-label="Fechar carrinho">
+          <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0" onClick={onCancel} aria-label="Fechar carrinho">
             <X size={18} />
           </Button>
         </div>
@@ -234,7 +242,7 @@ function CustomerCartModal({ cart, onCancel, onConfirm, onIncrement, onDecrement
                   <strong className="line-clamp-2 break-words text-gp-text-inverse">{item.name}</strong>
                   <span className="mt-1 block font-gp-bold text-slate-600">{formatCurrency(item.unit_price)} un.</span>
                 </div>
-                <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-gp-danger hover:bg-red-50 hover:text-gp-danger" onClick={() => onRemove(item)} aria-label={`Remover ${item.name}`}>
+                <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-gp-danger hover:bg-red-50 hover:text-gp-danger" onClick={() => onRemove(item)} aria-label={`Remover ${item.name}`}>
                   <Trash2 size={17} />
                 </Button>
               </div>
@@ -242,7 +250,7 @@ function CustomerCartModal({ cart, onCancel, onConfirm, onIncrement, onDecrement
                 <div className="flex shrink-0 items-center gap-2">
                   <button
                     type="button"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
+                    className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-xl border border-slate-300 bg-white p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
                     style={{ fontFamily: 'Arial, sans-serif', fontSize: '24px', lineHeight: '1', color: '#06110b' }}
                     onClick={() => onDecrement(item)}
                     aria-label={`Diminuir ${item.name}`}
@@ -252,7 +260,7 @@ function CustomerCartModal({ cart, onCancel, onConfirm, onIncrement, onDecrement
                   <strong className="w-8 text-center text-gp-base text-gp-text-inverse">{item.quantity}</strong>
                   <button
                     type="button"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gp-lime/60 bg-gp-lime p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
+                    className="flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-xl border border-gp-lime/60 bg-gp-lime p-0 font-sans font-bold leading-none text-slate-950 shadow-gp-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35"
                     style={{ fontFamily: 'Arial, sans-serif', fontSize: '24px', lineHeight: '1', color: '#06110b' }}
                     onClick={() => onIncrement(item)}
                     aria-label={`Aumentar ${item.name}`}
@@ -292,7 +300,7 @@ function CustomerOrdersPanel({ orders, productMap, onRefresh }) {
         </div>
         <Button className="shrink-0" variant="inverse" onClick={onRefresh}>Atualizar</Button>
       </div>
-      {orders.length === 0 ? <Feedback>Nenhum pedido encontrado.</Feedback> : orders.map((order) => (
+      {orders.length === 0 ? <Feedback>Nenhum pedido encontrado neste acesso.</Feedback> : orders.map((order) => (
         <article key={order.id} className="gp-card-light p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -300,7 +308,7 @@ function CustomerOrdersPanel({ orders, productMap, onRefresh }) {
               <h2 className="mt-2 text-xl font-gp-black">{formatCurrency(order.total_amount)}</h2>
               <p className="mt-1 text-gp-sm font-gp-bold text-slate-600">{new Date(order.created_at).toLocaleString('pt-BR')}</p>
             </div>
-            <Badge className="shrink-0" variant={order.status === 'canceled' ? 'danger' : 'success'}>{order.status}</Badge>
+            <Badge className="shrink-0" variant={order.status === 'canceled' ? 'danger' : 'success'}>{CUSTOMER_ORDER_STATUS_LABELS[order.status] || order.status}</Badge>
           </div>
           <div className="mt-3 space-y-2">
             {order.items.map((item) => (
@@ -469,7 +477,7 @@ function CustomerMenuPage({ user, onLogout }) {
           <Search className="shrink-0 text-gp-lime" size={22} />
           <input
             className="min-w-0 flex-1 bg-transparent text-gp-base font-gp-bold text-gp-text-primary outline-none placeholder:text-gp-text-secondary"
-            placeholder="Buscar no cardapio"
+            placeholder="Buscar produtos"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
@@ -506,7 +514,7 @@ function CustomerMenuPage({ user, onLogout }) {
             <Feedback>Carregando produtos...</Feedback>
           ) : visibleProducts.length === 0 ? (
             <EmptyState icon={<ShoppingBag size={34} />} title="Nenhum produto encontrado">
-              Ajuste a busca ou escolha outra categoria.
+              Tente outra busca ou escolha outra categoria.
             </EmptyState>
           ) : (
             visibleProducts.map((product) => (

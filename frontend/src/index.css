@@ -559,6 +559,90 @@
     }
   }
 
+  @media (max-width: 767px) {
+    .gp-admin-layout,
+    .gp-admin-layout.is-sidebar-collapsed {
+      grid-template-columns: minmax(4.75rem, 4.75rem) minmax(0, 1fr);
+    }
+
+    .gp-admin-sidebar {
+      padding-right: 0.75rem;
+      padding-left: 0.75rem;
+    }
+
+    .gp-admin-brand-row {
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .gp-admin-brand-row img {
+      display: none;
+    }
+
+    .gp-admin-layout:not(.is-sidebar-collapsed) .gp-admin-brand-row > div:first-child {
+      display: none;
+    }
+
+    .gp-admin-brand-row::before {
+      display: flex;
+      width: 2.75rem;
+      height: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgb(var(--gp-lime-rgb) / 0.30);
+      border-radius: var(--gp-radius);
+      background: rgb(var(--gp-lime-rgb) / 0.10);
+      color: var(--gp-lime);
+      content: 'GP';
+      font-size: 0.875rem;
+      font-weight: var(--gp-weight-black);
+    }
+
+    .gp-admin-layout.is-sidebar-collapsed .gp-admin-brand-row::before {
+      display: none;
+    }
+
+    .gp-admin-eyebrow,
+    .gp-admin-summary,
+    .gp-admin-sidebar > div:last-child > div:last-child {
+      display: none;
+    }
+
+    .gp-admin-sidebar nav {
+      margin-top: 1rem;
+    }
+
+    .gp-admin-nav-item {
+      justify-content: center;
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .gp-admin-nav-item .truncate {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .gp-admin-sidebar a.gp-admin-chip {
+      min-height: 2.75rem;
+      padding: 0;
+      font-size: 0;
+    }
+
+    .gp-admin-sidebar a.gp-admin-chip::before {
+      content: 'T';
+      font-size: 0.75rem;
+      font-weight: var(--gp-weight-black);
+    }
+  }
+
   .gp-operational-status {
     border: 1px solid rgb(var(--gp-lime-rgb) / 0.22);
     border-radius: var(--gp-radius-pill);
@@ -595,6 +679,7 @@
   }
 
   .gp-scrollbar-soft {
+    -webkit-overflow-scrolling: touch;
     scrollbar-color: rgb(var(--gp-lime-rgb) / 0.38) transparent;
     scrollbar-width: thin;
   }
@@ -614,6 +699,7 @@
   }
 
   .gp-scrollbar-none {
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
 

@@ -52,7 +52,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'inline-flex min-w-0 items-center justify-center gap-2 rounded-gp font-gp-black transition duration-150 ease-out active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gp-bg-main disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700 disabled:shadow-none disabled:ring-0 disabled:ring-offset-0',
+        'inline-flex min-w-0 touch-manipulation items-center justify-center gap-2 rounded-gp text-center font-gp-black leading-tight transition duration-150 ease-out active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gp-lime/35 focus-visible:ring-offset-2 focus-visible:ring-offset-gp-bg-main disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700 disabled:shadow-none disabled:ring-0 disabled:ring-offset-0',
         buttonVariants[variant],
         buttonSizes[size],
         className,
@@ -68,7 +68,7 @@ export function TextInput({ className = '', ...props }) {
   return (
     <input
       className={cn(
-        'gp-field min-w-0 w-full px-3 py-3',
+        'gp-field min-w-0 w-full px-3 py-3 text-base sm:text-gp-sm',
         className,
       )}
       {...props}
@@ -106,7 +106,7 @@ export function Feedback({ children, className = '', variant = 'muted' }) {
 export function Dialog({ children, className = '', as = 'section', ...props }) {
   const dialog = (
     <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-gp-bg-main/75 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:p-4">
-      <Card as={as} className={cn('max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-gp-modal', className)} {...props}>
+      <Card as={as} className={cn('max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain p-5 shadow-gp-modal', className)} role="dialog" aria-modal="true" {...props}>
         {children}
       </Card>
     </div>
@@ -143,7 +143,7 @@ export function DataTable({ children, className = '', ...props }) {
 
 export function ModalActions({ children, className = '', ...props }) {
   return (
-    <div className={cn('mt-5 grid grid-cols-2 gap-3', className)} {...props}>
+    <div className={cn('mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2', className)} {...props}>
       {children}
     </div>
   );
@@ -152,9 +152,9 @@ export function ModalActions({ children, className = '', ...props }) {
 export function PanelHeader({ title, subtitle, action = null, children = null, className = '', ...props }) {
   return (
     <div className={cn('gp-section-header flex-wrap p-4', className)} {...props}>
-      <div>
-        {title && <h2 className="text-lg font-black">{title}</h2>}
-        {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+      <div className="min-w-0">
+        {title && <h2 className="break-words text-lg font-black">{title}</h2>}
+        {subtitle && <p className="mt-1 break-words text-sm text-slate-400">{subtitle}</p>}
       </div>
       {action || children}
     </div>
